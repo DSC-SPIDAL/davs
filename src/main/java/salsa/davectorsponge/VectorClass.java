@@ -30,15 +30,15 @@ public class VectorClass
 	public final void getEigenvaluefromMatrix(double[][] SecondDerivMatrix)
 	{
 
-		Eigenvector = new double[DAVectorSponge.ParameterVectorDimension];
-		if (!DAVectorSponge.CalculateEigenvaluesfromMatrix)
+		Eigenvector = new double[Program.ParameterVectorDimension];
+		if (!Program.CalculateEigenvaluesfromMatrix)
 		{ // Re-use Earlier Calculation of results for all clusters
 		}
 
 		//  Calculate Eigenvalues from Matrix
-		if (DAVectorSponge.ParameterVectorDimension != 2)
+		if (Program.ParameterVectorDimension != 2)
 		{
-			DAVectorUtility.printAndThrowRuntimeException(" Illegal Vector Dimension " + DAVectorSponge.ParameterVectorDimension);
+			DAVectorUtility.printAndThrowRuntimeException(" Illegal Vector Dimension " + Program.ParameterVectorDimension);
 
 		}
 
@@ -52,12 +52,12 @@ public class VectorClass
 
 		// Normalize
 		tmp = 0.0;
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			tmp += Eigenvector[VectorIndex] * Eigenvector[VectorIndex];
 		}
 		tmp = 1.0 / Math.sqrt(tmp);
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			Eigenvector[VectorIndex] *= tmp;
 		}
@@ -70,28 +70,28 @@ public class VectorClass
 			DAVectorUtility.printAndThrowRuntimeException(" Illegal Eigenvalue and Parallelization Combination ");
 
 		}
-		if (DAVectorSponge.SigmaMethod > 0)
+		if (Program.SigmaMethod > 0)
 		{
-			DAVectorUtility.printAndThrowRuntimeException(" Illegal Eigenvalue and Sigma Method Combination " + DAVectorSponge.SigmaMethod);
+			DAVectorUtility.printAndThrowRuntimeException(" Illegal Eigenvalue and Sigma Method Combination " + Program.SigmaMethod);
 
 		}
 		this.CurrentSolution = Solution;
 		this.CenterEigenvector = this.CurrentSolution.Eigenvector_k_i;
 		this.CenterEigenvalue = this.CurrentSolution.Eigenvalue_k;
-		this.InitVector = new double[DAVectorSponge.ParameterVectorDimension];
+		this.InitVector = new double[Program.ParameterVectorDimension];
 		this.FirstTerm = new double[this.CurrentSolution.Ncent_Global];
 		this.CenterEigenstatus = new int[this.CurrentSolution.Ncent_Global];
 		this.CenterEigenconvergence = new int[this.CurrentSolution.Ncent_Global];
 
 		Random random = new Random();
 		double InitNorm = 0.0;
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			InitVector[VectorIndex] = -0.5 + random.nextDouble();
 			InitNorm += InitVector[VectorIndex] * InitVector[VectorIndex];
 		}
 		InitNorm = 1.0 / Math.sqrt(InitNorm);
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			InitVector[VectorIndex] *= InitNorm;
 		}
@@ -109,7 +109,7 @@ public class VectorClass
 			}
 			++somethingtodo;
             System.arraycopy(InitVector, 0, this.CenterEigenvector[ClusterIndex], 0,
-                    DAVectorSponge.ParameterVectorDimension);
+                    Program.ParameterVectorDimension);
 		} // End Loop over Clusters
 		if (somethingtodo == 0)
 		{
@@ -119,7 +119,7 @@ public class VectorClass
 		final GlobalReductions.FindVectorDoubleSum FindClusterFirstTerm = new GlobalReductions.FindVectorDoubleSum(DAVectorUtility.ThreadCount, this.CurrentSolution.Ncent_Global);
 		final GlobalReductions.FindDoubleSum FindNumberScalarProducts = new GlobalReductions.FindDoubleSum(DAVectorUtility.ThreadCount);
 
-		for (int NumPowerIterations = 0; NumPowerIterations < DAVectorSponge.PowerIterationLimit; NumPowerIterations++)
+		for (int NumPowerIterations = 0; NumPowerIterations < Program.PowerIterationLimit; NumPowerIterations++)
 		{
 			somethingtodo = 0;
 			for (int ClusterIndex = 0; ClusterIndex < this.CurrentSolution.Ncent_Global; ClusterIndex++)
@@ -142,14 +142,14 @@ public class VectorClass
 				break;
 			}
 
-			final GlobalReductions.FindVectorDoubleSum3 FindNewPowerVectors = new GlobalReductions.FindVectorDoubleSum3(DAVectorUtility.ThreadCount, DAVectorSponge.ParameterVectorDimension, this.CurrentSolution.Ncent_Global);
+			final GlobalReductions.FindVectorDoubleSum3 FindNewPowerVectors = new GlobalReductions.FindVectorDoubleSum3(DAVectorUtility.ThreadCount, Program.ParameterVectorDimension, this.CurrentSolution.Ncent_Global);
 
             final int NumPowerIterationsLoopVar = NumPowerIterations;
             // Note - parallel for
             try {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                     FindNewPowerVectors.startthread(threadIndex);
-                    double[] PartVector = new double[DAVectorSponge.ParameterVectorDimension];
+                    double[] PartVector = new double[Program.ParameterVectorDimension];
                     int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                     int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                     for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
@@ -175,15 +175,15 @@ public class VectorClass
                                 FindClusterFirstTerm.addapoint(threadIndex, Mvalue, RealClusterIndex);
                             }
                             double multiplier = 0.0;
-                            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension;
+                            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension;
                                  VectorIndex++) {
                                 PartVector[VectorIndex] = this.CurrentSolution.Y_k_i_[RealClusterIndex][VectorIndex] -
-                                        DAVectorSponge.PointPosition[alpha][VectorIndex];
+                                        Program.PointPosition[alpha][VectorIndex];
                                 multiplier += PartVector[VectorIndex] * CenterEigenvector[RealClusterIndex][VectorIndex];
                             }
                             FindNumberScalarProducts.addapoint(threadIndex, 1.0);
                             double wgt = Mvalue * multiplier;
-                            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension;
+                            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension;
                                  VectorIndex++) {
                                 PartVector[VectorIndex] *= wgt;
                             }
@@ -212,9 +212,9 @@ public class VectorClass
 				{
 					sums[loop] = 0.0;
 				}
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
-					int TotalIndex = VectorIndex + ClusterIndex * DAVectorSponge.ParameterVectorDimension;
+					int TotalIndex = VectorIndex + ClusterIndex * Program.ParameterVectorDimension;
 					double newvalue = FindNewPowerVectors.TotalVectorSum[TotalIndex];
 					double oldvalue = CenterEigenvector[ClusterIndex][VectorIndex];
 					sums[0] += oldvalue * newvalue;
@@ -236,12 +236,12 @@ public class VectorClass
 					int EigenvalueDone = 0;
 					if (DAVectorUtility.MPI_Rank == 0)
 					{ // Decisions can only be made in one process
-						if (Math.abs(CandidateEigenvalue - this.CenterEigenvalue[ClusterIndex]) > CandidateEigenvalue * DAVectorSponge.eigenvaluechange)
+						if (Math.abs(CandidateEigenvalue - this.CenterEigenvalue[ClusterIndex]) > CandidateEigenvalue * Program.eigenvaluechange)
 						{
 							++EigenvalueDone;
 						}
 						double delta = sums[2] - 2.0 * sums[0] * CandidateEigenvalue + sums[1] * CandidateEigenvalue * CandidateEigenvalue; // (Ax- Eigenvalue*Axold)**2
-						if (Math.abs(delta) > CandidateEigenvalue * CandidateEigenvalue * DAVectorSponge.eigenvectorchange)
+						if (Math.abs(delta) > CandidateEigenvalue * CandidateEigenvalue * Program.eigenvectorchange)
 						{
 							++EigenvalueDone;
 						}
@@ -257,7 +257,7 @@ public class VectorClass
 
 				//  Normalize current Power Vector to 1
 				double wgt = 1.0 / Math.sqrt(sums[2]);
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					CenterEigenvector[ClusterIndex][VectorIndex] *= wgt;
 				}
@@ -267,7 +267,7 @@ public class VectorClass
 
 		FindClusterFirstTerm.sumoverthreadsandmpi();
 		FindNumberScalarProducts.sumoverthreadsandmpi();
-		DAVectorSponge.SumEigenSPCalcs += FindNumberScalarProducts.Total;
+		Program.SumEigenSPCalcs += FindNumberScalarProducts.Total;
 
 		for (int ClusterIndex = 0; ClusterIndex < this.CurrentSolution.Ncent_Global; ClusterIndex++)
 		{

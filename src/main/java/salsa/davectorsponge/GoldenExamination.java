@@ -61,9 +61,9 @@ public class GoldenExamination
 
 		for (int ClusteringMethod = 0; ClusteringMethod < NumberClusteringMethods; ClusteringMethod++)
 		{
-			Other_CenterOneDHistogram[ClusteringMethod] = new int[DAVectorSponge.ParameterVectorDimension][];
+			Other_CenterOneDHistogram[ClusteringMethod] = new int[Program.ParameterVectorDimension][];
 			Other_CenterTwoDHistogram[ClusteringMethod] = new int[TwoD_Center_HistogramSize];
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				Other_CenterOneDHistogram[ClusteringMethod][VectorIndex] = new int[OneD_Center_HistogramSize];
 			}
@@ -105,30 +105,30 @@ public class GoldenExamination
 			Other_TotalNonGoldenPeaksinCut = new int[NumberClusteringMethods];
 
 			// Next 3 not used in an accumulation
-			GoldenClusterSigma = new double[DAVectorSponge.ParameterVectorDimension];
-			GoldenClusterCenterTotal = new double[DAVectorSponge.ParameterVectorDimension];
-			GoldenClusterCenterCut = new double[DAVectorSponge.ParameterVectorDimension];
+			GoldenClusterSigma = new double[Program.ParameterVectorDimension];
+			GoldenClusterCenterTotal = new double[Program.ParameterVectorDimension];
+			GoldenClusterCenterCut = new double[Program.ParameterVectorDimension];
 
 			Other_ClusterCenterDifferenceTotal = new double[NumberClusteringMethods][];
 			Other_ClusterCenterDifferenceCut = new double[NumberClusteringMethods][];
 
-			GoldenClusterOneDHistogram = new int[DAVectorSponge.ParameterVectorDimension][];
+			GoldenClusterOneDHistogram = new int[Program.ParameterVectorDimension][];
 			GoldenClusterTwoDHistogram = new int[TwoDHistogramSize];
 			Other_ClusterOneDHistogram = new int[NumberClusteringMethods][][];
 			Other_ClusterTwoDHistogram = new int[NumberClusteringMethods][];
 
 			for (int ClusteringMethod = 0; ClusteringMethod < NumberClusteringMethods; ClusteringMethod++)
 			{
-				Other_ClusterCenterDifferenceTotal[ClusteringMethod] = new double[DAVectorSponge.ParameterVectorDimension];
-				Other_ClusterCenterDifferenceCut[ClusteringMethod] = new double[DAVectorSponge.ParameterVectorDimension];
-				Other_ClusterOneDHistogram[ClusteringMethod] = new int[DAVectorSponge.ParameterVectorDimension][];
+				Other_ClusterCenterDifferenceTotal[ClusteringMethod] = new double[Program.ParameterVectorDimension];
+				Other_ClusterCenterDifferenceCut[ClusteringMethod] = new double[Program.ParameterVectorDimension];
+				Other_ClusterOneDHistogram[ClusteringMethod] = new int[Program.ParameterVectorDimension][];
 				Other_ClusterTwoDHistogram[ClusteringMethod] = new int[TwoDHistogramSize];
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					Other_ClusterOneDHistogram[ClusteringMethod][VectorIndex] = new int[OneDHistogramSize];
 				}
 			}
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				GoldenClusterOneDHistogram[VectorIndex] = new int[OneDHistogramSize];
 			}
@@ -159,7 +159,7 @@ public class GoldenExamination
 			double[][] GoldenPeakPositions = new double[GoldenBase.ClusterCountsbyIndex[BaseClusterLoop]][];
 			for (int LocalPointIndex = 0; LocalPointIndex < GoldenBase.ClusterCountsbyIndex[BaseClusterLoop]; LocalPointIndex++)
 			{
-				GoldenPeakPositions[LocalPointIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+				GoldenPeakPositions[LocalPointIndex] = new double[Program.ParameterVectorDimension];
 			}
 			int localcount = 0;
 			for (int GlobalPointIndex = 0; GlobalPointIndex < GoldenBase.NumberofPoints; GlobalPointIndex++)
@@ -178,7 +178,7 @@ public class GoldenExamination
 			}
 
 			//  Set Sigmas
-			double[] GoldenSigma = new double[DAVectorSponge.ParameterVectorDimension];
+			double[] GoldenSigma = new double[Program.ParameterVectorDimension];
 			Box<double[]> tempRef_GoldenSigma = new Box<>(GoldenSigma);
 			this.SetSigma(GoldenPeakPositions, GoldenRecordforthisCluster.TotalGoldenPeaks, tempRef_GoldenSigma);
 			GoldenSigma = tempRef_GoldenSigma.content;
@@ -223,7 +223,7 @@ public class GoldenExamination
 			{
 				this.Accumulation.GoldenClusterTwoDHistogram[Histbin] += GoldenRecordforthisCluster.GoldenClusterTwoDHistogram[Histbin];
 			}
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				for (int Histbin = 0; Histbin < OneDHistogramSize; Histbin++)
 				{
@@ -276,7 +276,7 @@ public class GoldenExamination
 				double[][] OtherPeakPositions = new double[num][];
 				for (int LocalPointIndex = 0; LocalPointIndex < num; LocalPointIndex++)
 				{
-					OtherPeakPositions[LocalPointIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+					OtherPeakPositions[LocalPointIndex] = new double[Program.ParameterVectorDimension];
 				}
 				localcount = 0;
 				int WrongGoldenCluster = 0;
@@ -304,8 +304,8 @@ public class GoldenExamination
 				//  Set Cut for Other Method
 				int Totin = 0;
 				int Totout = 0;
-				double[] FullCenterfromClustering = new double[DAVectorSponge.ParameterVectorDimension];
-				double[] CutCenterfromClustering = new double[DAVectorSponge.ParameterVectorDimension];
+				double[] FullCenterfromClustering = new double[Program.ParameterVectorDimension];
+				double[] CutCenterfromClustering = new double[Program.ParameterVectorDimension];
 				Box<double[]> tempRef_GoldenSigma4 = new Box<>(GoldenSigma);
 				Box<Integer> tempRef_Totin = new Box<>(Totin);
 				Box<Integer> tempRef_Totout = new Box<>(Totout);
@@ -340,7 +340,7 @@ public class GoldenExamination
 
 				double distance = 0.0;
 				int idist;
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					double tmp = (CutCenterfromClustering[VectorIndex] - GoldenRecordforthisCluster.GoldenClusterCenterCut[VectorIndex]) / GoldenSigma[VectorIndex];
 					GoldenRecordforthisCluster.Other_ClusterCenterDifferenceCut[MethodLoop][VectorIndex] = Math.abs(tmp);
@@ -362,7 +362,7 @@ public class GoldenExamination
 
 				//  Final accumulations
 				++NumberOtherAccumulationsCenterCutCalc[MethodLoop];
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					this.Accumulation.Other_ClusterCenterDifferenceCut[MethodLoop][VectorIndex] += GoldenRecordforthisCluster.Other_ClusterCenterDifferenceCut[MethodLoop][VectorIndex];
 					this.Accumulation.Other_ClusterCenterDifferenceTotal[MethodLoop][VectorIndex] += GoldenRecordforthisCluster.Other_ClusterCenterDifferenceTotal[MethodLoop][VectorIndex];
@@ -395,8 +395,8 @@ public class GoldenExamination
 		}
 		center[0] = center[0] / NumberofPoints;
 		center[1] = center[1] / NumberofPoints;
-		Sigma.content[0] = DAVectorSponge.SigmaVectorParameters_i_[0] * center[0];
-		Sigma.content[1] = DAVectorSponge.SigmaVectorParameters_i_[1];
+		Sigma.content[0] = Program.SigmaVectorParameters_i_[0] * center[0];
+		Sigma.content[1] = Program.SigmaVectorParameters_i_[1];
 
 	} // End SetSigma
 
@@ -432,7 +432,7 @@ public class GoldenExamination
 		}
 
 		// Iterate points in cut
-		double[] NewCenter = new double[DAVectorSponge.ParameterVectorDimension];
+		double[] NewCenter = new double[Program.ParameterVectorDimension];
 
 		for (int IterationLoop = 0; IterationLoop < 10; IterationLoop++)
 		{

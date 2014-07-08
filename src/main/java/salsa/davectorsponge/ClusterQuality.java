@@ -102,7 +102,7 @@ public class ClusterQuality
                 if (DAVectorUtility.MPI_Rank == 0) {
                     int beginindex = ParallelClusterRange[threadIndex].getStartIndex();
                     int indexlength = ParallelClusterRange[threadIndex].getLength();
-                    double[] ClusterSigma = new double[DAVectorSponge.ParameterVectorDimension];
+                    double[] ClusterSigma = new double[Program.ParameterVectorDimension];
                     for (int ClusterIndex1 = beginindex; ClusterIndex1 < beginindex + indexlength; ClusterIndex1++) {
                         int count = 0;
                         if (ClusterIndex1 == SpongeOption) {
@@ -122,7 +122,7 @@ public class ClusterQuality
                             }
                             Box<double[]> tempRef_ClusterSigma =
                                     new Box<>(ClusterSigma);
-                            DAVectorSponge
+                            Program
                                     .CalculateSigma(
                                             ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex1],
                                             tempRef_ClusterSigma);
@@ -189,13 +189,13 @@ public class ClusterQuality
         // Note - parallel for
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
-                double[] ClusterSigma = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] ClusterSigma = new double[Program.ParameterVectorDimension];
                 AccumulateSpongePoints.startthread(threadIndex);
                 AccumulateNonSpongePoints.startthread(threadIndex);
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int index = beginpoint; index < indexlen + beginpoint; index++) {
-                    int AssignedCluster = DAVectorSponge.ClusterAssignments[index + DAVectorUtility.PointStart_Process];
+                    int AssignedCluster = Program.ClusterAssignments[index + DAVectorUtility.PointStart_Process];
                     boolean isSponge = false;
                     if (AssignedCluster == SpongeOption) {
                         isSponge = true;
@@ -211,12 +211,12 @@ public class ClusterQuality
                                 continue;
                             }
                             Box<double[]> tempRef_ClusterSigma = new Box<>(ClusterSigma);
-                            DAVectorSponge.CalculateSigma(
+                            Program.CalculateSigma(
                                     ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex],
                                     tempRef_ClusterSigma);
                             ClusterSigma = tempRef_ClusterSigma.content;
                             double tmp = DAVectorParallelism.getSquaredScaledDistancebetweenVectors(
-                                    DAVectorSponge.PointPosition[index],
+                                    Program.PointPosition[index],
                                     ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex], ClusterSigma);
                             if (tmp < NearbyCut) {
                                 if ((nearbyrealcluster < 0) || (tmp < NearesetDistce)) {
@@ -226,7 +226,7 @@ public class ClusterQuality
                             }
                         }
                         if (nearbyrealcluster >= 0) {
-                            DAVectorSponge.ClusterAssignments[index + DAVectorUtility.PointStart_Process] = nearbyrealcluster;
+                            Program.ClusterAssignments[index + DAVectorUtility.PointStart_Process] = nearbyrealcluster;
                             AssignedCluster = nearbyrealcluster;
                             isSponge = false;
                             ConfusedSpongePoints1.addapoint(threadIndex, 1.0);
@@ -239,19 +239,19 @@ public class ClusterQuality
 
                         }
                         Box<double[]> tempRef_ClusterSigma2 = new Box<>(ClusterSigma);
-                        DAVectorSponge.CalculateSigma(
+                        Program.CalculateSigma(
                                 ClusteringSolution.TotalClusterSummary.CenterPosition[AssignedCluster],
                                 tempRef_ClusterSigma2);
                         ClusterSigma = tempRef_ClusterSigma2.content;
                         double distce = DAVectorParallelism.getSquaredScaledDistancebetweenVectors(
-                                DAVectorSponge.PointPosition[index],
+                                Program.PointPosition[index],
                                 ClusteringSolution.TotalClusterSummary.CenterPosition[AssignedCluster], ClusterSigma);
                         FindMaxExtension[AssignedCluster].addapoint(threadIndex, distce);
                         if (distce > NearbyCut) {
                             FindIllegalPoints[AssignedCluster].addapoint(threadIndex, 1);
                             if (SpongeOption >= 0) {
                                 AssignedCluster = SpongeOption;
-                                DAVectorSponge.ClusterAssignments[index + DAVectorUtility.PointStart_Process] = AssignedCluster;
+                                Program.ClusterAssignments[index + DAVectorUtility.PointStart_Process] = AssignedCluster;
                             }
                         }
                     }
@@ -265,11 +265,11 @@ public class ClusterQuality
                             continue;
                         }
                         Box<double[]> tempRef_ClusterSigma3 = new Box<>(ClusterSigma);
-                        DAVectorSponge.CalculateSigma(ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex],
+                        Program.CalculateSigma(ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex],
                                 tempRef_ClusterSigma3);
                         ClusterSigma = tempRef_ClusterSigma3.content;
                         double tmp = DAVectorParallelism.getSquaredScaledDistancebetweenVectors(
-                                DAVectorSponge.PointPosition[index],
+                                Program.PointPosition[index],
                                 ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex], ClusterSigma);
                         if (tmp < NearbyCut) {
                             if (isSponge) {
@@ -325,7 +325,7 @@ public class ClusterQuality
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 int beginindex = ParallelClusterRange[threadIndex].getStartIndex();
                 int indexlength = ParallelClusterRange[threadIndex].getLength();
-                double[] ClusterSigma = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] ClusterSigma = new double[Program.ParameterVectorDimension];
                 int[] localindices = new int[NumberNearbyClusters];
                 double[] localdistces = new double[NumberNearbyClusters];
                 for (int ClusterIndex1 = beginindex; ClusterIndex1 < beginindex + indexlength; ClusterIndex1++) {
@@ -345,7 +345,7 @@ public class ClusterQuality
                             continue;
                         }
                         Box<double[]> tempRef_ClusterSigma = new Box<>(ClusterSigma);
-                        DAVectorSponge.CalculateSigma(ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex1],
+                        Program.CalculateSigma(ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex1],
                                 tempRef_ClusterSigma);
                         ClusterSigma = tempRef_ClusterSigma.content;
                         double tmp = DAVectorParallelism.getSquaredScaledDistancebetweenVectors(
@@ -404,8 +404,9 @@ public class ClusterQuality
 		//  Output Global Counts versus Temperature
 		ClusterQuality.CaculateTemperatureClusterCountPlot();
 
-		String directory = (new File(DAVectorSponge.config.ClusterFile)).getParent();
-		String file = Files.getNameWithoutExtension(DAVectorSponge.config.ClusterFile) + "Status1" + "-M" + DAVectorSponge.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global + "." + Files.getFileExtension(DAVectorSponge.config.ClusterFile);
+		String directory = (new File(Program.config.ClusterFile)).getParent();
+		String file = Files.getNameWithoutExtension(Program.config.ClusterFile) + "Status1" + "-M" + Program.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global + "." + Files.getFileExtension(
+                Program.config.ClusterFile);
 		String StatusFileName = Paths.get(directory, file).toString();
 		try (PrintWriter writer = new PrintWriter(java.nio.file.Files.newBufferedWriter(Paths.get(StatusFileName),
                 Charset.defaultCharset(), StandardOpenOption.CREATE),true))
@@ -419,14 +420,14 @@ public class ClusterQuality
                     continue;
                 }
                 nextline = DAVectorUtility.PrintFixedInteger(ClusterIndex, 5);
-                for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+                for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                 {
                     double tmp = ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex][VectorIndex];
-                    if ((DAVectorSponge.SigmaMethod >= 2) && (VectorIndex == 0))
+                    if ((Program.SigmaMethod >= 2) && (VectorIndex == 0))
                     {
                         tmp = Math.log(tmp);
                     }
-                    tmp = tmp / DAVectorSponge.SigmaVectorParameters_i_[VectorIndex];
+                    tmp = tmp / Program.SigmaVectorParameters_i_[VectorIndex];
                     nextline += "\t" + DAVectorUtility.PadString(String.format("%1$5.4f", tmp), 10);
                 }
                 nextline += "\t" + DAVectorUtility.PrintFixedInteger(ClusteringSolution.TotalClusterSummary.OccupationCount[ClusterIndex], 4) + "\t" + DAVectorUtility.PrintFixedInteger(NumberClustersinCut[ClusterIndex], 4) + "\t" + DAVectorUtility.PrintFixedInteger(SpongePointsinCut[ClusterIndex], 4) + "\t" + DAVectorUtility.PrintFixedInteger(ClusterIllegalPoints[ClusterIndex], 4) + "\t" + DAVectorUtility.PadString(String.format("%1$4.3f", ClusterMaxWidths[ClusterIndex]), 8) + "\t" + DAVectorUtility.PrintFixedInteger(NonSpongePointsinCut[ClusterIndex], 4);

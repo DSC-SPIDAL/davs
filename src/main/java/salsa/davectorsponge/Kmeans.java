@@ -498,20 +498,20 @@ public class Kmeans {
                     Kmeans.InitialPointAssignment[ActualPointPosition] = label - FirstClustervalue;
                 } else {
                     Kmeans.InitialPointAssignment[ActualPointPosition] =
-                            RandomObject.nextInt(DAVectorSponge.InitialNcent);
+                            RandomObject.nextInt(Program.InitialNcent);
                     if (ClusterPosition == -2) { // Force each cluster to have one point
-                        if (countLinesinFile < DAVectorSponge.InitialNcent) {
+                        if (countLinesinFile < Program.InitialNcent) {
                             Kmeans.InitialPointAssignment[ActualPointPosition] = countLinesinFile;
                         }
                     }
                     if (ClusterPosition == -3) {
-                        int divisor = DAVectorSponge.NumberDataPoints / DAVectorSponge.InitialNcent;
+                        int divisor = Program.NumberDataPoints / Program.InitialNcent;
                         if (countLinesinFile % divisor == 0) {
                             Kmeans.InitialPointAssignment[ActualPointPosition] = countLinesinFile / divisor;
                         }
                     }
                     if (ClusterPosition == -4) {
-                        int divisor = DAVectorSponge.NumberDataPoints / DAVectorSponge.InitialNcent;
+                        int divisor = Program.NumberDataPoints / Program.InitialNcent;
                         Kmeans.InitialPointAssignment[ActualPointPosition] = countLinesinFile / divisor;
                     }
                 }

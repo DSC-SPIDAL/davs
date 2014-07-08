@@ -90,21 +90,21 @@ public class DAVectorParallelism
 
 	public static double getDistancefromPoint(int LocalToProcessIndex, double[] ClusterPosition)
 	{
-		double tmp0 = DAVectorSponge.PointPosition[LocalToProcessIndex][0] - ClusterPosition[0];
-		double tmp1 = DAVectorSponge.PointPosition[LocalToProcessIndex][1] - ClusterPosition[1];
+		double tmp0 = Program.PointPosition[LocalToProcessIndex][0] - ClusterPosition[0];
+		double tmp1 = Program.PointPosition[LocalToProcessIndex][1] - ClusterPosition[1];
 		double tmp = tmp0 * tmp0 + tmp1 * tmp1;
-		if (DAVectorSponge.ParameterVectorDimension == 2)
+		if (Program.ParameterVectorDimension == 2)
 		{
 			return Math.sqrt(tmp);
 		}
-		if (DAVectorSponge.ParameterVectorDimension == 3)
+		if (Program.ParameterVectorDimension == 3)
 		{
-			double tmp2 = DAVectorSponge.PointPosition[LocalToProcessIndex][2] - ClusterPosition[2];
+			double tmp2 = Program.PointPosition[LocalToProcessIndex][2] - ClusterPosition[2];
 			return Math.sqrt(tmp + tmp2 * tmp2);
 		}
-		for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
-			double tmp3 = DAVectorSponge.PointPosition[LocalToProcessIndex][VectorIndex] - ClusterPosition[VectorIndex];
+			double tmp3 = Program.PointPosition[LocalToProcessIndex][VectorIndex] - ClusterPosition[VectorIndex];
 			tmp += tmp3 * tmp3;
 		}
 
@@ -117,10 +117,10 @@ public class DAVectorParallelism
 		if (Solution.DistributedExecutionMode && (ActiveClusterIndex >= ClusteringSolution.NumberLocalActiveClusters))
 		{
 			int RemoteIndex = ActiveClusterIndex - ClusteringSolution.NumberLocalActiveClusters;
-			return getSquaredScaledDistancebetweenVectors(DAVectorSponge.PointPosition[LocalToProcessIndex], DistributedClusteringSolution.StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex], DistributedClusteringSolution.StorageforTransportedClusters.TotalTransportedSigma_t_i[RemoteIndex]);
+			return getSquaredScaledDistancebetweenVectors(Program.PointPosition[LocalToProcessIndex], DistributedClusteringSolution.StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex], DistributedClusteringSolution.StorageforTransportedClusters.TotalTransportedSigma_t_i[RemoteIndex]);
 		}
 		int RealClusterIndex = ClusteringSolution.RealClusterIndices[ActiveClusterIndex];
-		return getSquaredScaledDistancebetweenVectors(DAVectorSponge.PointPosition[LocalToProcessIndex], Solution.Y_k_i_[RealClusterIndex], Solution.Sigma_k_i_[RealClusterIndex]);
+		return getSquaredScaledDistancebetweenVectors(Program.PointPosition[LocalToProcessIndex], Solution.Y_k_i_[RealClusterIndex], Solution.Sigma_k_i_[RealClusterIndex]);
 
 	} // End getSquaredScaledDistancefromPoint
 
@@ -157,10 +157,10 @@ public class DAVectorParallelism
 
 	public static double getSquaredScaledDistancebetweenVectors(double[] vector1, double[] vector2, double[] sigma)
 	{
-		if (DAVectorSponge.SigmaMethod == 0)
+		if (Program.SigmaMethod == 0)
 		{
 			double tmp4 = 0.0;
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				double tmp3 = (vector1[VectorIndex] - vector2[VectorIndex]);
 				tmp4 += tmp3 * tmp3;
@@ -171,16 +171,16 @@ public class DAVectorParallelism
 		double tmp0 = (vector1[0] - vector2[0]);
 		double tmp1 = (vector1[1] - vector2[1]);
 		double tmp = (tmp0 * tmp0 / sigma[0]) + (tmp1 * tmp1 / sigma[1]);
-		if (DAVectorSponge.ParameterVectorDimension == 2)
+		if (Program.ParameterVectorDimension == 2)
 		{
 			return tmp;
 		}
-		if (DAVectorSponge.ParameterVectorDimension == 3)
+		if (Program.ParameterVectorDimension == 3)
 		{
 			double tmp2 = (vector1[2] - vector2[2]);
 			return tmp + tmp2 * tmp2 / sigma[2];
 		}
-		for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			double tmp3 = (vector1[VectorIndex] - vector2[VectorIndex]);
 			tmp += tmp3 * tmp3 / sigma[VectorIndex];
@@ -192,10 +192,10 @@ public class DAVectorParallelism
 
 	public static double getNOTSquaredScaledDistancebetweenVectors(double[] vector1, double[] vector2, double[] sigma)
 	{
-		if (DAVectorSponge.SigmaMethod == 0)
+		if (Program.SigmaMethod == 0)
 		{
 			double tmp4 = 0.0;
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				double tmp3 = (vector1[VectorIndex] - vector2[VectorIndex]);
 				tmp4 += tmp3 * tmp3;
@@ -206,16 +206,16 @@ public class DAVectorParallelism
 		double tmp0 = (vector1[0] - vector2[0]);
 		double tmp1 = (vector1[1] - vector2[1]);
 		double tmp = (tmp0 * tmp0 / sigma[0]) + (tmp1 * tmp1 / sigma[1]);
-		if (DAVectorSponge.ParameterVectorDimension == 2)
+		if (Program.ParameterVectorDimension == 2)
 		{
 			return Math.sqrt(tmp);
 		}
-		if (DAVectorSponge.ParameterVectorDimension == 3)
+		if (Program.ParameterVectorDimension == 3)
 		{
 			double tmp2 = (vector1[2] - vector2[2]);
 			return Math.sqrt(tmp + tmp2 * tmp2 / sigma[2]);
 		}
-		for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			double tmp3 = (vector1[VectorIndex] - vector2[VectorIndex]);
 			tmp += tmp3 * tmp3 / sigma[VectorIndex];
@@ -230,16 +230,16 @@ public class DAVectorParallelism
 		double tmp0 = (vector1[0] - vector2[0]);
 		double tmp1 = (vector1[1] - vector2[1]);
 		double tmp = (tmp0 * tmp0) + (tmp1 * tmp1);
-		if (DAVectorSponge.ParameterVectorDimension == 2)
+		if (Program.ParameterVectorDimension == 2)
 		{
 			return Math.sqrt(tmp);
 		}
-		if (DAVectorSponge.ParameterVectorDimension == 3)
+		if (Program.ParameterVectorDimension == 3)
 		{
 			double tmp2 = (vector1[2] - vector2[2]);
 			return Math.sqrt(tmp + tmp2 * tmp2);
 		}
-		for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			double tmp3 = (vector1[VectorIndex] - vector2[VectorIndex]);
 			tmp += tmp3 * tmp3;

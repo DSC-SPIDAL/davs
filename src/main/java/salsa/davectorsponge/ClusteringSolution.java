@@ -30,7 +30,7 @@ public class ClusteringSolution {
     public boolean[] YPreviousActuallySet; // If true this Y has YPrevious set
     public double[][][] Correlation_k_i_j; // Correlation that is second term in second derivation -- Symmetric -- Diagonal Sum is Square of Cluster Width
     public double[][] DC_k_DY_k_i_; // Derivative of C[k] used in splitting
-    public double[][] Sigma_k_i_; // Squared Standard Deviation of Cluster k calculated as controlled by DAVectorSponge.SigmaMethod
+    public double[][] Sigma_k_i_; // Squared Standard Deviation of Cluster k calculated as controlled by Program.SigmaMethod
     public double[][] Eigenvector_k_i; // Splitting vector for cluster k in Y_k_/SQRT(Sigma_k_i_) -- only set for clusters that are candidates
 
     public int ClustertoSplit = -1; // Current Cluster being split
@@ -40,7 +40,7 @@ public class ClusteringSolution {
     public double OldHammy = 0.0; //  Previous value of Hamiltonian
     public int Ncent_ThisNode = 1; //  the current number of clusters stored in this node
     public int Ncent_Global = 1; //  the current number of clusters summed over all nodes
-    public double ActualCoolingFactor = DAVectorSponge.InitialCoolingFactor; // Actual Cooling Factor
+    public double ActualCoolingFactor = Program.InitialCoolingFactor; // Actual Cooling Factor
     public double Temperature; // The current temperature
     public int IterationSetAt = 0; // Iteration set at
     public boolean Eigenvectorset = false; // If True Eigenvector set
@@ -222,7 +222,7 @@ public class ClusteringSolution {
         YPreviousActuallySet = new boolean[MaximumNumberClusterspernode];
         Eigenvector_k_i = new double[MaximumNumberClusterspernode][];
         DC_k_DY_k_i_ = new double[MaximumNumberClusterspernode][];
-        Sigma_k_i_ = new double[MaximumNumberClusterspernode][]; // Standard Deviation Squared of Cluster k calculated as controlled by DAVectorSponge.SigmaMethod
+        Sigma_k_i_ = new double[MaximumNumberClusterspernode][]; // Standard Deviation Squared of Cluster k calculated as controlled by Program.SigmaMethod
         Correlation_k_i_j = new double[MaximumNumberClusterspernode][][]; // Correlation that is second term in second derivation -- Symmetric -- Diagonal Sum is Square of Cluster Width
 
         RealClusterIndices = new int[MaximumNumberClusterspernode];
@@ -233,19 +233,19 @@ public class ClusteringSolution {
 
         for (int ClusterIndex = 0; ClusterIndex < MaximumNumberClusterspernode; ClusterIndex++) {
             YPreviousActuallySet[ClusterIndex] = false;
-            Y_k_i_[ClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
-            YPrevious_k_i_[ClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
-            Eigenvector_k_i[ClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
-            DC_k_DY_k_i_[ClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
-            Sigma_k_i_[ClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+            Y_k_i_[ClusterIndex] = new double[Program.ParameterVectorDimension];
+            YPrevious_k_i_[ClusterIndex] = new double[Program.ParameterVectorDimension];
+            Eigenvector_k_i[ClusterIndex] = new double[Program.ParameterVectorDimension];
+            DC_k_DY_k_i_[ClusterIndex] = new double[Program.ParameterVectorDimension];
+            Sigma_k_i_[ClusterIndex] = new double[Program.ParameterVectorDimension];
             int correlsize = 1;
-            if (DAVectorSponge.CalculateCorrelationMatrix) {
-                correlsize = DAVectorSponge.ParameterVectorDimension;
+            if (Program.CalculateCorrelationMatrix) {
+                correlsize = Program.ParameterVectorDimension;
             }
             Correlation_k_i_j[ClusterIndex] = new double[correlsize][correlsize];
         }
 
-        AverageWidth = new double[DAVectorSponge.ParameterVectorDimension];
+        AverageWidth = new double[Program.ParameterVectorDimension];
         Eigenvectorset = false;
         SolutionSet = false;
         CorrelationsSet = false;
@@ -330,7 +330,7 @@ public class ClusteringSolution {
             BeginFindWidthsinDistributedMode = -1;
         }
 
-        GlobalReductions.FindVectorDoubleSum FindAverageWidth = new GlobalReductions.FindVectorDoubleSum(DAVectorUtility.ThreadCount, DAVectorSponge.ParameterVectorDimension);
+        GlobalReductions.FindVectorDoubleSum FindAverageWidth = new GlobalReductions.FindVectorDoubleSum(DAVectorUtility.ThreadCount, Program.ParameterVectorDimension);
 
         // Note - parallel for
         try {
@@ -343,7 +343,7 @@ public class ClusteringSolution {
                 int ThreadStorePosition = -1;
                 double[] Sigma_Pointer;
                 double[] Y_Pointer;
-                double[] WorkSpace_Avg = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] WorkSpace_Avg = new double[Program.ParameterVectorDimension];
                 int ArraySize = Math.min(ClusteringSolution.NumberAvailableActiveClusters,
                         ClusteringSolution.MaximumClustersperPoint);
                 int[] ActiveClustersperPoint = new int[ArraySize];
@@ -382,13 +382,13 @@ public class ClusteringSolution {
                         if ((SpongeCluster < 0) || (RealClusterIndex != SpongeCluster)) {
                             WorkSpace_k_[IndirectClusterIndex] = wgt * DAVectorParallelism.getSquaredScaledDistancePointActiveCluster(
                                     alpha, ActiveClusterIndex, this);
-                            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
-                                double tmp = DAVectorSponge.PointPosition[alpha][VectorIndex] - Y_Pointer[VectorIndex];
+                            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
+                                double tmp = Program.PointPosition[alpha][VectorIndex] - Y_Pointer[VectorIndex];
                                 WorkSpace_Avg[VectorIndex] = wgt * tmp * tmp / Sigma_Pointer[VectorIndex];
                             }
                             FindAverageWidth.addapoint(threadIndex, WorkSpace_Avg);
                         } else {
-                            WorkSpace_k_[IndirectClusterIndex] = wgt * DAVectorSponge.SpongeFactor * DAVectorSponge.SpongeFactor;
+                            WorkSpace_k_[IndirectClusterIndex] = wgt * Program.SpongeFactor * Program.SpongeFactor;
                         }
                         if (this.DistributedExecutionMode) {
                             FindWidthsinDistributedMode.addapoint(threadIndex, ThreadStorePosition,
@@ -421,7 +421,7 @@ public class ClusteringSolution {
             }
             boolean zerosizecluster = false;
             if (RealClusterIndex != ParallelClustering.runningSolution.SpongeCluster) {
-                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.CountforCluster_C_ktobezero;
+                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.CountforCluster_C_ktobezero;
             }
             ZeroSizeClusters[CountGlobalClusters] = zerosizecluster;
             ++CountGlobalClusters;
@@ -450,11 +450,11 @@ public class ClusteringSolution {
                 zerosizecluster = ZeroSizeClusters[CountGlobalClusters];
                 ++CountGlobalClusters;
             } else if (ParallelClustering.runningSolution.DistributedExecutionMode) {
-                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.CountforCluster_C_ktobezero;
+                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.CountforCluster_C_ktobezero;
             }
 
             if (RealClusterIndex == ParallelClustering.runningSolution.SpongeCluster) {
-                this.ClusterScaledSquaredWidth_k_[RealClusterIndex] = DAVectorSponge.SpongeFactor * DAVectorSponge.SpongeFactor;
+                this.ClusterScaledSquaredWidth_k_[RealClusterIndex] = Program.SpongeFactor * Program.SpongeFactor;
                 continue;
             }
 
@@ -489,7 +489,7 @@ public class ClusteringSolution {
         //   No contribution from Sponge here
         FindAverageWidth.sumoverthreadsandmpi();
         this.TotaloverVectorIndicesAverageWidth = 0.0;
-        for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+        for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
             this.AverageWidth[VectorIndex] = FindAverageWidth.TotalVectorSum[VectorIndex] / C_Sum;
             this.TotaloverVectorIndicesAverageWidth += this.AverageWidth[VectorIndex];
         }
@@ -617,7 +617,7 @@ public class ClusteringSolution {
             }
             boolean zerosizecluster = false;
             if (RealClusterIndex != ParallelClustering.runningSolution.SpongeCluster) {
-                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.CountforCluster_C_ktobezero;
+                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.CountforCluster_C_ktobezero;
             }
             ZeroSizeClusters[CountGlobalClusters] = zerosizecluster;
             ++CountGlobalClusters;
@@ -644,7 +644,7 @@ public class ClusteringSolution {
                 zerosizecluster = ZeroSizeClusters[CountGlobalClusters];
                 ++CountGlobalClusters;
             } else if (ParallelClustering.runningSolution.DistributedExecutionMode) {
-                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.CountforCluster_C_ktobezero;
+                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.CountforCluster_C_ktobezero;
             }
 
             if (!zerosizecluster) {
@@ -662,8 +662,8 @@ public class ClusteringSolution {
     public final void SetClusterCorrelations() throws MPIException {
         DAVectorUtility.StartSubTimer(4);
         final int NumberofCorrelationPositions;
-        if (DAVectorSponge.CalculateCorrelationMatrix) {
-            NumberofCorrelationPositions = (DAVectorSponge.ParameterVectorDimension * (DAVectorSponge.ParameterVectorDimension + 1)) / 2;
+        if (Program.CalculateCorrelationMatrix) {
+            NumberofCorrelationPositions = (Program.ParameterVectorDimension * (Program.ParameterVectorDimension + 1)) / 2;
         } else {
             NumberofCorrelationPositions = 0;
         }
@@ -676,8 +676,8 @@ public class ClusteringSolution {
 
         if (this.DistributedExecutionMode) {
             Find2Components = new DistributedReductions.FindIndirectMultiVectorDoubleSum();
-            BeginDC_k_DY_k_ = Find2Components.AddComponents(DAVectorSponge.ParameterVectorDimension);
-            if (DAVectorSponge.CalculateCorrelationMatrix) {
+            BeginDC_k_DY_k_ = Find2Components.AddComponents(Program.ParameterVectorDimension);
+            if (Program.CalculateCorrelationMatrix) {
                 BeginCorrelations = Find2Components.AddComponents(NumberofCorrelationPositions);
             } else {
                 BeginCorrelations = -1;
@@ -686,11 +686,11 @@ public class ClusteringSolution {
             FindDC_k_DY_k_ = null;
             FindCorrelations = null;
         } else {
-            FindDC_k_DY_k_ = new GlobalReductions.FindIndirectVectorDoubleSum[DAVectorSponge.ParameterVectorDimension];
-            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+            FindDC_k_DY_k_ = new GlobalReductions.FindIndirectVectorDoubleSum[Program.ParameterVectorDimension];
+            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                 FindDC_k_DY_k_[VectorIndex] = new GlobalReductions.FindIndirectVectorDoubleSum(DAVectorUtility.ThreadCount, ClusteringSolution.NumberLocalActiveClusters);
             }
-            if (DAVectorSponge.CalculateCorrelationMatrix) {
+            if (Program.CalculateCorrelationMatrix) {
                 FindCorrelations = new GlobalReductions.FindIndirectVectorDoubleSum[NumberofCorrelationPositions];
                 for (int CorrelationPositions = 0; CorrelationPositions < NumberofCorrelationPositions; CorrelationPositions++) {
                     FindCorrelations[CorrelationPositions] = new GlobalReductions.FindIndirectVectorDoubleSum(DAVectorUtility.ThreadCount, ClusteringSolution.NumberLocalActiveClusters);
@@ -710,12 +710,12 @@ public class ClusteringSolution {
                 if (this.DistributedExecutionMode) {
                     Find2Components.ThreadInitialize(threadIndex);
                 } else {
-                    if (DAVectorSponge.CalculateCorrelationMatrix) {
+                    if (Program.CalculateCorrelationMatrix) {
                         for (int CorrelationPositions = 0; CorrelationPositions < NumberofCorrelationPositions; CorrelationPositions++) {
                             FindCorrelations[CorrelationPositions].startthread(threadIndex);
                         }
                     }
-                    for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                    for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                         FindDC_k_DY_k_[VectorIndex].startthread(threadIndex);
                     }
                 }
@@ -725,15 +725,15 @@ public class ClusteringSolution {
                 int ArraySize = Math.min(ClusteringSolution.NumberAvailableActiveClusters,
                         ClusteringSolution.MaximumClustersperPoint);
                 int[] ActiveClustersperPoint = new int[ArraySize];
-                double[] DC_k_DY_k_Values = new double[DAVectorSponge.ParameterVectorDimension];
-                double[][] DC_k_DY_k_Values_ClusterIndex = new double[DAVectorSponge.ParameterVectorDimension][];
-                for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                double[] DC_k_DY_k_Values = new double[Program.ParameterVectorDimension];
+                double[][] DC_k_DY_k_Values_ClusterIndex = new double[Program.ParameterVectorDimension][];
+                for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                     DC_k_DY_k_Values_ClusterIndex[VectorIndex] = new double[ArraySize];
                 }
                 int Maynotneed = Math.max(1, NumberofCorrelationPositions);
                 double[][] WorkSpace_Sym_i_j_ClusterIndex = new double[Maynotneed][];
                 double[] WorkSpace_Sym_i_j_ = new double[Maynotneed];
-                if (DAVectorSponge.CalculateCorrelationMatrix) {
+                if (Program.CalculateCorrelationMatrix) {
                     for (int CorrelationPositions = 0; CorrelationPositions < NumberofCorrelationPositions; CorrelationPositions++) {
                         WorkSpace_Sym_i_j_ClusterIndex[CorrelationPositions] = new double[ArraySize];
                     }
@@ -769,10 +769,10 @@ public class ClusteringSolution {
                             ThreadStorePosition = DistributedClusteringSolution.StorageforTransportedClusters.TransportedThreadAccPosition[RemoteIndex][threadIndex];
                         }
                         if ((RealClusterIndex == SpongeCluster) && (SpongeCluster >= 0)) {
-                            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                                 DC_k_DY_k_Values_ClusterIndex[VectorIndex][IndirectClusterIndex] = 0.0;
                             }
-                            if (DAVectorSponge.CalculateCorrelationMatrix) {
+                            if (Program.CalculateCorrelationMatrix) {
                                 for (int CorrelationPositions = 0; CorrelationPositions < NumberofCorrelationPositions; CorrelationPositions++) {
                                     WorkSpace_Sym_i_j_ClusterIndex[CorrelationPositions][IndirectClusterIndex] = 0.0;
                                 }
@@ -781,14 +781,14 @@ public class ClusteringSolution {
                         }
                         double CurrentMvalue = this.M_alpha_kpointer_[alpha][IndirectClusterIndex] * 0.5;
                         int countdoubleindex = 0;
-                        for (int VectorIndex1 = 0; VectorIndex1 < DAVectorSponge.ParameterVectorDimension; VectorIndex1++) {
+                        for (int VectorIndex1 = 0; VectorIndex1 < Program.ParameterVectorDimension; VectorIndex1++) {
                             double fudge = 1.0 / (Math.sqrt(Sigma_Pointer[VectorIndex1]) * this.Temperature);
-                            DC_k_DY_k_Values[VectorIndex1] = -(Y_Pointer[VectorIndex1] - DAVectorSponge.PointPosition[alpha][VectorIndex1]) * fudge * CurrentMvalue * (1.0 - CurrentMvalue);
+                            DC_k_DY_k_Values[VectorIndex1] = -(Y_Pointer[VectorIndex1] - Program.PointPosition[alpha][VectorIndex1]) * fudge * CurrentMvalue * (1.0 - CurrentMvalue);
                             DC_k_DY_k_Values_ClusterIndex[VectorIndex1][IndirectClusterIndex] = DC_k_DY_k_Values[VectorIndex1];
-                            if (DAVectorSponge.CalculateCorrelationMatrix) {
-                                double vecdiff1 = DAVectorSponge.PointPosition[alpha][VectorIndex1] - Y_Pointer[VectorIndex1];
-                                for (int VectorIndex2 = VectorIndex1; VectorIndex2 < DAVectorSponge.ParameterVectorDimension; VectorIndex2++) {
-                                    double vecdiff2 = DAVectorSponge.PointPosition[alpha][VectorIndex2] - Y_Pointer[VectorIndex2];
+                            if (Program.CalculateCorrelationMatrix) {
+                                double vecdiff1 = Program.PointPosition[alpha][VectorIndex1] - Y_Pointer[VectorIndex1];
+                                for (int VectorIndex2 = VectorIndex1; VectorIndex2 < Program.ParameterVectorDimension; VectorIndex2++) {
+                                    double vecdiff2 = Program.PointPosition[alpha][VectorIndex2] - Y_Pointer[VectorIndex2];
                                     WorkSpace_Sym_i_j_[countdoubleindex] = CurrentMvalue * vecdiff1 * vecdiff2;
                                     WorkSpace_Sym_i_j_ClusterIndex[countdoubleindex][IndirectClusterIndex] = WorkSpace_Sym_i_j_[countdoubleindex];
                                     ++countdoubleindex;
@@ -812,22 +812,22 @@ public class ClusteringSolution {
                                 );
 
                             }
-                            if (DAVectorSponge.CalculateCorrelationMatrix) {
+                            if (Program.CalculateCorrelationMatrix) {
                                 Find2Components.addapoint(threadIndex, ThreadStorePosition, BeginCorrelations,
                                         NumberofCorrelationPositions, WorkSpace_Sym_i_j_);
                             }
                             Find2Components.addapoint(threadIndex, ThreadStorePosition, BeginDC_k_DY_k_,
-                                    DAVectorSponge.ParameterVectorDimension, DC_k_DY_k_Values);
+                                    Program.ParameterVectorDimension, DC_k_DY_k_Values);
                         }
                     }
                     if (!this.DistributedExecutionMode) {
-                        if (DAVectorSponge.CalculateCorrelationMatrix) {
+                        if (Program.CalculateCorrelationMatrix) {
                             for (int CorrelationPositions = 0; CorrelationPositions < NumberofCorrelationPositions; CorrelationPositions++) {
                                 FindCorrelations[CorrelationPositions].addapoint(threadIndex, IndirectSize,
                                         ActiveClustersperPoint, WorkSpace_Sym_i_j_ClusterIndex[CorrelationPositions]);
                             }
                         }
-                        for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                        for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                             FindDC_k_DY_k_[VectorIndex].addapoint(threadIndex, IndirectSize, ActiveClustersperPoint,
                                     DC_k_DY_k_Values_ClusterIndex[VectorIndex]);
                         }
@@ -842,12 +842,12 @@ public class ClusteringSolution {
         if (this.DistributedExecutionMode) {
             Find2Components.sumoverthreadsandmpi();
         } else {
-            if (DAVectorSponge.CalculateCorrelationMatrix) {
+            if (Program.CalculateCorrelationMatrix) {
                 for (int CorrelationPositions = 0; CorrelationPositions < NumberofCorrelationPositions; CorrelationPositions++) {
                     FindCorrelations[CorrelationPositions].sumoverthreadsandmpi();
                 }
             }
-            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                 FindDC_k_DY_k_[VectorIndex].sumoverthreadsandmpi();
             }
         }
@@ -865,14 +865,14 @@ public class ClusteringSolution {
             }
 
             int countdoubleindex = 0;
-            for (int VectorIndex1 = 0; VectorIndex1 < DAVectorSponge.ParameterVectorDimension; VectorIndex1++) {
+            for (int VectorIndex1 = 0; VectorIndex1 < Program.ParameterVectorDimension; VectorIndex1++) {
                 if (this.DistributedExecutionMode) {
                     this.DC_k_DY_k_i_[RealClusterIndex][VectorIndex1] = Find2Components.TotalVectorSum[AccumulationPosition][BeginDC_k_DY_k_ + VectorIndex1];
                 } else {
                     this.DC_k_DY_k_i_[RealClusterIndex][VectorIndex1] = FindDC_k_DY_k_[VectorIndex1].TotalVectorSum[LocalActiveClusterIndex];
                 }
-                if (DAVectorSponge.CalculateCorrelationMatrix) {
-                    for (int VectorIndex2 = VectorIndex1; VectorIndex2 < DAVectorSponge.ParameterVectorDimension; VectorIndex2++) {
+                if (Program.CalculateCorrelationMatrix) {
+                    for (int VectorIndex2 = VectorIndex1; VectorIndex2 < Program.ParameterVectorDimension; VectorIndex2++) {
                         if (this.DistributedExecutionMode) {
                             result = Find2Components.TotalVectorSum[AccumulationPosition][BeginCorrelations + countdoubleindex];
                         } else {
@@ -1016,7 +1016,7 @@ public class ClusteringSolution {
                 UniversalMapping[ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex]].GlobalClusterNumber = CountGlobal;
                 TotalClusterSummary.CreatedIndex[CountGlobal] = ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex];
                 System.arraycopy(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], 0,
-                        TotalClusterSummary.CenterPosition[CountGlobal], 0, DAVectorSponge.ParameterVectorDimension);
+                        TotalClusterSummary.CenterPosition[CountGlobal], 0, Program.ParameterVectorDimension);
                 TotalClusterSummary.CurrentNode[CountGlobal] = 0;
                 TotalClusterSummary.OccupationCount[CountGlobal] = ParallelClustering.runningSolution.OccupationCounts_k_[RealClusterIndex];
                 ++CountGlobal;
@@ -1107,7 +1107,7 @@ public class ClusteringSolution {
             }
 
             //  Transport Center positions
-            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                 if (SourceNode == DAVectorUtility.MPI_Rank) {
                     FromAfarDouble.setNumberOfPoints(CountLocal);
                     FromAfarDouble.setFirstPoint(0);
@@ -1288,7 +1288,7 @@ public class ClusteringSolution {
         To.YPreviousSet = From.YPreviousSet;
         To.ClustertoSplit = From.ClustertoSplit;
         To.TotaloverVectorIndicesAverageWidth = From.TotaloverVectorIndicesAverageWidth;
-        System.arraycopy(From.AverageWidth, 0, To.AverageWidth, 0, DAVectorSponge.ParameterVectorDimension);
+        System.arraycopy(From.AverageWidth, 0, To.AverageWidth, 0, Program.ParameterVectorDimension);
 
         int NumberClusters = From.Ncent_ThisNode;
         for (int ClusterIndex = 0; ClusterIndex < NumberClusters; ClusterIndex++) {
@@ -1306,7 +1306,7 @@ public class ClusteringSolution {
             To.LocalSplitCreatedIndex[ClusterIndex] = From.LocalSplitCreatedIndex[ClusterIndex];
             To.YPreviousActuallySet[ClusterIndex] = From.YPreviousActuallySet[ClusterIndex];
 
-            for (int VectorIndex1 = 0; VectorIndex1 < DAVectorSponge.ParameterVectorDimension; VectorIndex1++) {
+            for (int VectorIndex1 = 0; VectorIndex1 < Program.ParameterVectorDimension; VectorIndex1++) {
                 To.Y_k_i_[ClusterIndex][VectorIndex1] = From.Y_k_i_[ClusterIndex][VectorIndex1];
                 To.YPrevious_k_i_[ClusterIndex][VectorIndex1] = From.YPrevious_k_i_[ClusterIndex][VectorIndex1];
                 To.Eigenvector_k_i[ClusterIndex][VectorIndex1] = From.Eigenvector_k_i[ClusterIndex][VectorIndex1];
@@ -1316,7 +1316,7 @@ public class ClusteringSolution {
                 if (From.CorrelationsSet) {
                     System.arraycopy(To.Correlation_k_i_j[ClusterIndex][VectorIndex1], 0,
                                      From.Correlation_k_i_j[ClusterIndex][VectorIndex1], 0,
-                                     DAVectorSponge.ParameterVectorDimension);
+                                     Program.ParameterVectorDimension);
                 }
             }
         }
@@ -1376,7 +1376,7 @@ public class ClusteringSolution {
             this.LocalSplitCreatedIndex[NewClusterIndex] = this.LocalSplitCreatedIndex[OldClusterIndex];
             this.YPreviousActuallySet[NewClusterIndex] = this.YPreviousActuallySet[OldClusterIndex];
 
-            for (int VectorIndex1 = 0; VectorIndex1 < DAVectorSponge.ParameterVectorDimension; VectorIndex1++) {
+            for (int VectorIndex1 = 0; VectorIndex1 < Program.ParameterVectorDimension; VectorIndex1++) {
                 this.Y_k_i_[NewClusterIndex][VectorIndex1] = this.Y_k_i_[OldClusterIndex][VectorIndex1];
                 this.YPrevious_k_i_[NewClusterIndex][VectorIndex1] = this.YPrevious_k_i_[OldClusterIndex][VectorIndex1];
                 this.Sigma_k_i_[NewClusterIndex][VectorIndex1] = this.Sigma_k_i_[OldClusterIndex][VectorIndex1];
@@ -1386,7 +1386,7 @@ public class ClusteringSolution {
                 if (this.CorrelationsSet) {
                     System.arraycopy(this.Correlation_k_i_j[OldClusterIndex][VectorIndex1], 0,
                             this.Correlation_k_i_j[NewClusterIndex][VectorIndex1], 0,
-                            DAVectorSponge.ParameterVectorDimension);
+                            Program.ParameterVectorDimension);
                 }
             }
             int CreatedIndex = this.LocalCreatedIndex[OldClusterIndex];
@@ -1439,7 +1439,7 @@ public class ClusteringSolution {
             this.LocalSplitCreatedIndex[ClusterIndex] = this.LocalSplitCreatedIndex[ClusterIndex + 1];
             this.YPreviousActuallySet[ClusterIndex] = this.YPreviousActuallySet[ClusterIndex + 1];
 
-            for (int VectorIndex1 = 0; VectorIndex1 < DAVectorSponge.ParameterVectorDimension; VectorIndex1++) {
+            for (int VectorIndex1 = 0; VectorIndex1 < Program.ParameterVectorDimension; VectorIndex1++) {
                 this.Y_k_i_[ClusterIndex][VectorIndex1] = this.Y_k_i_[ClusterIndex + 1][VectorIndex1];
                 this.YPrevious_k_i_[ClusterIndex][VectorIndex1] = this.YPrevious_k_i_[ClusterIndex + 1][VectorIndex1];
                 this.Sigma_k_i_[ClusterIndex][VectorIndex1] = this.Sigma_k_i_[ClusterIndex + 1][VectorIndex1];
@@ -1449,7 +1449,7 @@ public class ClusteringSolution {
                 if (this.CorrelationsSet) {
                     System.arraycopy(this.Correlation_k_i_j[ClusterIndex + 1][VectorIndex1], 0,
                             this.Correlation_k_i_j[ClusterIndex][VectorIndex1], 0,
-                            DAVectorSponge.ParameterVectorDimension);
+                            Program.ParameterVectorDimension);
                 }
             }
         }
@@ -1458,7 +1458,7 @@ public class ClusteringSolution {
         this.YPreviousActuallySet[this.Ncent_ThisNode] = false;
         ParallelClustering.runningSolution.SetActiveClusters();
 
-        if (DAVectorSponge.UseTriangleInequality_DA > 0) {
+        if (Program.UseTriangleInequality_DA > 0) {
             DATriangleInequality.DeleteCenter(RemovedIndex, DeletedCreatedIndex);
         }
 
@@ -1468,8 +1468,8 @@ public class ClusteringSolution {
         // Note - parallel for
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
-                //  If DAVectorSponge.UseTriangleInequality_DA > 0, zero cluster count will be fixed in DistributedClusteringSolution.ManageMajorSynchronization(true) called later
-                if (DAVectorSponge.RemovalDiagnosticPrint) {
+                //  If Program.UseTriangleInequality_DA > 0, zero cluster count will be fixed in DistributedClusteringSolution.ManageMajorSynchronization(true) called later
+                if (Program.RemovalDiagnosticPrint) {
                     OldClusterNumberHistogram.startthread(threadIndex);
                     NewClusterNumberHistogram.startthread(threadIndex);
                 }
@@ -1514,7 +1514,7 @@ public class ClusteringSolution {
                     }
                     this.NumClusters_alpha_[alpha] = IndirectSize - decrement;
                     int NewIndirectSize = this.NumClusters_alpha_[alpha];
-                    if ((NewIndirectSize <= 0) && (DAVectorSponge.UseTriangleInequality_DA == 0)) {
+                    if ((NewIndirectSize <= 0) && (Program.UseTriangleInequality_DA == 0)) {
                         DAVectorUtility.printAndThrowRuntimeException(
                                 " Zero Cluster Count after removing cluster for Point " + (alpha + DAVectorUtility.PointStart_Process) + " Originally " + IndirectSize);
 
@@ -1534,7 +1534,7 @@ public class ClusteringSolution {
                         }
                     }
                     if (this.NumClusters_alpha_[alpha] < 1) {
-                        if (DAVectorSponge.UseTriangleInequality_DA == 0) {
+                        if (Program.UseTriangleInequality_DA == 0) {
                             this.SetClustersforaPoint(alpha);
                         }
                     } else {
@@ -1551,7 +1551,7 @@ public class ClusteringSolution {
                     for (int IndirectClusterIndex = 0; IndirectClusterIndex < NewIndirectSize; IndirectClusterIndex++) {
                         ParallelClustering.runningSolution.LegalCluster(alpha, IndirectClusterIndex);
                     }
-                    if (DAVectorSponge.RemovalDiagnosticPrint) {
+                    if (Program.RemovalDiagnosticPrint) {
                         OldClusterNumberHistogram.addapoint(threadIndex, IndirectSize);
                         NewClusterNumberHistogram.addapoint(threadIndex, NewIndirectSize);
                     }
@@ -1562,7 +1562,7 @@ public class ClusteringSolution {
             DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
         }
 
-        if (DAVectorSponge.RemovalDiagnosticPrint) {
+        if (Program.RemovalDiagnosticPrint) {
             OldClusterNumberHistogram.sumoverthreadsandmpi();
             NewClusterNumberHistogram.sumoverthreadsandmpi();
 

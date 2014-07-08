@@ -63,8 +63,8 @@ public class DistributedClusteringSolution
 		NodeCutUpperLimit = new double[DAVectorUtility.MPI_Size];
 		ThreadCutUpperLimit = new double[DAVectorUtility.ThreadCount];
 
-		double Lower = DAVectorSponge.PointPosition[0][0];
-		double Upper = DAVectorSponge.PointPosition[DAVectorUtility.PointCount_Process - 1][0];
+		double Lower = Program.PointPosition[0][0];
+		double Upper = Program.PointPosition[DAVectorUtility.PointCount_Process - 1][0];
 
 		DAVectorUtility.StartSubTimer(DAVectorUtility.MPIGATHERTiming);
 
@@ -93,10 +93,10 @@ public class DistributedClusteringSolution
 		for (int ThreadNo = 0; ThreadNo < DAVectorUtility.ThreadCount; ThreadNo++)
 		{
 			int indextop = DAVectorUtility.PointsperThread[ThreadNo] + DAVectorUtility.StartPointperThread[ThreadNo] - DAVectorUtility.PointStart_Process - 1;
-			ThreadCutUpperLimit[ThreadNo] = DAVectorSponge.PointPosition[indextop][0];
+			ThreadCutUpperLimit[ThreadNo] = Program.PointPosition[indextop][0];
 			if (ThreadNo != (DAVectorUtility.ThreadCount - 1))
 			{
-				ThreadCutUpperLimit[ThreadNo] = 0.5 * (ThreadCutUpperLimit[ThreadNo] + DAVectorSponge.PointPosition[indextop + 1][0]);
+				ThreadCutUpperLimit[ThreadNo] = 0.5 * (ThreadCutUpperLimit[ThreadNo] + Program.PointPosition[indextop + 1][0]);
 			}
 		}
 
@@ -155,7 +155,7 @@ public class DistributedClusteringSolution
 				if (tmp > 0.0)
 				{
 					double scaled1Ddistance = tmp * tmp / ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex][0];
-					if (scaled1Ddistance >= (2.0 * DAVectorSponge.ExpArgumentCut3 * ParallelClustering.runningSolution.Temperature))
+					if (scaled1Ddistance >= (2.0 * Program.ExpArgumentCut3 * ParallelClustering.runningSolution.Temperature))
 					{
 						break;
 					}
@@ -170,7 +170,7 @@ public class DistributedClusteringSolution
 				if (tmp < 0.0)
 				{
 					double scaled1Ddistance = tmp * tmp / ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex][0];
-					if (scaled1Ddistance >= (2.0 * DAVectorSponge.ExpArgumentCut3 * ParallelClustering.runningSolution.Temperature))
+					if (scaled1Ddistance >= (2.0 * Program.ExpArgumentCut3 * ParallelClustering.runningSolution.Temperature))
 					{
 						break;
 					}
@@ -294,12 +294,12 @@ public class DistributedClusteringSolution
 	public static void MinorSynchronizationTransportDistributedClusterCenters() throws MPIException {
 		DAVectorUtility.StartSubTimer(7);
 		int NumberofLocalDistributedClusters = 0;
-		++DAVectorSponge.NumberMinorSynchs;
-		if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0)
+		++Program.NumberMinorSynchs;
+		if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0)
 		{
 			if (ParallelClustering.runningSolution.DistributedExecutionMode)
 			{
-				DAVectorUtility.SALSAPrint(1, "Minor Synchronization " + DAVectorSponge.NumberMinorSynchs + " Iteration " + ClusteringSolution.CurrentIteration + " Temperature " + String.format("%1$5.4f", ParallelClustering.runningSolution.Temperature) + " Cluster Count " + ParallelClustering.runningSolution.Ncent_Global);
+				DAVectorUtility.SALSAPrint(1, "Minor Synchronization " + Program.NumberMinorSynchs + " Iteration " + ClusteringSolution.CurrentIteration + " Temperature " + String.format("%1$5.4f", ParallelClustering.runningSolution.Temperature) + " Cluster Count " + ParallelClustering.runningSolution.Ncent_Global);
 			}
 		}
 		int H = DAVectorUtility.MPI_Rank;
@@ -329,13 +329,13 @@ public class DistributedClusteringSolution
 			TemporaryLocalClustersforSynchronization.totalTransportedCreatedIndex[NumberofLocalDistributedClusters] = ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex];
             System.arraycopy(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], 0,
                     TemporaryLocalClustersforSynchronization.totalTransportedY_t_i[NumberofLocalDistributedClusters], 0,
-                    DAVectorSponge.ParameterVectorDimension);
-			TemporaryLocalClustersforSynchronization.totalTransportedY_t_i[NumberofLocalDistributedClusters][DAVectorSponge.ParameterVectorDimension] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
+                    Program.ParameterVectorDimension);
+			TemporaryLocalClustersforSynchronization.totalTransportedY_t_i[NumberofLocalDistributedClusters][Program.ParameterVectorDimension] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
 			++NumberofLocalDistributedClusters;
 		} // End Loop over LocalClusterIndex
 
 		TemporaryLocalClustersforSynchronization.sizeOfTransportedArray = NumberofLocalDistributedClusters;
-		DAVectorSponge.ActualMaxTransportedClusterStorage = Math.max(DAVectorSponge.ActualMaxTransportedClusterStorage, NumberofLocalDistributedClusters);
+		Program.ActualMaxTransportedClusterStorage = Math.max(Program.ActualMaxTransportedClusterStorage, NumberofLocalDistributedClusters);
 		DistributedSynchronization.TransportviaPipeline DoSynchronization = new DistributedSynchronization.TransportviaPipeline(0, true, 3, 0, NumberofLocalDistributedClusters, 2);
 
 		int FinalClusterCount = 0; // Dummy
@@ -346,11 +346,12 @@ public class DistributedClusteringSolution
 		// Load P_t and Reset Sigmas if necessary
 		for (int Clustersfromafar = 0; Clustersfromafar < StorageforTransportedClusters.SizeOfTransportedArray; Clustersfromafar++)
 		{
-			StorageforTransportedClusters.TotalTransportedP_t[Clustersfromafar] = StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar][DAVectorSponge.ParameterVectorDimension];
-			if ((DAVectorSponge.SigmaMethod > 1) && (StorageforTransportedClusters.TotalTransportedStatus[Clustersfromafar][0] == 3))
+			StorageforTransportedClusters.TotalTransportedP_t[Clustersfromafar] = StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar][Program.ParameterVectorDimension];
+			if ((Program.SigmaMethod > 1) && (StorageforTransportedClusters.TotalTransportedStatus[Clustersfromafar][0] == 3))
 			{
 				Box<double[]> tempRef_Object = new Box<>(StorageforTransportedClusters.TotalTransportedSigma_t_i[Clustersfromafar]);
-				DAVectorSponge.CalculateSigma(StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar], tempRef_Object);
+				Program.CalculateSigma(StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar],
+                        tempRef_Object);
 				StorageforTransportedClusters.TotalTransportedSigma_t_i[Clustersfromafar] = tempRef_Object.content;
 			}
 		}
@@ -394,13 +395,13 @@ public class DistributedClusteringSolution
 			TemporaryLocalClustersforSynchronization.totalTransportedStatus[NumberofLocalDistributedClusters][1] = ParallelClustering.runningSolution.LocalSplitCreatedIndex[RealClusterIndex];
             System.arraycopy(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], 0,
                     TemporaryLocalClustersforSynchronization.totalTransportedY_t_i[NumberofLocalDistributedClusters], 0,
-                    DAVectorSponge.ParameterVectorDimension);
-			TemporaryLocalClustersforSynchronization.totalTransportedY_t_i[NumberofLocalDistributedClusters][DAVectorSponge.ParameterVectorDimension] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
+                    Program.ParameterVectorDimension);
+			TemporaryLocalClustersforSynchronization.totalTransportedY_t_i[NumberofLocalDistributedClusters][Program.ParameterVectorDimension] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
 			++NumberofLocalDistributedClusters;
 		} // End Loop over LocalClusterIndex
 
 		TemporaryLocalClustersforSynchronization.sizeOfTransportedArray = NumberofLocalDistributedClusters;
-		DAVectorSponge.ActualMaxTransportedClusterStorage = Math.max(DAVectorSponge.ActualMaxTransportedClusterStorage, NumberofLocalDistributedClusters);
+		Program.ActualMaxTransportedClusterStorage = Math.max(Program.ActualMaxTransportedClusterStorage, NumberofLocalDistributedClusters);
 		DistributedSynchronization.TransportviaPipeline DoSynchronization = new DistributedSynchronization.TransportviaPipeline(2, true, 3, 1, NumberofLocalDistributedClusters, 0);
 
 		int FinalClusterCount = 0;
@@ -408,7 +409,7 @@ public class DistributedClusteringSolution
 		DoSynchronization.PipelineDistributedBroadcast(TemporaryLocalClustersforSynchronization.totalTransportedY_t_i, StorageforTransportedClusters.TotalTransportedY_t_i, TemporaryLocalClustersforSynchronization.totalTransportedStatus, StorageforTransportedClusters.TotalTransportedStatus, TemporaryLocalClustersforSynchronization.totalTransportedCreatedIndex, StorageforTransportedClusters.TotalTransportedCreatedIndex, TemporaryLocalClustersforSynchronization.totalTransportedOriginalHost, StorageforTransportedClusters.TotalTransportedOriginalHost, tempRef_FinalClusterCount);
 		FinalClusterCount = tempRef_FinalClusterCount.content;
 		StorageforTransportedClusters.SizeOfTransportedArray = FinalClusterCount;
-		DAVectorSponge.ActualMaxTransportedClusterStorage = Math.max(FinalClusterCount + 1, DAVectorSponge.ActualMaxTransportedClusterStorage);
+		Program.ActualMaxTransportedClusterStorage = Math.max(FinalClusterCount + 1, Program.ActualMaxTransportedClusterStorage);
 
 		// Set P_t and sigmas which were not transported
 		// Add Created Index if new
@@ -420,11 +421,12 @@ public class DistributedClusteringSolution
 				ClusteringSolution.UniversalMapping[CreatedIndex] = new ClusterIndirection(ClusteringSolution.CurrentIteration, -1 - Clustersfromafar);
 			}
 			ClusteringSolution.UniversalMapping[CreatedIndex].PackedHost = StorageforTransportedClusters.TotalTransportedOriginalHost[Clustersfromafar];
-			StorageforTransportedClusters.TotalTransportedP_t[Clustersfromafar] = StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar][DAVectorSponge.ParameterVectorDimension];
+			StorageforTransportedClusters.TotalTransportedP_t[Clustersfromafar] = StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar][Program.ParameterVectorDimension];
 			if (StorageforTransportedClusters.TotalTransportedStatus[Clustersfromafar][0] == 3)
 			{
 				Box<double[]> tempRef_Object = new Box<>(StorageforTransportedClusters.TotalTransportedSigma_t_i[Clustersfromafar]);
-				DAVectorSponge.CalculateSigma(StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar], tempRef_Object);
+				Program.CalculateSigma(StorageforTransportedClusters.TotalTransportedY_t_i[Clustersfromafar],
+                        tempRef_Object);
 				StorageforTransportedClusters.TotalTransportedSigma_t_i[Clustersfromafar] = tempRef_Object.content;
 			}
 		}
@@ -440,8 +442,8 @@ public class DistributedClusteringSolution
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End loop over Point dependent quantities
             {
-                int[] ProposedClusters = new int[DAVectorSponge.maxNcentperPoint];
-                double[] ProposedDistances = new double[DAVectorSponge.maxNcentperPoint];
+                int[] ProposedClusters = new int[Program.maxNcentperPoint];
+                double[] ProposedDistances = new double[Program.maxNcentperPoint];
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
@@ -558,9 +560,9 @@ public class DistributedClusteringSolution
 		FindDiagnosticSums_Points.sumoverthreadsandmpi();
 		for (int DiagnosticLoop = 0; DiagnosticLoop < 8; DiagnosticLoop++)
 		{
-			DAVectorSponge.ClustersperCenterDiagnostics[DiagnosticLoop] += FindDiagnosticSums_Points.TotalVectorSum[DiagnosticLoop];
+			Program.ClustersperCenterDiagnostics[DiagnosticLoop] += FindDiagnosticSums_Points.TotalVectorSum[DiagnosticLoop];
 		}
-		VectorAnnealIterate.NumberCountChanges = DAVectorSponge.ClustersperCenterDiagnostics[7] / DAVectorSponge.ClustersperCenterDiagnostics[0];
+		VectorAnnealIterate.NumberCountChanges = Program.ClustersperCenterDiagnostics[7] / Program.ClustersperCenterDiagnostics[0];
 		DAVectorUtility.StopSubTimer(13);
 
     } // End SetClustersforaPoint(ClusteringSolution Solution)
@@ -586,7 +588,7 @@ public class DistributedClusteringSolution
 				ClusteringSolution.UniversalMapping[CreatedIndex].IterationSet = ClusteringSolution.CurrentIteration;
 				ClusteringSolution.LocalHost[LocalActiveClusterIndex] = 0;
 			}
-			if (DAVectorSponge.UseTriangleInequality_DA > 0)
+			if (Program.UseTriangleInequality_DA > 0)
 			{
 				ParallelClustering.runningSolution.SetClusterWidths();
 				DATriangleInequality.NextIteration();
@@ -596,13 +598,13 @@ public class DistributedClusteringSolution
 
 			ParallelClustering.runningSolution.SetClusterSizes();
 			ParallelClustering.runningSolution.SetClusterWidths();
-			++DAVectorSponge.NumberMajorSynchs1;
+			++Program.NumberMajorSynchs1;
 			DAVectorUtility.StopSubTimer(6);
 			return;
 		}
 
-		++DAVectorSponge.NumberMajorSynchs2;
-		DAVectorSponge.CountClusters2 += ParallelClustering.runningSolution.Ncent_ThisNode;
+		++Program.NumberMajorSynchs2;
+		Program.CountClusters2 += ParallelClustering.runningSolution.Ncent_ThisNode;
 
 		// Reset Host Information
 		boolean UseCluster1 = true;
@@ -889,7 +891,7 @@ public class DistributedClusteringSolution
 
 		//  Node Accumulation Book Keeping
 		NodeAccMetaData.NumberofPointsperNode = NumberNodeClusterAccIndices;
-		DAVectorSponge.ActualMaxNumberAccumulationsperNode = Math.max(DAVectorSponge.ActualMaxNumberAccumulationsperNode, NumberNodeClusterAccIndices);
+		Program.ActualMaxNumberAccumulationsperNode = Math.max(Program.ActualMaxNumberAccumulationsperNode, NumberNodeClusterAccIndices);
 		ParallelNodeAccumulationRanges = RangePartitioner.Partition(NumberNodeClusterAccIndices, DAVectorUtility.ThreadCount);
         System.arraycopy(NumberThreadClusterAccIndices, 0, NodeAccMetaData.NumberofPointsperThread, 0,
                 DAVectorUtility.ThreadCount);
@@ -1012,17 +1014,17 @@ public class DistributedClusteringSolution
 			}
 			++NumberTransported;
 		}
-		if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0)
+		if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0)
 		{
 			String endinfo = "";
-			if (!DAVectorSponge.CalculateIndividualWidths)
+			if (!Program.CalculateIndividualWidths)
 			{
 				endinfo = " Average Width " + String.format("%1$4.3E", ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth);
 			}
 			else
 			{
 				endinfo = " Average Widths ";
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					endinfo += String.format("%1$4.3E", ParallelClustering.runningSolution.AverageWidth[VectorIndex]) + " ";
 				}
@@ -1031,7 +1033,7 @@ public class DistributedClusteringSolution
 			String OverallMessage = "Major Synch Iteration " + ClusteringSolution.CurrentIteration + " Total Clstrs " + ParallelClustering.runningSolution.Ncent_Global + " Temperature " + String.format("%1$5.4f", ParallelClustering.runningSolution.Temperature) + " " + endinfo;
 			if (ParallelClustering.runningSolution.SpongeCluster >= 0)
 			{
-				OverallMessage = "Sponge Count " + String.format("%1$3.2f", ParallelClustering.runningSolution.C_k_[ParallelClustering.runningSolution.SpongeCluster]) + " Factor " + String.format("%1$3.2f", DAVectorSponge.SpongeFactor) + " " + OverallMessage;
+				OverallMessage = "Sponge Count " + String.format("%1$3.2f", ParallelClustering.runningSolution.C_k_[ParallelClustering.runningSolution.SpongeCluster]) + " Factor " + String.format("%1$3.2f", Program.SpongeFactor) + " " + OverallMessage;
 			}
 			DAVectorUtility.SALSASyncPrint(1, OverallMessage, LocalMessage);
 			DAVectorUtility.SALSASyncPrint(2, "Host", HostLinkageMessage);
@@ -1121,7 +1123,7 @@ public class DistributedClusteringSolution
 				ParallelClustering.runningSolution.SplitPriority_k_[NewCenterIndex] = 2;
 				ClusteringSolution.UniversalMapping[CreatedIndex].PackedHost = StorageforTransportedClusters.TotalTransportedOriginalHost[RemoteIndex];
 
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					ParallelClustering.runningSolution.Y_k_i_[NewCenterIndex][VectorIndex] = StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][VectorIndex];
 					ParallelClustering.runningSolution.Sigma_k_i_[NewCenterIndex][VectorIndex] = StorageforTransportedClusters.TotalTransportedSigma_t_i[RemoteIndex][VectorIndex];
@@ -1134,15 +1136,15 @@ public class DistributedClusteringSolution
 				StorageforTransportedClusters.TotalTransportedCreatedIndex[NewTransportedCount] = StorageforTransportedClusters.TotalTransportedCreatedIndex[RemoteIndex];
 				StorageforTransportedClusters.TotalTransportedOriginalHost[NewTransportedCount] = StorageforTransportedClusters.TotalTransportedOriginalHost[RemoteIndex];
 				StorageforTransportedClusters.TotalTransportedP_t[NewTransportedCount] = StorageforTransportedClusters.TotalTransportedP_t[RemoteIndex];
-				for (int VectorIndex = 0; VectorIndex <= DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex <= Program.ParameterVectorDimension; VectorIndex++)
 				{
 					StorageforTransportedClusters.TotalTransportedY_t_i[NewTransportedCount][VectorIndex] = StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][VectorIndex];
-					if (VectorIndex < DAVectorSponge.ParameterVectorDimension)
+					if (VectorIndex < Program.ParameterVectorDimension)
 					{
 						StorageforTransportedClusters.TotalTransportedSigma_t_i[NewTransportedCount][VectorIndex] = StorageforTransportedClusters.TotalTransportedSigma_t_i[RemoteIndex][VectorIndex];
 					}
 				}
-				StorageforTransportedClusters.TotalTransportedY_t_i[NewTransportedCount][DAVectorSponge.ParameterVectorDimension] = StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][DAVectorSponge.ParameterVectorDimension];
+				StorageforTransportedClusters.TotalTransportedY_t_i[NewTransportedCount][Program.ParameterVectorDimension] = StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][Program.ParameterVectorDimension];
                 System.arraycopy(StorageforTransportedClusters.TotalTransportedStatus[RemoteIndex], 0,
                         StorageforTransportedClusters.TotalTransportedStatus[NewTransportedCount], 0, 2);
 			}
@@ -1154,7 +1156,7 @@ public class DistributedClusteringSolution
 		{
 			changedclusters = true;
 			StorageforTransportedClusters.SizeOfTransportedArray = NewTransportedCount;
-			DAVectorSponge.ActualMaxTransportedClusterStorage = Math.max(NewTransportedCount + 1, DAVectorSponge.ActualMaxTransportedClusterStorage);
+			Program.ActualMaxTransportedClusterStorage = Math.max(NewTransportedCount + 1, Program.ActualMaxTransportedClusterStorage);
 		}
 		GlobalChangedClusters = changedclusters;
 		DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming5);
@@ -1229,20 +1231,20 @@ public class DistributedClusteringSolution
 			{
 				continue;
 			}
-			if (RemoteIndex >= DAVectorSponge.MaxMPITransportBuffer)
+			if (RemoteIndex >= Program.MaxMPITransportBuffer)
 			{
-				DAVectorUtility.printAndThrowRuntimeException("MPI Buffer over limit " + RemoteIndex + " Limit " + DAVectorSponge.MaxMPITransportBuffer + " Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Local " + ParallelClustering.runningSolution.Ncent_ThisNode);
+				DAVectorUtility.printAndThrowRuntimeException("MPI Buffer over limit " + RemoteIndex + " Limit " + Program.MaxMPITransportBuffer + " Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Local " + ParallelClustering.runningSolution.Ncent_ThisNode);
 
 			}
 			StorageforTransportedClusters.TotalTransportedCreatedIndex[RemoteIndex] = ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex];
 			StorageforTransportedClusters.TotalTransportedP_t[RemoteIndex] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
 			StorageforTransportedClusters.TotalTransportedOriginalHost[RemoteIndex] = PackedHost;
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][VectorIndex] = ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex][VectorIndex];
 				StorageforTransportedClusters.TotalTransportedSigma_t_i[RemoteIndex][VectorIndex] = ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex][VectorIndex];
 			}
-			StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][DAVectorSponge.ParameterVectorDimension] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
+			StorageforTransportedClusters.TotalTransportedY_t_i[RemoteIndex][Program.ParameterVectorDimension] = ParallelClustering.runningSolution.P_k_[RealClusterIndex];
 
 			StorageforTransportedClusters.TotalTransportedStatus[RemoteIndex][0] = 3;
 			StorageforTransportedClusters.TotalTransportedStatus[RemoteIndex][1] = ParallelClustering.runningSolution.LocalSplitCreatedIndex[RealClusterIndex];
@@ -1250,7 +1252,7 @@ public class DistributedClusteringSolution
 		} // End Loop over Clusters being dispersed
 
 		StorageforTransportedClusters.SizeOfTransportedArray = RemoteIndex;
-		DAVectorSponge.ActualMaxTransportedClusterStorage = Math.max(RemoteIndex + 1, DAVectorSponge.ActualMaxTransportedClusterStorage);
+		Program.ActualMaxTransportedClusterStorage = Math.max(RemoteIndex + 1, Program.ActualMaxTransportedClusterStorage);
 
 		int[] ClusterCountsperNode = new int[DAVectorUtility.MPI_Size];
 		int[] UpClusterCountsperNode = new int[DAVectorUtility.MPI_Size];

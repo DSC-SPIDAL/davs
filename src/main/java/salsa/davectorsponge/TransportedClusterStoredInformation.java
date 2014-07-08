@@ -28,8 +28,8 @@ public class TransportedClusterStoredInformation
 
 		for (int TransportIndex = 0; TransportIndex < MaxStorage; TransportIndex++)
 		{
-			TotalTransportedY_t_i[TransportIndex] = new double[DAVectorSponge.ParameterVectorDimension + 1];
-			TotalTransportedSigma_t_i[TransportIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+			TotalTransportedY_t_i[TransportIndex] = new double[Program.ParameterVectorDimension + 1];
+			TotalTransportedSigma_t_i[TransportIndex] = new double[Program.ParameterVectorDimension];
 			TotalTransportedStatus[TransportIndex] = new int[2];
 			TransportedThreadAccPosition[TransportIndex] = new int[DAVectorUtility.ThreadCount];
 		}

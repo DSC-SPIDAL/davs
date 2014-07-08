@@ -22,7 +22,7 @@ import java.util.Date;
 
 import static edu.rice.hj.Module1.forallChunked;
 
-public class DAVectorSponge
+public class Program
 {
     private static Options programOptions = new Options();
     static {
@@ -289,28 +289,28 @@ public class DAVectorSponge
 	public static void CalculateSigma(double[] Centre, Box<double[]> Sigma)
 	{
 
-		if (DAVectorSponge.SigmaMethod == 0)
+		if (Program.SigmaMethod == 0)
 		{
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				Sigma.content[VectorIndex] = 1.0;
 			}
 			return;
 		}
-		if (DAVectorSponge.SigmaMethod == 1)
+		if (Program.SigmaMethod == 1)
 		{
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
-				Sigma.content[VectorIndex] = DAVectorSponge.SigmaVectorParameters_i_[VectorIndex] * DAVectorSponge.SigmaVectorParameters_i_[VectorIndex];
+				Sigma.content[VectorIndex] = Program.SigmaVectorParameters_i_[VectorIndex] * Program.SigmaVectorParameters_i_[VectorIndex];
 			}
 			return;
 		}
-		if ((DAVectorSponge.SigmaMethod == 2) || (DAVectorSponge.SigmaMethod == 3))
+		if ((Program.SigmaMethod == 2) || (Program.SigmaMethod == 3))
 		{
-            System.arraycopy(DAVectorSponge.SigmaVectorParameters_i_, 0, Sigma.content, 0,
-                    DAVectorSponge.ParameterVectorDimension);
+            System.arraycopy(Program.SigmaVectorParameters_i_, 0, Sigma.content, 0,
+                    Program.ParameterVectorDimension);
 			Sigma.content[0] = Sigma.content[0] * Centre[0];
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				Sigma.content[VectorIndex] = Sigma.content[VectorIndex] * Sigma.content[VectorIndex];
 			}
@@ -320,36 +320,37 @@ public class DAVectorSponge
     } // End CalculateSigmaSquared
 
 	public static boolean ChangeClusterSigmas(double TemperatureRatioChange, ClusteringSolution Solution) throws MPIException {
-		if (DAVectorSponge.SigmaMethod != 3)
+		if (Program.SigmaMethod != 3)
 		{
 			return false;
 		}
 
-		boolean asymptotic = (DAVectorSponge.SigmaVectorParameters_i_[0] <= DAVectorSponge.FinalTargetSigma0);
+		boolean asymptotic = (Program.SigmaVectorParameters_i_[0] <= Program.FinalTargetSigma0);
         asymptotic  = DAVectorUtility.SynchronizeMPIBoolean(asymptotic);
 
 		if (asymptotic)
 		{
 			return false;
 		}
-		boolean justsetit = Solution.Temperature <= DAVectorSponge.FinalTargetTemperature;
+		boolean justsetit = Solution.Temperature <= Program.FinalTargetTemperature;
         justsetit = DAVectorUtility.SynchronizeMPIBoolean(justsetit);
 		if (justsetit)
 		{
-			DAVectorSponge.SigmaVectorParameters_i_[0] = DAVectorSponge.FinalTargetSigma0;
+			Program.SigmaVectorParameters_i_[0] = Program.FinalTargetSigma0;
 		}
 		else
 		{
-			double LogTemperatureChange = Math.min(Math.log(DAVectorSponge.FinalTargetTemperature) - Math.log(Solution.Temperature), Math.log(TemperatureRatioChange));
-			double ActualRatio = Math.exp(Math.log(TemperatureRatioChange) * (Math.log(DAVectorSponge.FinalTargetSigma0) - Math.log(DAVectorSponge.SigmaVectorParameters_i_[0])) / LogTemperatureChange);
-			DAVectorSponge.SigmaVectorParameters_i_[0] = Math.max(DAVectorSponge.FinalTargetSigma0, DAVectorSponge.SigmaVectorParameters_i_[0] * ActualRatio);
+			double LogTemperatureChange = Math.min(Math.log(Program.FinalTargetTemperature) - Math.log(Solution.Temperature), Math.log(TemperatureRatioChange));
+			double ActualRatio = Math.exp(Math.log(TemperatureRatioChange) * (Math.log(Program.FinalTargetSigma0) - Math.log(
+                    Program.SigmaVectorParameters_i_[0])) / LogTemperatureChange);
+			Program.SigmaVectorParameters_i_[0] = Math.max(Program.FinalTargetSigma0, Program.SigmaVectorParameters_i_[0] * ActualRatio);
 		}
 
 		for (int ActiveClusterIndex = 0; ActiveClusterIndex < ClusteringSolution.NumberLocalActiveClusters; ActiveClusterIndex++)
 		{
 			int RealClusterIndex = ClusteringSolution.RealClusterIndices[ActiveClusterIndex];
 			Box<double[]> tempRef_Object = new Box<>(Solution.Sigma_k_i_[RealClusterIndex]);
-			DAVectorSponge.CalculateSigma(Solution.Y_k_i_[RealClusterIndex], tempRef_Object);
+			Program.CalculateSigma(Solution.Y_k_i_[RealClusterIndex], tempRef_Object);
 			Solution.Sigma_k_i_[RealClusterIndex] = tempRef_Object.content;
 		}
 		return true;
@@ -361,30 +362,31 @@ public class DAVectorSponge
 		{
 			return false;
 		}
-		if ((DAVectorSponge.SpongeTemperature2 < 0.0) || (DAVectorSponge.SpongeFactor2 < 0.0))
+		if ((Program.SpongeTemperature2 < 0.0) || (Program.SpongeFactor2 < 0.0))
 		{
 			return false;
 		}
-		boolean asymptotic = (DAVectorSponge.SpongeFactor <= DAVectorSponge.SpongeFactor2);
+		boolean asymptotic = (Program.SpongeFactor <= Program.SpongeFactor2);
 		asymptotic = DAVectorUtility.SynchronizeMPIBoolean(asymptotic);
 		if (asymptotic)
 		{
 			return false;
 		}
 
-		boolean justsetit = Solution.Temperature <= DAVectorSponge.SpongeTemperature2;
+		boolean justsetit = Solution.Temperature <= Program.SpongeTemperature2;
 		justsetit = DAVectorUtility.SynchronizeMPIBoolean(justsetit);
 		if (justsetit)
 		{
-			DAVectorSponge.SpongeFactor = DAVectorSponge.SpongeFactor2;
+			Program.SpongeFactor = Program.SpongeFactor2;
 		}
 		else
 		{
-			double LogTemperatureChange = Math.min(Math.log(DAVectorSponge.SpongeTemperature2) - Math.log(Solution.Temperature), Math.log(TemperatureRatioChange));
-			double ActualRatio = Math.exp(Math.log(TemperatureRatioChange) * (Math.log(DAVectorSponge.SpongeFactor2) - Math.log(DAVectorSponge.SpongeFactor)) / LogTemperatureChange);
-			DAVectorSponge.SpongeFactor = DAVectorSponge.SpongeFactor * ActualRatio;
-			DAVectorSponge.SpongeFactor = DAVectorSponge.SpongeFactor2 + (DAVectorSponge.SpongeFactor1 - DAVectorSponge.SpongeFactor2) * (Solution.Temperature - DAVectorSponge.SpongeTemperature2) / (DAVectorSponge.SpongeTemperature1 - DAVectorSponge.SpongeTemperature2);
-			DAVectorSponge.SpongeFactor = Math.max(DAVectorSponge.SpongeFactor2, DAVectorSponge.SpongeFactor);
+			double LogTemperatureChange = Math.min(Math.log(Program.SpongeTemperature2) - Math.log(Solution.Temperature), Math.log(TemperatureRatioChange));
+			double ActualRatio = Math.exp(Math.log(TemperatureRatioChange) * (Math.log(Program.SpongeFactor2) - Math.log(
+                    Program.SpongeFactor)) / LogTemperatureChange);
+			Program.SpongeFactor = Program.SpongeFactor * ActualRatio;
+			Program.SpongeFactor = Program.SpongeFactor2 + (Program.SpongeFactor1 - Program.SpongeFactor2) * (Solution.Temperature - Program.SpongeTemperature2) / (Program.SpongeTemperature1 - Program.SpongeTemperature2);
+			Program.SpongeFactor = Math.max(Program.SpongeFactor2, Program.SpongeFactor);
 		}
 		return true;
 
@@ -419,66 +421,66 @@ public class DAVectorSponge
 
         // TODO - Unnecessary as reading this from config as an array.
 		//  Initialize Clusters
-		/*SigmaVectorParameters_i_ = new double[DAVectorSponge.ParameterVectorDimension];*/
+		/*SigmaVectorParameters_i_ = new double[Program.ParameterVectorDimension];*/
 
-		DAVectorSponge.DoKmeans = false;
-		DAVectorSponge.DoLCMS = true;
-		DAVectorSponge.DoBasicDA = false;
-		DAVectorSponge.FollowUpKmeans = true;
+		Program.DoKmeans = false;
+		Program.DoLCMS = true;
+		Program.DoBasicDA = false;
+		Program.FollowUpKmeans = true;
 
-		if (DAVectorSponge.DoLCMS)
+		if (Program.DoLCMS)
 		{
-			DAVectorSponge.DoBasicDA = false;
+			Program.DoBasicDA = false;
 		}
-		if (DAVectorSponge.DoBasicDA)
+		if (Program.DoBasicDA)
 		{
-			DAVectorSponge.DoKmeans = false;
+			Program.DoKmeans = false;
 		}
-		if (!DAVectorSponge.DoBasicDA)
+		if (!Program.DoBasicDA)
 		{
-			DAVectorSponge.FollowUpKmeans = false;
+			Program.FollowUpKmeans = false;
 		}
 
-		DAVectorSponge.SetupLCMS();
-		if (!DAVectorSponge.DoLCMS)
+		Program.SetupLCMS();
+		if (!Program.DoLCMS)
 		{
-			DAVectorSponge.CompareSolution = -1;
+			Program.CompareSolution = -1;
 		}
-		DAVectorSponge.SetupKmeans();
-		DAVectorSponge.SetupDA();
+		Program.SetupKmeans();
+		Program.SetupDA();
 
-		if (DAVectorSponge.UseTriangleInequality_DA > 0)
+		if (Program.UseTriangleInequality_DA > 0)
 		{
 			for (int DiagnosticLoop = 0; DiagnosticLoop < 6; DiagnosticLoop++)
 			{
-				DAVectorSponge.ClustersperCenterDiagnostics[DiagnosticLoop] = 0.0;
+				Program.ClustersperCenterDiagnostics[DiagnosticLoop] = 0.0;
 			}
 		}
-		if (!DAVectorSponge.CalculateEigenvaluesfromMatrix)
+		if (!Program.CalculateEigenvaluesfromMatrix)
 		{
-			DAVectorSponge.CalculateCorrelationMatrix = false;
+			Program.CalculateCorrelationMatrix = false;
 		}
 
 		//  Don't Change anything after this
-		if (!DAVectorSponge.Refinement)
+		if (!Program.Refinement)
 		{
-			DAVectorSponge.RestartTemperature = Tminimum;
+			Program.RestartTemperature = Tminimum;
 			RestartInputFileType = 1;
 			RestartClusterFile = config.DistanceMatrixFile;
 			config.LabelFile = "";
 		}
 
-		// if (DAVectorSponge.RestartTemperature > 0.0)
-		//   DAVectorSponge.UseSponge = true;
+		// if (Program.RestartTemperature > 0.0)
+		//   Program.UseSponge = true;
 
-		DAVectorSponge.InitialCoolingFactor2 = Math.max(DAVectorSponge.InitialCoolingFactor2, DAVectorSponge.InitialCoolingFactor1);
-		DAVectorSponge.FineCoolingFactor2 = Math.max(DAVectorSponge.FineCoolingFactor2, DAVectorSponge.FineCoolingFactor1);
-		DAVectorSponge.InitialCoolingFactor = DAVectorSponge.InitialCoolingFactor1;
-		DAVectorSponge.FineCoolingFactor = DAVectorSponge.FineCoolingFactor1;
+		Program.InitialCoolingFactor2 = Math.max(Program.InitialCoolingFactor2, Program.InitialCoolingFactor1);
+		Program.FineCoolingFactor2 = Math.max(Program.FineCoolingFactor2, Program.FineCoolingFactor1);
+		Program.InitialCoolingFactor = Program.InitialCoolingFactor1;
+		Program.FineCoolingFactor = Program.FineCoolingFactor1;
 
 		// Set Initial Values of Annealed Parameters
-		DAVectorSponge.InitialSigma0 = DAVectorSponge.SigmaVectorParameters_i_[0];
-		DAVectorSponge.SpongeFactor = DAVectorSponge.SpongeFactor1;
+		Program.InitialSigma0 = Program.SigmaVectorParameters_i_[0];
+		Program.SpongeFactor = Program.SpongeFactor1;
 
 
 		//  Set up MPI and threads parallelism
@@ -493,17 +495,17 @@ public class DAVectorSponge
         /*initializeLogging();*/
 
         //  Restrict number of splits per node
-		DAVectorSponge.MaxNumberSplitClusters = Math.min(DAVectorSponge.MaxNumberSplitClusters, DAVectorUtility.MPI_Size * 32);
-		if (!DAVectorSponge.DoKmeans)
+		Program.MaxNumberSplitClusters = Math.min(Program.MaxNumberSplitClusters, DAVectorUtility.MPI_Size * 32);
+		if (!Program.DoKmeans)
 		{
-			DAVectorSponge.maxNcentperPoint = Math.max(DAVectorSponge.maxNcentperPoint, DAVectorSponge.targetNcentperPoint + DAVectorSponge.MaxNumberSplitClusters + 3);
+			Program.maxNcentperPoint = Math.max(Program.maxNcentperPoint, Program.targetNcentperPoint + Program.MaxNumberSplitClusters + 3);
 		}
-		int SaveSplitNumber = DAVectorSponge.MaxNumberSplitClusters;
+		int SaveSplitNumber = Program.MaxNumberSplitClusters;
 
 		//  Find number of points if requested
-		if (DAVectorSponge.NumberDataPoints < 1)
+		if (Program.NumberDataPoints < 1)
 		{
-			if (DAVectorSponge.DoLCMS)
+			if (Program.DoLCMS)
 			{
 				if (DAVectorUtility.MPI_Rank == 0)
 				{
@@ -522,40 +524,40 @@ public class DAVectorSponge
 		}
 		else
 		{
-			DAVectorUtility.PointCount_Global = DAVectorSponge.NumberDataPoints;
+			DAVectorUtility.PointCount_Global = Program.NumberDataPoints;
 		}
 
-		DAVectorUtility.SALSAPrint(1, "Points " + DAVectorUtility.PointCount_Global + " Selection " + DAVectorSponge.SelectedInputLabel + " Input File Type " + DAVectorSponge.InputFileType + " Comparison Selection " + DAVectorSponge.ComparisonSelectedInputLabel + " Comparison Input File Type " + DAVectorSponge.ComparisonInputFileType + " Restart Selection " + DAVectorSponge.RestartSelectedInputLabel + " Restart Input File Type " + DAVectorSponge.RestartInputFileType);
-		DAVectorUtility.SALSAPrint(1, "Files " + config.DistanceMatrixFile + " Comparison " + DAVectorSponge.ComparisonClusterFile + " Restarts " + DAVectorSponge.RestartClusterFile + " "
+		DAVectorUtility.SALSAPrint(1, "Points " + DAVectorUtility.PointCount_Global + " Selection " + Program.SelectedInputLabel + " Input File Type " + Program.InputFileType + " Comparison Selection " + Program.ComparisonSelectedInputLabel + " Comparison Input File Type " + Program.ComparisonInputFileType + " Restart Selection " + Program.RestartSelectedInputLabel + " Restart Input File Type " + Program.RestartInputFileType);
+		DAVectorUtility.SALSAPrint(1, "Files " + config.DistanceMatrixFile + " Comparison " + Program.ComparisonClusterFile + " Restarts " + Program.RestartClusterFile + " "
 		    + config.LabelFile);
 
-		if (DAVectorSponge.ComparisonInputFileType == 1)
+		if (Program.ComparisonInputFileType == 1)
 		{
-			DAVectorSponge.CompareSolution = -1;
+			Program.CompareSolution = -1;
 		}
 
 		//  Read data for LC-MS Clustering Comparisons
-		if (DAVectorSponge.CompareSolution > 0)
+		if (Program.CompareSolution > 0)
 		{
-			if (!DAVectorSponge.DoLCMS)
+			if (!Program.DoLCMS)
 			{
-				DAVectorUtility.printAndThrowRuntimeException("Invalid Compare Solution Option " + DAVectorSponge.CompareSolution);
+				DAVectorUtility.printAndThrowRuntimeException("Invalid Compare Solution Option " + Program.CompareSolution);
 			}
 
 			int save1 = InputFileType;
 			int save2 = SelectedInputLabel;
 			InputFileType = ComparisonInputFileType;
 			SelectedInputLabel = ComparisonSelectedInputLabel;
-			DAVectorSponge.GoldenPeaks = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "Golden Peaks");
-			DAVectorSponge.MclustClusters = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "Mclust");
-			DAVectorSponge.MedeaClusters = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "Medea");
-			DAVectorSponge.OurClusters = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "DAVectorSponge");
+			Program.GoldenPeaks = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "Golden Peaks");
+			Program.MclustClusters = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "Mclust");
+			Program.MedeaClusters = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "Medea");
+			Program.OurClusters = new ArbitraryClustering(DAVectorUtility.PointCount_Global, "DAVectorSponge");
 			GoldenExamination.GoldenID = new int[DAVectorUtility.PointCount_Global];
 			GoldenExamination.GoldenLabel = new String[DAVectorUtility.PointCount_Global];
 			GoldenExamination.PeakPosition = new double[DAVectorUtility.PointCount_Global][];
 			for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
 			{
-				GoldenExamination.PeakPosition[GlobalPointIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+				GoldenExamination.PeakPosition[GlobalPointIndex] = new double[Program.ParameterVectorDimension];
 			}
 			DAVectorReadData.ReadLabelsFromFile(ComparisonClusterFile);
 			InputFileType = save1;
@@ -564,32 +566,32 @@ public class DAVectorSponge
 
 		// Set up Decomposition of USED points
 		DAVectorParallelism.SetParallelDecomposition();
-		if (DAVectorSponge.Replicate > 1)
+		if (Program.Replicate > 1)
 		{
-			DAVectorUtility.SALSAPrint(1, "Replicate " + DAVectorSponge.Replicate);
-			DAVectorUtility.PointCount_Global *= DAVectorSponge.Replicate;
-			DAVectorUtility.PointCount_Largest *= DAVectorSponge.Replicate;
-			DAVectorUtility.PointStart_Process *= DAVectorSponge.Replicate;
-			DAVectorUtility.PointCount_Process *= DAVectorSponge.Replicate;
+			DAVectorUtility.SALSAPrint(1, "Replicate " + Program.Replicate);
+			DAVectorUtility.PointCount_Global *= Program.Replicate;
+			DAVectorUtility.PointCount_Largest *= Program.Replicate;
+			DAVectorUtility.PointStart_Process *= Program.Replicate;
+			DAVectorUtility.PointCount_Process *= Program.Replicate;
 			for (int ProcessIndex = 0; ProcessIndex < DAVectorUtility.MPI_Size; ProcessIndex++)
 			{
-				DAVectorUtility.PointsperProcess[ProcessIndex] *= DAVectorSponge.Replicate;
+				DAVectorUtility.PointsperProcess[ProcessIndex] *= Program.Replicate;
 				for (int ThreadIndex = 0; ThreadIndex < DAVectorUtility.ThreadCount; ThreadIndex++)
 				{
-					DAVectorUtility.PointsperThreadperProcess[ProcessIndex][ThreadIndex] *= DAVectorSponge.Replicate;
+					DAVectorUtility.PointsperThreadperProcess[ProcessIndex][ThreadIndex] *= Program.Replicate;
 				}
 			}
 			for (int ThreadIndex = 0; ThreadIndex < DAVectorUtility.ThreadCount; ThreadIndex++)
 			{
-				DAVectorUtility.StartPointperThread[ThreadIndex] *= DAVectorSponge.Replicate;
-				DAVectorUtility.PointsperThread[ThreadIndex] *= DAVectorSponge.Replicate;
+				DAVectorUtility.StartPointperThread[ThreadIndex] *= Program.Replicate;
+				DAVectorUtility.PointsperThread[ThreadIndex] *= Program.Replicate;
 			}
 		}
 
 		// Setup PointPosition and related arrays
-		DAVectorSponge.PointOriginalIndex = new int[DAVectorUtility.PointCount_Process]; // Point Index on File
-		DAVectorSponge.PointLabel = new int[DAVectorUtility.PointCount_Process];
-		DAVectorSponge.PointPosition = new double[DAVectorUtility.PointCount_Process][];
+		Program.PointOriginalIndex = new int[DAVectorUtility.PointCount_Process]; // Point Index on File
+		Program.PointLabel = new int[DAVectorUtility.PointCount_Process];
+		Program.PointPosition = new double[DAVectorUtility.PointCount_Process][];
         // Note - parallel for
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
@@ -597,7 +599,7 @@ public class DAVectorSponge
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
-                    DAVectorSponge.PointPosition[alpha] = new double[DAVectorSponge.ParameterVectorDimension];
+                    Program.PointPosition[alpha] = new double[Program.ParameterVectorDimension];
                 }
 
             });// End loop initialing Point dependent quantities
@@ -605,9 +607,9 @@ public class DAVectorSponge
             DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
         }
 
-        DAVectorSponge.ClusterAssignments = new int[DAVectorUtility.PointCount_Global];
+        Program.ClusterAssignments = new int[DAVectorUtility.PointCount_Global];
 
-		DAVectorSponge.ClusterLimitforDistribution = Math.max(DAVectorSponge.ClusterLimitforDistribution, 4 * DAVectorUtility.MPI_Size);
+		Program.ClusterLimitforDistribution = Math.max(Program.ClusterLimitforDistribution, 4 * DAVectorUtility.MPI_Size);
 
 		// Initial Processing Complete
         // Note - MPI Call - Barrier
@@ -615,41 +617,41 @@ public class DAVectorSponge
             DAVectorUtility.mpiOps.barrier(); // Make certain all processes have processed original data before writing updated
         }
 		//  read data into memory
-		if (DAVectorSponge.DoKmeans)
+		if (Program.DoKmeans)
 		{
-			KmeansTriangleInequality.SetTriangleInequalityParameters(DAVectorSponge.UseTriangleInequality_Kmeans, DAVectorSponge.MaxClusterLBsperPoint_Kmeans, DAVectorSponge.MaxCentersperCenter_Kmeans, DAVectorSponge.TriangleInequality_Delta1_old_Kmeans, DAVectorSponge.TriangleInequality_Delta1_current_Kmeans, DAVectorSponge.OldCenterOption_Kmeans, DAVectorSponge.DoBackwardFacingTests_Kmeans);
-			Kmeans.InitializeKmeans(DAVectorSponge.PointPosition, DAVectorSponge.config.DistanceMatrixFile,
-			    DAVectorSponge.ClusterIndexonInputLine, DAVectorSponge.FirstClusterValue, DAVectorSponge.StartPointPositiononInputLine, DAVectorSponge.InitialNcent, DAVectorSponge.maxNcentTOTAL, DAVectorSponge.maxNcentTOTALforParallelism_Kmeans,
-			    DAVectorSponge.ParameterVectorDimension, DAVectorSponge.KmeansCenterChangeStop, DAVectorSponge.KmeansIterationLimit);
+			KmeansTriangleInequality.SetTriangleInequalityParameters(Program.UseTriangleInequality_Kmeans, Program.MaxClusterLBsperPoint_Kmeans, Program.MaxCentersperCenter_Kmeans, Program.TriangleInequality_Delta1_old_Kmeans, Program.TriangleInequality_Delta1_current_Kmeans, Program.OldCenterOption_Kmeans, Program.DoBackwardFacingTests_Kmeans);
+			Kmeans.InitializeKmeans(Program.PointPosition, Program.config.DistanceMatrixFile,
+			    Program.ClusterIndexonInputLine, Program.FirstClusterValue, Program.StartPointPositiononInputLine, Program.InitialNcent, Program.maxNcentTOTAL, Program.maxNcentTOTALforParallelism_Kmeans,
+			    Program.ParameterVectorDimension, Program.KmeansCenterChangeStop, Program.KmeansIterationLimit);
 		}
-		else if (DAVectorSponge.DoLCMS)
+		else if (Program.DoLCMS)
 		{
 			DAVectorReadData.ReadDataFromFile(config.DistanceMatrixFile, 0);
 		}
 		else
 		{
 			DAVectorReadData.ReadDataFromFile(config.DistanceMatrixFile,
-			                                  DAVectorSponge.ClusterIndexonInputLine, null,
-			                                  DAVectorSponge.StartPointPositiononInputLine);
+			                                  Program.ClusterIndexonInputLine, null,
+			                                  Program.StartPointPositiononInputLine);
 		}
-		// DAVectorSponge.ClusterIndexonInputLine MUST be NULL
+		// Program.ClusterIndexonInputLine MUST be NULL
 
 		//  Read 3D Data for Plotviz
 		if (config.LabelFile.length() <= 0)
 		{
-			DAVectorSponge.RW3DData = -1;
+			Program.RW3DData = -1;
 		}
-		if (DAVectorSponge.RW3DData > 0)
+		if (Program.RW3DData > 0)
 		{
 			DAVectorUtility.SALSAPrint(0, "3D Data " + config.LabelFile);
-			DAVectorSponge.FullPoint3DPosition = new double[DAVectorUtility.PointCount_Global][];
+			Program.FullPoint3DPosition = new double[DAVectorUtility.PointCount_Global][];
 			for (int alpha = 0; alpha < DAVectorUtility.PointCount_Global; alpha++)
 			{
-				DAVectorSponge.FullPoint3DPosition[alpha] = new double[DAVectorSponge.RW3DData];
+				Program.FullPoint3DPosition[alpha] = new double[Program.RW3DData];
 			}
 			if (DAVectorUtility.MPI_Rank == 0)
 			{
-				DAVectorReadData.Read3DDataFromFile(config.LabelFile,DAVectorSponge.RW3DData, 1);
+				DAVectorReadData.Read3DDataFromFile(config.LabelFile, Program.RW3DData, 1);
 			}
 		}
 
@@ -685,13 +687,13 @@ public class DAVectorSponge
 		DAVectorUtility.TimingOutputOrder[11] = 6;
 		DAVectorUtility.TimingOutputOrder[12] = 11;
 		DAVectorUtility.TimingOutputOrder[13] = 12;
-		if ((!DAVectorSponge.DoLCMS) && (!DAVectorSponge.DoKmeans))
+		if ((!Program.DoLCMS) && (!Program.DoKmeans))
 		{
 			DAVectorUtility.SetUpSubTimer(6, "Full Triangle Ineq");
 			DAVectorUtility.SetUpSubTimer(11, "CenterFacing");
 			DAVectorUtility.SetUpSubTimer(12, "Point LB");
 		}
-		if (DAVectorSponge.DoKmeans)
+		if (Program.DoKmeans)
 		{
 			DAVectorUtility.SetUpSubTimer(0, "Pure Kmeans");
 			DAVectorUtility.SetUpSubTimer(1, "End Iteration");
@@ -712,11 +714,11 @@ public class DAVectorSponge
 		}
 
 		//  Set up basic clusters
-		ClusteringSolution.SetParameters(DAVectorUtility.PointCount_Process, DAVectorSponge.maxNcentCreated, DAVectorSponge.maxNcentTOTAL, DAVectorSponge.maxNcentperNode, DAVectorSponge.cachelinesize, DAVectorSponge.targetNcentperPoint, DAVectorSponge.targetMinimumNcentperPoint, DAVectorSponge.maxNcentperPoint, DAVectorSponge.ExpArgumentCut2);
+		ClusteringSolution.SetParameters(DAVectorUtility.PointCount_Process, Program.maxNcentCreated, Program.maxNcentTOTAL, Program.maxNcentperNode, Program.cachelinesize, Program.targetNcentperPoint, Program.targetMinimumNcentperPoint, Program.maxNcentperPoint, Program.ExpArgumentCut2);
 
 		//  Set up Distributed Clusters
 		DistributedClusteringSolution DistributedSetup;
-		if (DAVectorSponge.DoLCMS)
+		if (Program.DoLCMS)
 		{
 			DistributedSetup = new DistributedClusteringSolution(MaxMPITransportBuffer, MaxTransportedClusterStorage, MaxNumberAccumulationsperNode, MaxDoubleComponents, MaxIntegerComponents);
 		}
@@ -734,7 +736,7 @@ public class DAVectorSponge
 			RunVectorSpongeDA = new VectorAnnealIterate();
 			RunVectorSpongeDA.ControlVectorSpongeDA();
 		}
-		DAVectorSponge.ActualEndTemperatureafterconverging = ParallelClustering.runningSolution.Temperature;
+		Program.ActualEndTemperatureafterconverging = ParallelClustering.runningSolution.Temperature;
 
 		//  End Timing
 		DAVectorUtility.EndTiming();
@@ -744,35 +746,35 @@ public class DAVectorSponge
 
 		// Calculate Occupation Counts and other statistics for LCMS
 		//  This can alter "Sponge Confused Points"
-		if (!DAVectorSponge.DoKmeans)
+		if (!Program.DoKmeans)
 		{
 			ParallelClustering.runningSolution.FindOccupationCounts();
 		}
 
-		if (DAVectorSponge.ClusterCountOutput >= 0 && (!DAVectorSponge.DoKmeans))
+		if (Program.ClusterCountOutput >= 0 && (!Program.DoKmeans))
 		{
 			VectorAnnealIterate.OutputClusteringResults("Final");
 		}
 
-		if (DAVectorSponge.DoBasicDA && (DAVectorSponge.RW3DData > 0))
+		if (Program.DoBasicDA && (Program.RW3DData > 0))
 		{
 			VectorAnnealIterate.Output3DClusterLabels("DA");
 		}
-		if (DAVectorSponge.DoKmeans)
+		if (Program.DoKmeans)
 		{
-			double[][] ClusterCenters = ControlKmeans.CaptureKmeans(DAVectorSponge.ClusterAssignments);
-			if (DAVectorSponge.ClusterCountOutput >= 0)
+			double[][] ClusterCenters = ControlKmeans.CaptureKmeans(Program.ClusterAssignments);
+			if (Program.ClusterCountOutput >= 0)
 			{
 				VectorAnnealIterate.SimpleOutputClusteringResults("Kmeans", ClusterCenters);
 				DAVectorUtility.SALSAPrint(0, "End Output of Full Clusters");
 			}
-			if (DAVectorSponge.RW3DData > 0)
+			if (Program.RW3DData > 0)
 			{
 				VectorAnnealIterate.Output3DClusterLabels("Kmeans");
 				DAVectorUtility.SALSAPrint(0, "End Output of 3D Clusters");
 			}
 		}
-		if (DAVectorSponge.DoLCMS)
+		if (Program.DoLCMS)
 		{
 			VectorAnnealIterate.CalculateClusterStatus();
 		}
@@ -780,22 +782,22 @@ public class DAVectorSponge
 		// Output Results
 		String nextline = "\nNode 0 Center Averages (Counts) [Distce] ";
 		int Totnumber = ClusteringSolution.NumberLocalActiveClusters;
-		if (Totnumber > DAVectorSponge.MaxNumberClustersToPrint)
+		if (Totnumber > Program.MaxNumberClustersToPrint)
 		{
-			nextline += Totnumber + " Truncated at " + DAVectorSponge.MaxNumberClustersToPrint + " ";
-			Totnumber = DAVectorSponge.MaxNumberClustersToPrint;
+			nextline += Totnumber + " Truncated at " + Program.MaxNumberClustersToPrint + " ";
+			Totnumber = Program.MaxNumberClustersToPrint;
 		}
 		for (int ActiveClusterIndex = 0; ActiveClusterIndex < Totnumber; ActiveClusterIndex++)
 		{
 			int RealClusterIndex = ClusteringSolution.RealClusterIndices[ActiveClusterIndex];
 			double meandist = ParallelClustering.runningSolution.ClusterScaledSquaredWidth_k_[RealClusterIndex];
 			String cees = "";
-			if (!DAVectorSponge.DoKmeans)
+			if (!Program.DoKmeans)
 			{
 				cees = String.format("%1$3.2f", ParallelClustering.runningSolution.C_k_[RealClusterIndex]) + " - ";
 			}
 			nextline += RealClusterIndex + " " + cees + ParallelClustering.runningSolution.OccupationCounts_k_[RealClusterIndex] + " [Wid " + String.format("%1$2.1f", meandist) + "]";
-			if (!DAVectorSponge.DoKmeans)
+			if (!Program.DoKmeans)
 			{
 				nextline += "[Frz " + String.format("%1$3.2E", ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex]) + "]";
 			}
@@ -809,19 +811,19 @@ public class DAVectorSponge
 		DAVectorUtility.SALSAPrint(0, nextline);
 		DAVectorUtility.ConsoleDebugOutput = save;
 
-		if (!DAVectorSponge.DoKmeans)
+		if (!Program.DoKmeans)
 		{
 			double tmp1 = 0.0;
-			if (DAVectorSponge.NumberMdiffSums > 0)
+			if (Program.NumberMdiffSums > 0)
 			{
-				DAVectorSponge.MdiffSum = DAVectorSponge.MdiffSum / DAVectorSponge.NumberMdiffSums;
+				Program.MdiffSum = Program.MdiffSum / Program.NumberMdiffSums;
 			}
-			if (DAVectorSponge.NumberIterationSteps > 0)
+			if (Program.NumberIterationSteps > 0)
 			{
-				tmp1 = (double) DAVectorSponge.IterationsperStepSum / (double) DAVectorSponge.NumberIterationSteps;
+				tmp1 = (double) Program.IterationsperStepSum / (double) Program.NumberIterationSteps;
 			}
 
-			DAVectorUtility.SALSAPrint(0, "\nT " + String.format("%1$6.5f", ParallelClustering.runningSolution.Temperature) + " Cluster " + ParallelClustering.runningSolution.Ncent_Global + " Iter " + VectorAnnealIterate.EMIterationCount + " Extra Iter " + VectorAnnealIterate.Extra_EMIterationCount + " Average Mdiff " + String.format("%1$6.5f", DAVectorSponge.MdiffSum) + " Number of Steps " + DAVectorSponge.NumberIterationSteps + " Iterations per Step " + String.format("%1$3.2f", tmp1));
+			DAVectorUtility.SALSAPrint(0, "\nT " + String.format("%1$6.5f", ParallelClustering.runningSolution.Temperature) + " Cluster " + ParallelClustering.runningSolution.Ncent_Global + " Iter " + VectorAnnealIterate.EMIterationCount + " Extra Iter " + VectorAnnealIterate.Extra_EMIterationCount + " Average Mdiff " + String.format("%1$6.5f", Program.MdiffSum) + " Number of Steps " + Program.NumberIterationSteps + " Iterations per Step " + String.format("%1$3.2f", tmp1));
 		}
 
 		DAVectorUtility.SALSAPrint(0, "\n" + DAVectorUtility.PatternLabel);
@@ -832,36 +834,36 @@ public class DAVectorSponge
 		{
 			message = " Selected with Cluster ";
 		}
-		if (DAVectorSponge.DoKmeans)
+		if (Program.DoKmeans)
 		{
 			message = " Selection ";
 		}
-		DAVectorUtility.SALSAPrint(0, "Data Points " + DAVectorUtility.PointCount_Global + message + DAVectorSponge.SelectedInputLabel);
-		DAVectorUtility.SALSAPrint(0, "Vector Dimension: " + DAVectorSponge.ParameterVectorDimension);
-		DAVectorUtility.SALSAPrint(0, "Continuous Clustering: " + DAVectorSponge.ContinuousClustering);
+		DAVectorUtility.SALSAPrint(0, "Data Points " + DAVectorUtility.PointCount_Global + message + Program.SelectedInputLabel);
+		DAVectorUtility.SALSAPrint(0, "Vector Dimension: " + Program.ParameterVectorDimension);
+		DAVectorUtility.SALSAPrint(0, "Continuous Clustering: " + Program.ContinuousClustering);
 
-		String sigmamethodString = "Sigma Method: " + DAVectorSponge.SigmaMethod;
-		if (DAVectorSponge.SigmaMethod > 0)
+		String sigmamethodString = "Sigma Method: " + Program.SigmaMethod;
+		if (Program.SigmaMethod > 0)
 		{
 			sigmamethodString += " Parameters:";
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
-				sigmamethodString += " " + String.format("%1$5.4E", DAVectorSponge.SigmaVectorParameters_i_[VectorIndex]);
+				sigmamethodString += " " + String.format("%1$5.4E", Program.SigmaVectorParameters_i_[VectorIndex]);
 			}
 		}
 		DAVectorUtility.SALSAPrint(0, sigmamethodString);
-		if (DAVectorSponge.SigmaMethod == 3)
+		if (Program.SigmaMethod == 3)
 		{
-			DAVectorUtility.SALSAPrint(0, "Initial Sigma[0] " + String.format("%1$5.4E", DAVectorSponge.InitialSigma0) + " Final Sigma[0] = " + String.format("%1$5.4E", DAVectorSponge.FinalTargetSigma0) + " /Center[0] at Temperature " + String.format("%1$5.4f", DAVectorSponge.FinalTargetTemperature));
+			DAVectorUtility.SALSAPrint(0, "Initial Sigma[0] " + String.format("%1$5.4E", Program.InitialSigma0) + " Final Sigma[0] = " + String.format("%1$5.4E", Program.FinalTargetSigma0) + " /Center[0] at Temperature " + String.format("%1$5.4f", Program.FinalTargetTemperature));
 		}
 
-		DAVectorUtility.SALSAPrint(0, "Initial Number of Centers: " + DAVectorSponge.InitialNcent);
+		DAVectorUtility.SALSAPrint(0, "Initial Number of Centers: " + Program.InitialNcent);
 		DAVectorUtility.SALSAPrint(0, "Final Number of Centers: " + ParallelClustering.runningSolution.Ncent_Global);
-		DAVectorUtility.SALSAPrint(0, "Maximum Number of Centers: " + DAVectorSponge.maxNcentperNode);
-		DAVectorUtility.SALSAPrint(0, "Target Maximum number of cluster centers for each point (includes Sponge): " + DAVectorSponge.targetNcentperPoint);
-		DAVectorUtility.SALSAPrint(0, "Actual Maximum number of cluster centers for each point (includes Sponge): " + DAVectorSponge.maxNcentperPoint);
+		DAVectorUtility.SALSAPrint(0, "Maximum Number of Centers: " + Program.maxNcentperNode);
+		DAVectorUtility.SALSAPrint(0, "Target Maximum number of cluster centers for each point (includes Sponge): " + Program.targetNcentperPoint);
+		DAVectorUtility.SALSAPrint(0, "Actual Maximum number of cluster centers for each point (includes Sponge): " + Program.maxNcentperPoint);
 
-		if (!DAVectorSponge.DoKmeans)
+		if (!Program.DoKmeans)
 		{
             if (DAVectorUtility.MPI_Size > 1){
                 // Note - MPI Call - Allreduce - int - max
@@ -885,74 +887,74 @@ public class DAVectorSponge
             }
 			DAVectorUtility.SALSAPrint(0, "Created Index Space " + MaxCreatedIndex + " times " + ClusteringSolution.PACKINGMULTIPLIER);
 
-			DAVectorUtility.SALSAPrint(0, "Iterations at the End: " + DAVectorSponge.Iterationatend);
-			DAVectorUtility.SALSAPrint(0, "Limit on EM Convergence for each step: " + DAVectorSponge.ConvergenceLoopLimit);
-			DAVectorUtility.SALSAPrint(0, "Change in Average M per point: " + String.format("%1$5.4E", DAVectorSponge.Malpha_MaxChange) + " In final Loop " + String.format("%1$5.4E", DAVectorSponge.Malpha_MaxChange1) + " Y Change (final only) " + String.format("%1$5.4E", YChangeSquared));
-			DAVectorUtility.SALSAPrint(0, "Freezing Limit for convergence: " + String.format("%1$5.4E", DAVectorSponge.FreezingLimit));
-			DAVectorUtility.SALSAPrint(0, "Exponential Cut Used in Iteration Code " + String.format("%1$5.4f", DAVectorSponge.ExpArgumentCut1));
-			DAVectorUtility.SALSAPrint(0, "Exponential Cut Used in Associating Clusters with Points " + String.format("%1$5.4f", DAVectorSponge.ExpArgumentCut2) + " (Y(cluster)-X(point))^2 / (2 * Temperature) < ExpArgumentCut");
+			DAVectorUtility.SALSAPrint(0, "Iterations at the End: " + Program.Iterationatend);
+			DAVectorUtility.SALSAPrint(0, "Limit on EM Convergence for each step: " + Program.ConvergenceLoopLimit);
+			DAVectorUtility.SALSAPrint(0, "Change in Average M per point: " + String.format("%1$5.4E", Program.Malpha_MaxChange) + " In final Loop " + String.format("%1$5.4E", Program.Malpha_MaxChange1) + " Y Change (final only) " + String.format("%1$5.4E", YChangeSquared));
+			DAVectorUtility.SALSAPrint(0, "Freezing Limit for convergence: " + String.format("%1$5.4E", Program.FreezingLimit));
+			DAVectorUtility.SALSAPrint(0, "Exponential Cut Used in Iteration Code " + String.format("%1$5.4f", Program.ExpArgumentCut1));
+			DAVectorUtility.SALSAPrint(0, "Exponential Cut Used in Associating Clusters with Points " + String.format("%1$5.4f", Program.ExpArgumentCut2) + " (Y(cluster)-X(point))^2 / (2 * Temperature) < ExpArgumentCut");
 			DAVectorUtility.SALSAPrint(0, "Mean Cluster Count per point " + String.format("%1$3.2f", VectorAnnealIterate.MeanClusterCount) + " Pts with Just 1 Cluster " + String.format("%1$5.4E", VectorAnnealIterate.PointswithClusterCount1));
 
-			DAVectorUtility.SALSAPrint(0, "Tmininimum " + String.format("%1$5.4f", DAVectorSponge.Tminimum) + " If Positive this is minmum Temperature, If negative Divide maximum temperature by this to get target minimum");
+			DAVectorUtility.SALSAPrint(0, "Tmininimum " + String.format("%1$5.4f", Program.Tminimum) + " If Positive this is minmum Temperature, If negative Divide maximum temperature by this to get target minimum");
 
-			DAVectorUtility.SALSAPrint(0, "\nNumber of Clusters Split Simultaneously: " + DAVectorSponge.MaxNumberSplitClusters + " Initially " + SaveSplitNumber);
+			DAVectorUtility.SALSAPrint(0, "\nNumber of Clusters Split Simultaneously: " + Program.MaxNumberSplitClusters + " Initially " + SaveSplitNumber);
 
-			DAVectorUtility.SALSAPrint(0, "Do not split Clusters smaller than this: " + String.format("%1$4.3f", DAVectorSponge.ToosmalltoSplit));
-			DAVectorUtility.SALSAPrint(0, "Do not split Clusters with Scaled Squared Width Less than this " + String.format("%1$4.3f", DAVectorSponge.MinimumScaledWidthsquaredtosplit));
-			DAVectorUtility.SALSAPrint(0, "Wait stages between splits: " + DAVectorSponge.Waititerations);
-			DAVectorUtility.SALSAPrint(0, "Initial Cooling Factor in Annealing: " + String.format("%1$8.7f", DAVectorSponge.InitialCoolingFactor1) + " " + String.format("%1$8.7f", DAVectorSponge.InitialCoolingFactor2));
-			DAVectorUtility.SALSAPrint(0, "Refined Cooling Factor in Annealing: " + String.format("%1$8.7f", DAVectorSponge.FineCoolingFactor1) + " " + String.format("%1$8.7f", DAVectorSponge.FineCoolingFactor2) + " Switching at " + String.format("%1$4.3f", DAVectorSponge.CoolingTemperatureSwitch));
+			DAVectorUtility.SALSAPrint(0, "Do not split Clusters smaller than this: " + String.format("%1$4.3f", Program.ToosmalltoSplit));
+			DAVectorUtility.SALSAPrint(0, "Do not split Clusters with Scaled Squared Width Less than this " + String.format("%1$4.3f", Program.MinimumScaledWidthsquaredtosplit));
+			DAVectorUtility.SALSAPrint(0, "Wait stages between splits: " + Program.Waititerations);
+			DAVectorUtility.SALSAPrint(0, "Initial Cooling Factor in Annealing: " + String.format("%1$8.7f", Program.InitialCoolingFactor1) + " " + String.format("%1$8.7f", Program.InitialCoolingFactor2));
+			DAVectorUtility.SALSAPrint(0, "Refined Cooling Factor in Annealing: " + String.format("%1$8.7f", Program.FineCoolingFactor1) + " " + String.format("%1$8.7f", Program.FineCoolingFactor2) + " Switching at " + String.format("%1$4.3f", Program.CoolingTemperatureSwitch));
 
-			int cleanuplength = DAVectorSponge.MagicTemperatures.length;
+			int cleanuplength = Program.MagicTemperatures.length;
 			message = "Clean up Temperatures ";
 			for (int loop = 0; loop < cleanuplength; loop++)
 			{
-				message += String.format("%1$3.2f", DAVectorSponge.MagicTemperatures[loop]) + " ";
+				message += String.format("%1$3.2f", Program.MagicTemperatures[loop]) + " ";
 			}
 			DAVectorUtility.SALSAPrint(0, message);
 
 			if (ParallelClustering.runningSolution.SpongeCluster >= 0)
 			{
 				DAVectorUtility.SALSAPrint(0, "\nSponge Cluster: " + ParallelClustering.runningSolution.SpongeCluster);
-				if (DAVectorSponge.UseSponge)
+				if (Program.UseSponge)
 				{
 					DAVectorUtility.SALSAPrint(0, "Sponge Created Initially");
 				}
-				DAVectorUtility.SALSAPrint(0, "Final Sponge Factor: " + String.format("%1$3.2f", DAVectorSponge.SpongeFactor) + " Initial " + String.format("%1$3.2f", DAVectorSponge.SpongeFactor1) + " Started at " + String.format("%1$4.3f", DAVectorSponge.SpongeTemperature1) + " Aiming at " + String.format("%1$3.2f", DAVectorSponge.SpongeFactor2) + " at Temperature " + String.format("%1$4.3f", DAVectorSponge.SpongeTemperature2));
-				DAVectorUtility.SALSAPrint(0, "Sponge p(k) Option: " + DAVectorSponge.SpongePoption + " Weighting " + String.format("%1$4.3E", DAVectorSponge.SpongePWeight));
-				DAVectorUtility.SALSAPrint(0, "Nearby Sponge Point Limit: " + (new Double(DAVectorSponge.NearbySpongePointLimit)));
+				DAVectorUtility.SALSAPrint(0, "Final Sponge Factor: " + String.format("%1$3.2f", Program.SpongeFactor) + " Initial " + String.format("%1$3.2f", Program.SpongeFactor1) + " Started at " + String.format("%1$4.3f", Program.SpongeTemperature1) + " Aiming at " + String.format("%1$3.2f", Program.SpongeFactor2) + " at Temperature " + String.format("%1$4.3f", Program.SpongeTemperature2));
+				DAVectorUtility.SALSAPrint(0, "Sponge p(k) Option: " + Program.SpongePoption + " Weighting " + String.format("%1$4.3E", Program.SpongePWeight));
+				DAVectorUtility.SALSAPrint(0, "Nearby Sponge Point Limit: " + (new Double(Program.NearbySpongePointLimit)));
 				if (ParallelClustering.runningSolution.SpongeCluster >= 0)
 				{
 					DAVectorUtility.SALSAPrint(0, " Points in Sponge Cluster " + String.format("%1$3.2f", ParallelClustering.runningSolution.C_k_[ParallelClustering.runningSolution.SpongeCluster]) + " Occupation Count " + ParallelClustering.runningSolution.OccupationCounts_k_[ParallelClustering.runningSolution.SpongeCluster]);
 				}
-				DAVectorUtility.SALSAPrint(0, "Create a Sponge Cluster if doesn't exist already when average  squared scaled width reaches " + String.format("%1$3.2f", DAVectorSponge.CreateSpongeScaledSquaredWidth));
-				if (DAVectorSponge.ActualSpongeTemperature > 0.0)
+				DAVectorUtility.SALSAPrint(0, "Create a Sponge Cluster if doesn't exist already when average  squared scaled width reaches " + String.format("%1$3.2f", Program.CreateSpongeScaledSquaredWidth));
+				if (Program.ActualSpongeTemperature > 0.0)
 				{
-					double FractionTimeatSponge = DAVectorSponge.TimeatSponge / DAVectorUtility.HPDuration;
-					DAVectorUtility.SALSAPrint(0, "Temperature where Sponge Introduced " + String.format("%1$5.4f", DAVectorSponge.ActualSpongeTemperature) + " Width Then " + String.format("%1$4.3f", DAVectorSponge.ActualWidth) + " Time fraction " + String.format("%1$5.4f", FractionTimeatSponge));
+					double FractionTimeatSponge = Program.TimeatSponge / DAVectorUtility.HPDuration;
+					DAVectorUtility.SALSAPrint(0, "Temperature where Sponge Introduced " + String.format("%1$5.4f", Program.ActualSpongeTemperature) + " Width Then " + String.format("%1$4.3f", Program.ActualWidth) + " Time fraction " + String.format("%1$5.4f", FractionTimeatSponge));
 				}
 			}
 		}
 
-		DAVectorUtility.SALSAPrint(0, "\nCluster Deletion Statistics: C_k_ Small " + DAVectorSponge.TotalClustersDeleted_CSmall + " Occ. Count Small " + DAVectorSponge.TotalClustersDeleted_OccCount + " Clusters Close " + DAVectorSponge.TotalClustersDeleted_Close);
-		DAVectorUtility.SALSAPrint(0, "Minimum Cluster Count Average Point for Absorbing: " + String.format("%1$3.2f", DAVectorSponge.MinimumCountforCluster_C_k) + " With Sponge " + String.format("%1$3.2f", DAVectorSponge.MinimumCountforCluster_C_kwithSponge));
-		DAVectorUtility.SALSAPrint(0, "Minimum Cluster Identified Point Count for Absorbing: " + DAVectorSponge.MinimumCountforCluster_Points);
-		DAVectorUtility.SALSAPrint(0, "Minimum Cluster Average Count for considering as nonzero " + String.format("%1$6.5f", DAVectorSponge.CountforCluster_C_ktobezero));
-		DAVectorUtility.SALSAPrint(0, "Scaled Squared Distance Cut for Closeness " + String.format("%1$3.2f", DAVectorSponge.ScaledSquaredDistanceatClosenessTest) + " Temperature " + String.format("%1$3.2f", DAVectorSponge.TemperatureforClosenessTest));
+		DAVectorUtility.SALSAPrint(0, "\nCluster Deletion Statistics: C_k_ Small " + Program.TotalClustersDeleted_CSmall + " Occ. Count Small " + Program.TotalClustersDeleted_OccCount + " Clusters Close " + Program.TotalClustersDeleted_Close);
+		DAVectorUtility.SALSAPrint(0, "Minimum Cluster Count Average Point for Absorbing: " + String.format("%1$3.2f", Program.MinimumCountforCluster_C_k) + " With Sponge " + String.format("%1$3.2f", Program.MinimumCountforCluster_C_kwithSponge));
+		DAVectorUtility.SALSAPrint(0, "Minimum Cluster Identified Point Count for Absorbing: " + Program.MinimumCountforCluster_Points);
+		DAVectorUtility.SALSAPrint(0, "Minimum Cluster Average Count for considering as nonzero " + String.format("%1$6.5f", Program.CountforCluster_C_ktobezero));
+		DAVectorUtility.SALSAPrint(0, "Scaled Squared Distance Cut for Closeness " + String.format("%1$3.2f", Program.ScaledSquaredDistanceatClosenessTest) + " Temperature " + String.format("%1$3.2f", Program.TemperatureforClosenessTest));
 
 		if (ParallelClustering.runningSolution.DistributedExecutionMode)
 		{
-			double FractionTimeatDist = DAVectorSponge.TimeatDistribution / DAVectorUtility.HPDuration;
-			DAVectorUtility.SALSAPrint(0, "\nDistributed Execution entered at Temperature " + String.format("%1$5.4f", DAVectorSponge.ActualTemperatureforDistribution) + " Time(fraction) " + String.format("%1$5.4f", FractionTimeatDist) + " Cut " + String.format("%1$5.4f", DAVectorSponge.TemperatureLimitforDistribution) + " Clusters " + DAVectorSponge.ActualClusterNumberforDistribution + " Cut " + DAVectorSponge.ClusterLimitforDistribution);
-			DAVectorUtility.SALSAPrint(0, "Exponential Cut Used in Distributed Broadcast " + String.format("%1$5.4f", DAVectorSponge.ExpArgumentCut3) + " (Y(cluster)-X(point))^2 / (2 * Temperature) < ExpArgumentCut -- 0th component only");
-			DAVectorUtility.SALSAPrint(0, "Number of Minor Synchronizations " + DAVectorSponge.NumberMinorSynchs + " Number of Major Synchs while Global " + DAVectorSponge.NumberMajorSynchs1 + " Number of Major Synchs while Distributed " + DAVectorSponge.NumberMajorSynchs2);
+			double FractionTimeatDist = Program.TimeatDistribution / DAVectorUtility.HPDuration;
+			DAVectorUtility.SALSAPrint(0, "\nDistributed Execution entered at Temperature " + String.format("%1$5.4f", Program.ActualTemperatureforDistribution) + " Time(fraction) " + String.format("%1$5.4f", FractionTimeatDist) + " Cut " + String.format("%1$5.4f", Program.TemperatureLimitforDistribution) + " Clusters " + Program.ActualClusterNumberforDistribution + " Cut " + Program.ClusterLimitforDistribution);
+			DAVectorUtility.SALSAPrint(0, "Exponential Cut Used in Distributed Broadcast " + String.format("%1$5.4f", Program.ExpArgumentCut3) + " (Y(cluster)-X(point))^2 / (2 * Temperature) < ExpArgumentCut -- 0th component only");
+			DAVectorUtility.SALSAPrint(0, "Number of Minor Synchronizations " + Program.NumberMinorSynchs + " Number of Major Synchs while Global " + Program.NumberMajorSynchs1 + " Number of Major Synchs while Distributed " + Program.NumberMajorSynchs2);
 			double ClustersperPipeline = 0.0;
-			if (DAVectorSponge.NumberPipelineSteps > 0)
+			if (Program.NumberPipelineSteps > 0)
 			{
-				ClustersperPipeline = (double) DAVectorSponge.NumberofPipelineClusters / (double) DAVectorSponge.NumberPipelineSteps;
+				ClustersperPipeline = (double) Program.NumberofPipelineClusters / (double) Program.NumberPipelineSteps;
 			}
-			DAVectorUtility.SALSAPrint(0, " Number of Pipeline steps " + DAVectorSponge.NumberPipelineSteps + " with average cluster load " + String.format("%1$4.3f", ClustersperPipeline) + " In " + DAVectorSponge.NumberPipelineGroups + " sets");
-			double AverageClusterCount = (double) DAVectorSponge.CountClusters2 / (double) DAVectorSponge.NumberMajorSynchs2;
+			DAVectorUtility.SALSAPrint(0, " Number of Pipeline steps " + Program.NumberPipelineSteps + " with average cluster load " + String.format("%1$4.3f", ClustersperPipeline) + " In " + Program.NumberPipelineGroups + " sets");
+			double AverageClusterCount = (double) Program.CountClusters2 / (double) Program.NumberMajorSynchs2;
 			double[] AverageClusterCountvalues = new double[DAVectorUtility.MPI_Size];
 
             if (DAVectorUtility.MPI_Size > 1){
@@ -1006,55 +1008,55 @@ public class DAVectorSponge
 			DAVectorUtility.SALSAPrint(0, "Clusters per node Final " + String.format("%1$3.2f", avgClusterCountFinal) + " Min " + String.format("%1$3.2f", minClusterCountFinal) + " Max " + String.format("%1$3.2f", maxClusterCountFinal));
 		}
 
-		DAVectorUtility.SALSAPrint(0, "\nActual Starting Temperature " + String.format("%1$5.4f", DAVectorSponge.ActualStartTemperature));
-		DAVectorUtility.SALSAPrint(0, "Final Temperature after Converging " + String.format("%1$5.4f", DAVectorSponge.ActualEndTemperatureafterconverging));
-		double FractionTimeatSplitStop = DAVectorSponge.TimeatSplittingStop / DAVectorUtility.HPDuration;
-		DAVectorUtility.SALSAPrint(0, "Temperature where we decided to stop " + String.format("%1$5.4f", DAVectorSponge.ActualEndTemperature) + " Fractional Time " + String.format("%1$5.4f", FractionTimeatSplitStop));
-		DAVectorUtility.SALSAPrint(0, "Temperature where we aimed to stop at " + String.format("%1$5.4f", DAVectorSponge.TargetEndTemperature));
-		if (!DAVectorSponge.DoKmeans)
+		DAVectorUtility.SALSAPrint(0, "\nActual Starting Temperature " + String.format("%1$5.4f", Program.ActualStartTemperature));
+		DAVectorUtility.SALSAPrint(0, "Final Temperature after Converging " + String.format("%1$5.4f", Program.ActualEndTemperatureafterconverging));
+		double FractionTimeatSplitStop = Program.TimeatSplittingStop / DAVectorUtility.HPDuration;
+		DAVectorUtility.SALSAPrint(0, "Temperature where we decided to stop " + String.format("%1$5.4f", Program.ActualEndTemperature) + " Fractional Time " + String.format("%1$5.4f", FractionTimeatSplitStop));
+		DAVectorUtility.SALSAPrint(0, "Temperature where we aimed to stop at " + String.format("%1$5.4f", Program.TargetEndTemperature));
+		if (!Program.DoKmeans)
 		{
-			double TotalCalcs = DAVectorSponge.SumUsefulCalcs + DAVectorSponge.SumUselessCalcs + DAVectorSponge.SumIgnoredCalcs;
-			DAVectorUtility.SALSAPrint(0, "\nNumber of distance calcs in EMIterate " + String.format("%1$5.4E", TotalCalcs) + " Useful " + String.format("%1$5.4f", DAVectorSponge.SumUsefulCalcs / TotalCalcs) + " Useless " + String.format("%1$5.4f", DAVectorSponge.SumUselessCalcs / TotalCalcs) + " Ignored " + String.format("%1$5.4f", DAVectorSponge.SumIgnoredCalcs / TotalCalcs));
-			DAVectorUtility.SALSAPrint(0, "Scalar Products in Eigenvector part " + String.format("%1$5.4E", DAVectorSponge.SumEigenSPCalcs) + " Sum Useful + Useless " + String.format("%1$5.4E", DAVectorSponge.SumUsefulCalcs + DAVectorSponge.SumUselessCalcs));
+			double TotalCalcs = Program.SumUsefulCalcs + Program.SumUselessCalcs + Program.SumIgnoredCalcs;
+			DAVectorUtility.SALSAPrint(0, "\nNumber of distance calcs in EMIterate " + String.format("%1$5.4E", TotalCalcs) + " Useful " + String.format("%1$5.4f", Program.SumUsefulCalcs / TotalCalcs) + " Useless " + String.format("%1$5.4f", Program.SumUselessCalcs / TotalCalcs) + " Ignored " + String.format("%1$5.4f", Program.SumIgnoredCalcs / TotalCalcs));
+			DAVectorUtility.SALSAPrint(0, "Scalar Products in Eigenvector part " + String.format("%1$5.4E", Program.SumEigenSPCalcs) + " Sum Useful + Useless " + String.format("%1$5.4E", Program.SumUsefulCalcs + Program.SumUselessCalcs));
 
-			double MIterationAverage = DAVectorSponge.AccumulateMvalues / DAVectorSponge.NumberMsuccesses;
-			DAVectorUtility.SALSAPrint(0, "Mchange Test Failures " + String.format("%1$5.4E", DAVectorSponge.NumberMfailures) + " Successes " + String.format("%1$5.4E", DAVectorSponge.NumberMsuccesses) + " Average Iterations " + String.format("%1$3.2f", MIterationAverage) + " Max " + DAVectorSponge.ConvergenceLoopLimit);
-			double YIterationAverage = DAVectorSponge.AccumulateYvalues / DAVectorSponge.NumberYsuccesses;
-			DAVectorUtility.SALSAPrint(0, "Ychange Test Failures " + String.format("%1$5.4E", DAVectorSponge.NumberYfailures) + " Successes " + String.format("%1$5.4E", DAVectorSponge.NumberYsuccesses) + " Average Iterations " + String.format("%1$3.2f", YIterationAverage) + " Max " + DAVectorSponge.ConvergenceLoopLimit);
+			double MIterationAverage = Program.AccumulateMvalues / Program.NumberMsuccesses;
+			DAVectorUtility.SALSAPrint(0, "Mchange Test Failures " + String.format("%1$5.4E", Program.NumberMfailures) + " Successes " + String.format("%1$5.4E", Program.NumberMsuccesses) + " Average Iterations " + String.format("%1$3.2f", MIterationAverage) + " Max " + Program.ConvergenceLoopLimit);
+			double YIterationAverage = Program.AccumulateYvalues / Program.NumberYsuccesses;
+			DAVectorUtility.SALSAPrint(0, "Ychange Test Failures " + String.format("%1$5.4E", Program.NumberYfailures) + " Successes " + String.format("%1$5.4E", Program.NumberYsuccesses) + " Average Iterations " + String.format("%1$3.2f", YIterationAverage) + " Max " + Program.ConvergenceLoopLimit);
 		}
-		if (DAVectorSponge.UseTriangleInequality_DA > 0)
+		if (Program.UseTriangleInequality_DA > 0)
 		{
-			double weighting = 1.0 / DAVectorSponge.ClustersperCenterDiagnostics[0];
+			double weighting = 1.0 / Program.ClustersperCenterDiagnostics[0];
 			for (int DiagnosticLoop = 1; DiagnosticLoop < 8; DiagnosticLoop++)
 			{
-				DAVectorSponge.ClustersperCenterDiagnostics[DiagnosticLoop] *= weighting;
+				Program.ClustersperCenterDiagnostics[DiagnosticLoop] *= weighting;
 			}
-			DAVectorUtility.SALSAPrint(0, "Dynamic Clusters in Triangle Inequality Failures " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[1]) + " Succeses " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[2]) + " Very Small " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[3]) + " Small " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[4]) + " Too Big " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[5]) + " Average reset M " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[6]) + " Average Changes in Clusters per Point " + String.format("%1$5.4f", DAVectorSponge.ClustersperCenterDiagnostics[7]));
+			DAVectorUtility.SALSAPrint(0, "Dynamic Clusters in Triangle Inequality Failures " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[1]) + " Succeses " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[2]) + " Very Small " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[3]) + " Small " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[4]) + " Too Big " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[5]) + " Average reset M " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[6]) + " Average Changes in Clusters per Point " + String.format("%1$5.4f", Program.ClustersperCenterDiagnostics[7]));
 		}
 
-		DAVectorUtility.SALSAPrint(0, "\nPoints " + DAVectorUtility.PointCount_Global + " Selection " + DAVectorSponge.SelectedInputLabel + " Number of Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Temperature Steps " + DAVectorSponge.NumberTemperatureSteps + " " + DAVectorSponge.FinalReason);
+		DAVectorUtility.SALSAPrint(0, "\nPoints " + DAVectorUtility.PointCount_Global + " Selection " + Program.SelectedInputLabel + " Number of Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Temperature Steps " + Program.NumberTemperatureSteps + " " + Program.FinalReason);
 
 		//  Cluster Widths
 		String widthmessage = "";
-		if (!DAVectorSponge.CalculateIndividualWidths)
+		if (!Program.CalculateIndividualWidths)
 		{
 			widthmessage = " Average Width " + String.format("%1$4.3E", ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth);
 		}
 		else
 		{
 			widthmessage = " Average Widths excluding Sponge Points (These are in Hamiltonian value) ";
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				widthmessage += String.format("%1$4.3E", ParallelClustering.runningSolution.AverageWidth[VectorIndex]) + " ";
 			}
 		}
 		DAVectorUtility.SALSAPrint(0, widthmessage + " These are squared and divided by squares of appropriate sigmas with Hamiltonian " + String.format("%1$5.4E", ParallelClustering.runningSolution.PairwiseHammy));
 
-		if (DAVectorSponge.DoBasicDA)
+		if (Program.DoBasicDA)
 		{ //  General Statistics
 			ClusterQuality.CaculateTemperatureClusterCountPlot();
 			ClusteringSolution.TotalClusterSummary.HistogramClusterProperties();
-			if (DAVectorSponge.UseTriangleInequality_DA > 0)
+			if (Program.UseTriangleInequality_DA > 0)
 			{
 				DATriangleInequality.PrintDiagnostics();
 			}
@@ -1081,48 +1083,48 @@ public class DAVectorSponge
 		DAVectorUtility.SALSAPrint(0, nextline);
 
 		//  Add a Fast K means step using triangle inequality speed up
-		if (DAVectorSponge.DoBasicDA && DAVectorSponge.FollowUpKmeans && (ParallelClustering.runningSolution.SpongeCluster < 0) && !ParallelClustering.runningSolution.DistributedExecutionMode)
+		if (Program.DoBasicDA && Program.FollowUpKmeans && (ParallelClustering.runningSolution.SpongeCluster < 0) && !ParallelClustering.runningSolution.DistributedExecutionMode)
 		{
-			DAVectorSponge.DoKmeans = true;
+			Program.DoKmeans = true;
 
-			DAVectorSponge.TemperatureLimitforDistribution = -1.0;
-			DAVectorSponge.ClusterLimitforDistribution = -1;
+			Program.TemperatureLimitforDistribution = -1.0;
+			Program.ClusterLimitforDistribution = -1;
 
-			DAVectorSponge.CalculateEigenvaluesfromMatrix = false;
-			DAVectorSponge.UseSponge = false;
-			DAVectorSponge.ContinuousClustering = false;
-			DAVectorSponge.SigmaMethod = 0;
-			DAVectorSponge.targetNcentperPoint = ParallelClustering.runningSolution.Ncent_Global;
-			DAVectorSponge.maxNcentperPoint = ParallelClustering.runningSolution.Ncent_Global;
-			DAVectorSponge.targetMinimumNcentperPoint = 2;
+			Program.CalculateEigenvaluesfromMatrix = false;
+			Program.UseSponge = false;
+			Program.ContinuousClustering = false;
+			Program.SigmaMethod = 0;
+			Program.targetNcentperPoint = ParallelClustering.runningSolution.Ncent_Global;
+			Program.maxNcentperPoint = ParallelClustering.runningSolution.Ncent_Global;
+			Program.targetMinimumNcentperPoint = 2;
 
-			DAVectorSponge.InitialNcent = ParallelClustering.runningSolution.Ncent_Global;
-			DAVectorSponge.maxNcentperNode = ParallelClustering.runningSolution.Ncent_Global;
-			DAVectorSponge.maxNcentTOTAL = ParallelClustering.runningSolution.Ncent_Global;
-			DAVectorSponge.maxNcentTOTALforParallelism_Kmeans = 50;
-			DAVectorSponge.maxNcentCreated = 200;
-			DAVectorSponge.NumberDataPoints = 200000;
+			Program.InitialNcent = ParallelClustering.runningSolution.Ncent_Global;
+			Program.maxNcentperNode = ParallelClustering.runningSolution.Ncent_Global;
+			Program.maxNcentTOTAL = ParallelClustering.runningSolution.Ncent_Global;
+			Program.maxNcentTOTALforParallelism_Kmeans = 50;
+			Program.maxNcentCreated = 200;
+			Program.NumberDataPoints = 200000;
 
-			DAVectorSponge.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
-			DAVectorSponge.MaxClusterLBsperPoint_Kmeans = ParallelClustering.runningSolution.Ncent_Global;
-			DAVectorSponge.MaxCentersperCenter_Kmeans = ParallelClustering.runningSolution.Ncent_Global;
+			Program.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
+			Program.MaxClusterLBsperPoint_Kmeans = ParallelClustering.runningSolution.Ncent_Global;
+			Program.MaxCentersperCenter_Kmeans = ParallelClustering.runningSolution.Ncent_Global;
 
-			DAVectorSponge.TriangleInequality_Delta1_old_Kmeans = 0.2;
-			DAVectorSponge.TriangleInequality_Delta1_current_Kmeans = 0.2;
-			DAVectorSponge.KmeansCenterChangeStop = 0.00001;
-			DAVectorSponge.KmeansIterationLimit = 1000;
+			Program.TriangleInequality_Delta1_old_Kmeans = 0.2;
+			Program.TriangleInequality_Delta1_current_Kmeans = 0.2;
+			Program.KmeansCenterChangeStop = 0.00001;
+			Program.KmeansIterationLimit = 1000;
 
-			KmeansTriangleInequality.SetTriangleInequalityParameters(DAVectorSponge.UseTriangleInequality_Kmeans, DAVectorSponge.MaxClusterLBsperPoint_Kmeans, DAVectorSponge.MaxCentersperCenter_Kmeans, DAVectorSponge.TriangleInequality_Delta1_old_Kmeans, DAVectorSponge.TriangleInequality_Delta1_current_Kmeans, DAVectorSponge.OldCenterOption_Kmeans, DAVectorSponge.DoBackwardFacingTests_Kmeans);
-			Kmeans.InitializeKmeans(DAVectorSponge.PointPosition, "", DAVectorSponge.ClusterIndexonInputLine, DAVectorSponge.FirstClusterValue, DAVectorSponge.StartPointPositiononInputLine, DAVectorSponge.InitialNcent, DAVectorSponge.maxNcentTOTAL, DAVectorSponge.maxNcentTOTALforParallelism_Kmeans, DAVectorSponge.ParameterVectorDimension, DAVectorSponge.KmeansCenterChangeStop, DAVectorSponge.KmeansIterationLimit);
-			Kmeans.SetupKmeans(DAVectorSponge.ClusterAssignments);
+			KmeansTriangleInequality.SetTriangleInequalityParameters(Program.UseTriangleInequality_Kmeans, Program.MaxClusterLBsperPoint_Kmeans, Program.MaxCentersperCenter_Kmeans, Program.TriangleInequality_Delta1_old_Kmeans, Program.TriangleInequality_Delta1_current_Kmeans, Program.OldCenterOption_Kmeans, Program.DoBackwardFacingTests_Kmeans);
+			Kmeans.InitializeKmeans(Program.PointPosition, "", Program.ClusterIndexonInputLine, Program.FirstClusterValue, Program.StartPointPositiononInputLine, Program.InitialNcent, Program.maxNcentTOTAL, Program.maxNcentTOTALforParallelism_Kmeans, Program.ParameterVectorDimension, Program.KmeansCenterChangeStop, Program.KmeansIterationLimit);
+			Kmeans.SetupKmeans(Program.ClusterAssignments);
 			RunKmeansClustering = new ControlKmeans();
 
-			double[][] ClusterCenters = ControlKmeans.CaptureKmeans(DAVectorSponge.ClusterAssignments);
-			if (DAVectorSponge.ClusterCountOutput >= 0)
+			double[][] ClusterCenters = ControlKmeans.CaptureKmeans(Program.ClusterAssignments);
+			if (Program.ClusterCountOutput >= 0)
 			{
 				VectorAnnealIterate.SimpleOutputClusteringResults("Kmeans", ClusterCenters);
 			}
-			if (DAVectorSponge.RW3DData > 0)
+			if (Program.RW3DData > 0)
 			{
 				VectorAnnealIterate.Output3DClusterLabels("Kmeans");
 			}
@@ -1134,7 +1136,7 @@ public class DAVectorSponge
 			DAVectorUtility.writeClusterResults(config.SummaryFile, DAVectorUtility.CosmicOutput);
 			WriteTimingFile(config.TimingFile, DAVectorUtility.mainDuration, DAVectorUtility.HPDuration,
                     DAVectorUtility.ThreadCount, DAVectorUtility.MPIperNodeCount, DAVectorUtility.NodeCount,
-                    DAVectorUtility.PointCount_Process, DAVectorUtility.PointCount_Global, DAVectorSponge.maxNcentperNode,
+                    DAVectorUtility.PointCount_Process, DAVectorUtility.PointCount_Global, Program.maxNcentperNode,
                     DAVectorUtility.SubDurations[0] * 0.001, DAVectorUtility.SubDurations[0] / DAVectorUtility.HPDuration,
                     DAVectorUtility.SubDurations[1] * 0.001, DAVectorUtility.SubDurations[1] / DAVectorUtility.HPDuration,
                     DAVectorUtility.SubDurations[2] * 0.001, DAVectorUtility.SubDurations[2] / DAVectorUtility.HPDuration,
@@ -1154,7 +1156,7 @@ public class DAVectorSponge
 	public static void ReadControlFile(CommandLine cmd)
 	{
         config = ConfigurationMgr.LoadConfiguration(cmd.getOptionValue(Constants.CMD_OPTION_LONG_C)).daVectorSpongeSection;
-        DAVectorSponge.ControlFileName = cmd.getOptionValue(Constants.CMD_OPTION_LONG_C);
+        Program.ControlFileName = cmd.getOptionValue(Constants.CMD_OPTION_LONG_C);
         DAVectorUtility.NodeCount = Integer.parseInt(cmd.getOptionValue(Constants.CMD_OPTION_LONG_N));
         DAVectorUtility.ThreadCount = Integer.parseInt(cmd.getOptionValue(Constants.CMD_OPTION_LONG_T));
 
@@ -1167,107 +1169,107 @@ public class DAVectorSponge
         }
 
 
-        DAVectorSponge.ClusterFile = config.ClusterFile;
-        DAVectorSponge.DistanceMatrixFile = config.DistanceMatrixFile;
-        DAVectorSponge.LabelFile= config.LabelFile	;
-        DAVectorSponge.ComparisonClusterFile = config.ComparisonClusterFile;
-        DAVectorSponge.RestartClusterFile = config.RestartClusterFile;
-        DAVectorSponge.TimingFile = config.TimingFile;
-        DAVectorSponge.SummaryFile = config.SummaryFile;
+        Program.ClusterFile = config.ClusterFile;
+        Program.DistanceMatrixFile = config.DistanceMatrixFile;
+        Program.LabelFile= config.LabelFile	;
+        Program.ComparisonClusterFile = config.ComparisonClusterFile;
+        Program.RestartClusterFile = config.RestartClusterFile;
+        Program.TimingFile = config.TimingFile;
+        Program.SummaryFile = config.SummaryFile;
 
-        DAVectorSponge.UseSponge = config.UseSponge;
-        DAVectorSponge.SpongeFactor1 = config.SpongeFactor1;
-        DAVectorSponge.SpongeFactor2 = config.SpongeFactor2;
-        DAVectorSponge.SpongePoption = config.SpongePOption;
-        DAVectorSponge.SpongePWeight = config.SpongePWeight;
-        DAVectorSponge.CreateSpongeScaledSquaredWidth = config.CreateSpongeScaledSquaredWidth;
-        DAVectorSponge.ContinuousClustering = config.ContinuousClustering;
-        DAVectorSponge.ParameterVectorDimension = config.ParameterVectorDimension;
+        Program.UseSponge = config.UseSponge;
+        Program.SpongeFactor1 = config.SpongeFactor1;
+        Program.SpongeFactor2 = config.SpongeFactor2;
+        Program.SpongePoption = config.SpongePOption;
+        Program.SpongePWeight = config.SpongePWeight;
+        Program.CreateSpongeScaledSquaredWidth = config.CreateSpongeScaledSquaredWidth;
+        Program.ContinuousClustering = config.ContinuousClustering;
+        Program.ParameterVectorDimension = config.ParameterVectorDimension;
 
-        DAVectorSponge.SpongeTemperature1 = config.SpongeTemperature1;
-        DAVectorSponge.SpongeTemperature2 = config.SpongeTemperature2;
-        DAVectorSponge.RestartTemperature = config.RestartTemperature;
+        Program.SpongeTemperature1 = config.SpongeTemperature1;
+        Program.SpongeTemperature2 = config.SpongeTemperature2;
+        Program.RestartTemperature = config.RestartTemperature;
 
-        DAVectorSponge.NumberDataPoints = config.NumberDataPoints;
-        DAVectorSponge.SelectedInputLabel = config.SelectedInputLabel;
-        DAVectorSponge.InputFileType = config.InputFileType;
-        DAVectorSponge.Replicate = config.Replicate;
+        Program.NumberDataPoints = config.NumberDataPoints;
+        Program.SelectedInputLabel = config.SelectedInputLabel;
+        Program.InputFileType = config.InputFileType;
+        Program.Replicate = config.Replicate;
 
-        DAVectorSponge.CompareSolution = config.CompareSolution;
-        DAVectorSponge.ComparisonInputFileType = config.ComparisonInputFileType;
-        DAVectorSponge.ComparisonSelectedInputLabel = config.ComparisonSelectedInputLabel;
-        DAVectorSponge.RestartSelectedInputLabel = config.RestartSelectedInputLabel;
-        DAVectorSponge.RestartInputFileType = config.RestartInputFileType;
+        Program.CompareSolution = config.CompareSolution;
+        Program.ComparisonInputFileType = config.ComparisonInputFileType;
+        Program.ComparisonSelectedInputLabel = config.ComparisonSelectedInputLabel;
+        Program.RestartSelectedInputLabel = config.RestartSelectedInputLabel;
+        Program.RestartInputFileType = config.RestartInputFileType;
 
-        DAVectorSponge.SigmaMethod = config.SigmaMethod;
-        DAVectorSponge.SigmaVectorParameters_i_ = config.SigmaVectorParameters_i;
-        DAVectorSponge.FinalTargetTemperature = config.FinalTargetTemperature;
-        DAVectorSponge.FinalTargetSigma0 = config.FinalTargetSigma0;
-        DAVectorSponge.InitialSigma0 = config.InitialSigma0;
+        Program.SigmaMethod = config.SigmaMethod;
+        Program.SigmaVectorParameters_i_ = config.SigmaVectorParameters_i;
+        Program.FinalTargetTemperature = config.FinalTargetTemperature;
+        Program.FinalTargetSigma0 = config.FinalTargetSigma0;
+        Program.InitialSigma0 = config.InitialSigma0;
 
-        DAVectorSponge.ClusterCountOutput = config.ClusterCountOutput;
-        DAVectorSponge.NumberNearbyClusters = config.NumberNearbyClusters;
-        DAVectorSponge.NearbySpongePointLimit = config.NearbySpongePointLimit;
+        Program.ClusterCountOutput = config.ClusterCountOutput;
+        Program.NumberNearbyClusters = config.NumberNearbyClusters;
+        Program.NearbySpongePointLimit = config.NearbySpongePointLimit;
 
-        DAVectorSponge.ProcessingOption = config.ProcessingOption;
+        Program.ProcessingOption = config.ProcessingOption;
 
-        DAVectorSponge.cachelinesize = config.CacheLineSize;
-        DAVectorSponge.ClusterPrintNumber = config.ClusterPrintNumber;
-        DAVectorSponge.PrintInterval = config.PrintInterval;
-        DAVectorSponge.RemovalDiagnosticPrint = config.RemovalDiagnosticPrint;
-        DAVectorSponge.MagicTemperatures = config.MagicTemperatures;
-        DAVectorSponge.magicindex = config.MagicIndex;
+        Program.cachelinesize = config.CacheLineSize;
+        Program.ClusterPrintNumber = config.ClusterPrintNumber;
+        Program.PrintInterval = config.PrintInterval;
+        Program.RemovalDiagnosticPrint = config.RemovalDiagnosticPrint;
+        Program.MagicTemperatures = config.MagicTemperatures;
+        Program.magicindex = config.MagicIndex;
 
-        DAVectorSponge.maxNcentperNode = config.MaxNcentPerNode;
-        DAVectorSponge.maxNcentTOTAL = config.MaxNcentTotal;
-        DAVectorSponge.maxNcentCreated = config.maxNcentCreated;
-        DAVectorSponge.targetNcentperPoint = config.TargetNcentPerPoint;
-        DAVectorSponge.targetMinimumNcentperPoint = config.TargetMinimumNcentPerPoint;
-        DAVectorSponge.maxNcentperPoint = config.MaxNcentPerPoint;
+        Program.maxNcentperNode = config.MaxNcentPerNode;
+        Program.maxNcentTOTAL = config.MaxNcentTotal;
+        Program.maxNcentCreated = config.maxNcentCreated;
+        Program.targetNcentperPoint = config.TargetNcentPerPoint;
+        Program.targetMinimumNcentperPoint = config.TargetMinimumNcentPerPoint;
+        Program.maxNcentperPoint = config.MaxNcentPerPoint;
 
-        DAVectorSponge.MaxIntegerComponents = config.MaxIntegerComponents;
-        DAVectorSponge.MaxDoubleComponents = config.MaxDoubleComponents;
-        DAVectorSponge.MaxMPITransportBuffer = config.MaxMPITransportBuffer;
-        DAVectorSponge.MaxNumberAccumulationsperNode = config.MaxNumberAccumulationsPerNode;
-        DAVectorSponge.MaxTransportedClusterStorage = config.MaxTransportedClusterStorage;
+        Program.MaxIntegerComponents = config.MaxIntegerComponents;
+        Program.MaxDoubleComponents = config.MaxDoubleComponents;
+        Program.MaxMPITransportBuffer = config.MaxMPITransportBuffer;
+        Program.MaxNumberAccumulationsperNode = config.MaxNumberAccumulationsPerNode;
+        Program.MaxTransportedClusterStorage = config.MaxTransportedClusterStorage;
 
-        DAVectorSponge.ExpArgumentCut1 = config.ExpArgumentCut1;
-        DAVectorSponge.ExpArgumentCut2 = config.ExpArgumentCut2;
-        DAVectorSponge.ExpArgumentCut3 = config.ExpArgumentCut3;
-        DAVectorSponge.Tminimum = config.Tminimum;
+        Program.ExpArgumentCut1 = config.ExpArgumentCut1;
+        Program.ExpArgumentCut2 = config.ExpArgumentCut2;
+        Program.ExpArgumentCut3 = config.ExpArgumentCut3;
+        Program.Tminimum = config.Tminimum;
 
-        DAVectorSponge.InitialNcent = config.InitialNcent;
-        DAVectorSponge.MinimumCountforCluster_C_k = config.MinimumCountForClusterCk;
-        DAVectorSponge.MinimumCountforCluster_C_kwithSponge = config.MinimumCountForClusterCkWithSponge;
-        DAVectorSponge.MinimumCountforCluster_Points = config.MinimuCountForClusterPoints;
-        DAVectorSponge.CountforCluster_C_ktobezero = config.CountForClusterCkToBeZero;
-        DAVectorSponge.AddSpongeScaledWidthSquared = config.AddSpongeScaledWidthSquared;
+        Program.InitialNcent = config.InitialNcent;
+        Program.MinimumCountforCluster_C_k = config.MinimumCountForClusterCk;
+        Program.MinimumCountforCluster_C_kwithSponge = config.MinimumCountForClusterCkWithSponge;
+        Program.MinimumCountforCluster_Points = config.MinimuCountForClusterPoints;
+        Program.CountforCluster_C_ktobezero = config.CountForClusterCkToBeZero;
+        Program.AddSpongeScaledWidthSquared = config.AddSpongeScaledWidthSquared;
 
-        DAVectorSponge.InitialCoolingFactor = config.InitialCoolingFactor;
-        DAVectorSponge.InitialCoolingFactor1 = config.InitialCoolingFactor1;
-        DAVectorSponge.InitialCoolingFactor2 = config.InitialCoolingFactor2;
-        DAVectorSponge.FineCoolingFactor = config.FineCoolingFactor;
-        DAVectorSponge.FineCoolingFactor1 = config.FineCoolingFactor1;
-        DAVectorSponge.FineCoolingFactor2 = config.FineCoolingFactor2;
-        DAVectorSponge.CoolingTemperatureSwitch = config.CoolingTemperatureSwitch;
-        DAVectorSponge.Waititerations = config.WaitIterations;
-        DAVectorSponge.Waititerations_Converge = config.WaitIterationsConverge;
+        Program.InitialCoolingFactor = config.InitialCoolingFactor;
+        Program.InitialCoolingFactor1 = config.InitialCoolingFactor1;
+        Program.InitialCoolingFactor2 = config.InitialCoolingFactor2;
+        Program.FineCoolingFactor = config.FineCoolingFactor;
+        Program.FineCoolingFactor1 = config.FineCoolingFactor1;
+        Program.FineCoolingFactor2 = config.FineCoolingFactor2;
+        Program.CoolingTemperatureSwitch = config.CoolingTemperatureSwitch;
+        Program.Waititerations = config.WaitIterations;
+        Program.Waititerations_Converge = config.WaitIterationsConverge;
 
-        DAVectorSponge.Iterationatend = config.IterationAtEnd;
-        DAVectorSponge.ConvergenceLoopLimit = config.ConvergenceLoopLimit;
+        Program.Iterationatend = config.IterationAtEnd;
+        Program.ConvergenceLoopLimit = config.ConvergenceLoopLimit;
 
-        DAVectorSponge.FreezingLimit = config.FreezingLimit;
-        DAVectorSponge.Malpha_MaxChange = config.MalphaMaxChange;
-        DAVectorSponge.Malpha_MaxChange1 = config.MalphaMaxChange1;
-        DAVectorSponge.MaxNumberSplitClusters = config.MaxNumberSplitClusters;
-        DAVectorSponge.ConvergeIntermediateClusters = config.ConvergeIntermediateClusters;
-        DAVectorSponge.ToosmalltoSplit = config.TooSmallToSplit;
-        DAVectorSponge.MinimumScaledWidthsquaredtosplit = config.MinimumScaledWidthSquaredToSplit;
-        DAVectorSponge.ScaledSquaredDistanceatClosenessTest = config.ScaledSquaredDistanceAtClosenessTest;
+        Program.FreezingLimit = config.FreezingLimit;
+        Program.Malpha_MaxChange = config.MalphaMaxChange;
+        Program.Malpha_MaxChange1 = config.MalphaMaxChange1;
+        Program.MaxNumberSplitClusters = config.MaxNumberSplitClusters;
+        Program.ConvergeIntermediateClusters = config.ConvergeIntermediateClusters;
+        Program.ToosmalltoSplit = config.TooSmallToSplit;
+        Program.MinimumScaledWidthsquaredtosplit = config.MinimumScaledWidthSquaredToSplit;
+        Program.ScaledSquaredDistanceatClosenessTest = config.ScaledSquaredDistanceAtClosenessTest;
 
-        DAVectorSponge.ClusterLimitforDistribution = config.ClusterLimitForDistribution;
-        DAVectorSponge.TemperatureLimitforDistribution = config.TemperatureLimitForDistribution;
-        DAVectorSponge.TemperatureforClosenessTest = config.TemperatureForClosenessTest;
+        Program.ClusterLimitforDistribution = config.ClusterLimitForDistribution;
+        Program.TemperatureLimitforDistribution = config.TemperatureLimitForDistribution;
+        Program.TemperatureforClosenessTest = config.TemperatureForClosenessTest;
 
         DAVectorUtility.DebugPrintOption = config.DebugPrintOption;
         DAVectorUtility.ConsoleDebugOutput = config.ConsoleDebugOutput;
@@ -1276,24 +1278,24 @@ public class DAVectorSponge
 	public static void WriteControlFile()
 	{
 
-	    config.SpongeTemperature1 = DAVectorSponge.SpongeTemperature1;
-	    config.SpongeTemperature2 = DAVectorSponge.SpongeTemperature2;
-	    config.RestartTemperature = DAVectorSponge.RestartTemperature;
+	    config.SpongeTemperature1 = Program.SpongeTemperature1;
+	    config.SpongeTemperature2 = Program.SpongeTemperature2;
+	    config.RestartTemperature = Program.RestartTemperature;
 
-	    config.NumberDataPoints = DAVectorSponge.NumberDataPoints;
-	    config.ProcessingOption = DAVectorSponge.ProcessingOption;
-	    config.MaxNcentPerNode = DAVectorSponge.maxNcentperNode;
+	    config.NumberDataPoints = Program.NumberDataPoints;
+	    config.ProcessingOption = Program.ProcessingOption;
+	    config.MaxNcentPerNode = Program.maxNcentperNode;
 	    config.ThreadCount = DAVectorUtility.ThreadCount;
 	    config.NodeCount = DAVectorUtility.NodeCount;
-	    config.TooSmallToSplit = DAVectorSponge.ToosmalltoSplit;
-	    config.WaitIterations = DAVectorSponge.Waititerations;
-	    config.InitialCoolingFactor = DAVectorSponge.InitialCoolingFactor;
-	    config.FineCoolingFactor = DAVectorSponge.FineCoolingFactor;
-	    config.MalphaMaxChange = DAVectorSponge.Malpha_MaxChange;
-	    config.IterationAtEnd = DAVectorSponge.Iterationatend;
-	    config.ConvergenceLoopLimit = DAVectorSponge.ConvergenceLoopLimit;
-	    config.FreezingLimit = DAVectorSponge.FreezingLimit;
-	    config.ConvergeIntermediateClusters = DAVectorSponge.ConvergeIntermediateClusters;
+	    config.TooSmallToSplit = Program.ToosmalltoSplit;
+	    config.WaitIterations = Program.Waititerations;
+	    config.InitialCoolingFactor = Program.InitialCoolingFactor;
+	    config.FineCoolingFactor = Program.FineCoolingFactor;
+	    config.MalphaMaxChange = Program.Malpha_MaxChange;
+	    config.IterationAtEnd = Program.Iterationatend;
+	    config.ConvergenceLoopLimit = Program.ConvergenceLoopLimit;
+	    config.FreezingLimit = Program.FreezingLimit;
+	    config.ConvergeIntermediateClusters = Program.ConvergeIntermediateClusters;
 	    config.DebugPrintOption = DAVectorUtility.DebugPrintOption;
 	    config.ConsoleDebugOutput = DAVectorUtility.ConsoleDebugOutput;
 	} 
@@ -1347,319 +1349,319 @@ public class DAVectorSponge
 
 	public static void SetupDA()
 	{
-		if (!DAVectorSponge.DoBasicDA)
+		if (!Program.DoBasicDA)
 		{
 			return;
 		}
 
 		//  Avoid Distributed Execution
-		DAVectorSponge.TemperatureLimitforDistribution = -1.0;
-		DAVectorSponge.ClusterLimitforDistribution = -1;
+		Program.TemperatureLimitforDistribution = -1.0;
+		Program.ClusterLimitforDistribution = -1;
 
-		DAVectorSponge.RW3DData = 3; // Read and Write Plotviz
+		Program.RW3DData = 3; // Read and Write Plotviz
 
-		DAVectorSponge.CalculateEigenvaluesfromMatrix = false;
-		DAVectorSponge.UseSponge = false;
-		DAVectorSponge.ContinuousClustering = true;
-		DAVectorSponge.SigmaMethod = 0;
+		Program.CalculateEigenvaluesfromMatrix = false;
+		Program.UseSponge = false;
+		Program.ContinuousClustering = true;
+		Program.SigmaMethod = 0;
 
-		DAVectorSponge.maxNcentperNode = 140;
-		DAVectorSponge.maxNcentperNode = 10;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetMinimumNcentperPoint = 8;
-		DAVectorSponge.InitialNcent = 1;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentTOTALforParallelism_DA = DAVectorSponge.maxNcentTOTAL;
-		DAVectorSponge.maxNcentCreated = 500 * DAVectorSponge.maxNcentperNode;
+		Program.maxNcentperNode = 140;
+		Program.maxNcentperNode = 10;
+		Program.targetNcentperPoint = Program.maxNcentperNode;
+		Program.maxNcentperPoint = Program.maxNcentperNode;
+		Program.targetMinimumNcentperPoint = 8;
+		Program.InitialNcent = 1;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentTOTALforParallelism_DA = Program.maxNcentTOTAL;
+		Program.maxNcentCreated = 500 * Program.maxNcentperNode;
 
-		DAVectorSponge.NumberDataPoints = 200000;
-		DAVectorSponge.StartPointPositiononInputLine = 0;
-		DAVectorSponge.ParameterVectorDimension = 74;
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
+		Program.NumberDataPoints = 200000;
+		Program.StartPointPositiononInputLine = 0;
+		Program.ParameterVectorDimension = 74;
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = -1;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
 
-		DAVectorSponge.MagicTemperatures[0] = -1.0;
-		DAVectorSponge.MagicTemperatures[1] = -1.0;
-		DAVectorSponge.MagicTemperatures[2] = -1.0;
-		DAVectorSponge.MagicTemperatures[3] = -1.0;
-		DAVectorSponge.MagicTemperatures[4] = -1.0;
+		Program.MagicTemperatures[0] = -1.0;
+		Program.MagicTemperatures[1] = -1.0;
+		Program.MagicTemperatures[2] = -1.0;
+		Program.MagicTemperatures[3] = -1.0;
+		Program.MagicTemperatures[4] = -1.0;
 
-		DAVectorSponge.Iterationatend = 800;
-		DAVectorSponge.ConvergenceLoopLimit = 400;
-		DAVectorSponge.Malpha_MaxChange = 0.005;
-		DAVectorSponge.Malpha_MaxChange1 = 0.0005;
-		DAVectorSponge.YChangeSquared = 0.00000001;
-		DAVectorSponge.ExpArgumentCut1 = 20.0;
-		DAVectorSponge.ExpArgumentCut2 = 40.0;
-		DAVectorSponge.ExpArgumentCut2 = 20.0;
-		DAVectorSponge.Waititerations = 1;
-		DAVectorSponge.Waititerations_Converge = 4;
-		DAVectorSponge.MinimumCountforCluster_Points = -1;
-		DAVectorSponge.InitialCoolingFactor1 = 0.95;
-		DAVectorSponge.FineCoolingFactor1 = 0.995;
-		DAVectorSponge.InitialCoolingFactor2 = 0.95;
-		DAVectorSponge.FineCoolingFactor2 = 0.995;
-		DAVectorSponge.MinimumScaledWidthsquaredtosplit = -1.0;
-		DAVectorSponge.ScaledSquaredDistanceatClosenessTest = 0.01;
-		DAVectorSponge.TemperatureforClosenessTest = 0.01;
-		DAVectorSponge.MinimumCountforCluster_C_k = 8.0; // Remove clusters with fewer points than this (based on C_k_) (This only used for converged clusters)
-		DAVectorSponge.MinimumCountforCluster_Points = 10; // Remove clusters with fewer points than this (based on assigned points)
+		Program.Iterationatend = 800;
+		Program.ConvergenceLoopLimit = 400;
+		Program.Malpha_MaxChange = 0.005;
+		Program.Malpha_MaxChange1 = 0.0005;
+		Program.YChangeSquared = 0.00000001;
+		Program.ExpArgumentCut1 = 20.0;
+		Program.ExpArgumentCut2 = 40.0;
+		Program.ExpArgumentCut2 = 20.0;
+		Program.Waititerations = 1;
+		Program.Waititerations_Converge = 4;
+		Program.MinimumCountforCluster_Points = -1;
+		Program.InitialCoolingFactor1 = 0.95;
+		Program.FineCoolingFactor1 = 0.995;
+		Program.InitialCoolingFactor2 = 0.95;
+		Program.FineCoolingFactor2 = 0.995;
+		Program.MinimumScaledWidthsquaredtosplit = -1.0;
+		Program.ScaledSquaredDistanceatClosenessTest = 0.01;
+		Program.TemperatureforClosenessTest = 0.01;
+		Program.MinimumCountforCluster_C_k = 8.0; // Remove clusters with fewer points than this (based on C_k_) (This only used for converged clusters)
+		Program.MinimumCountforCluster_Points = 10; // Remove clusters with fewer points than this (based on assigned points)
 
-		DAVectorSponge.MaxNumberSplitClusters = 16;
-		DAVectorSponge.ToosmalltoSplit = 200.0;
-		DAVectorSponge.eigenvaluechange = 0.001; // Limit 1 on Eigenvalue Changes
-		DAVectorSponge.eigenvectorchange = 0.001; // Limit 2 on Eigenvalue Changes
+		Program.MaxNumberSplitClusters = 16;
+		Program.ToosmalltoSplit = 200.0;
+		Program.eigenvaluechange = 0.001; // Limit 1 on Eigenvalue Changes
+		Program.eigenvectorchange = 0.001; // Limit 2 on Eigenvalue Changes
 
-		DAVectorSponge.UseTriangleInequality_DA = 1;
-		DAVectorSponge.OldCenterOption_DA = -1;
-		DAVectorSponge.maxNcentTOTALforParallelism_DA = 20; // Use Center parallelism when this limit hit
-		DAVectorSponge.TriangleInequality_Delta1_old_DA = 0.1; // Test for center change and old lower bounds (normalized by radius)
-		DAVectorSponge.TriangleInequality_Delta1_current_DA = 0.1; // Test for Center change and current lower bounds (normalized by radius)
-		DAVectorSponge.MaxClusterLBsperPoint_DA = 140; // Maximum number of Lower Bound values
-		DAVectorSponge.MaxCentersperCenter_DA = 200; // Maximum number of Centers in Center Difference Array
+		Program.UseTriangleInequality_DA = 1;
+		Program.OldCenterOption_DA = -1;
+		Program.maxNcentTOTALforParallelism_DA = 20; // Use Center parallelism when this limit hit
+		Program.TriangleInequality_Delta1_old_DA = 0.1; // Test for center change and old lower bounds (normalized by radius)
+		Program.TriangleInequality_Delta1_current_DA = 0.1; // Test for Center change and current lower bounds (normalized by radius)
+		Program.MaxClusterLBsperPoint_DA = 140; // Maximum number of Lower Bound values
+		Program.MaxCentersperCenter_DA = 200; // Maximum number of Centers in Center Difference Array
 
-		DAVectorSponge.Tminimum = -20000.0;
+		Program.Tminimum = -20000.0;
 
-		DAVectorSponge.PrintInterval = 5;
-		DAVectorSponge.ClusterPrintNumber = 10;
+		Program.PrintInterval = 5;
+		Program.ClusterPrintNumber = 10;
 		DAVectorUtility.DebugPrintOption = 2;
 
 		/* 85399 54D
-		DAVectorSponge.maxNcentperNode = 100;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetMinimumNcentperPoint = 4;
-		DAVectorSponge.InitialNcent = 1;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentTOTALforParallelism_DA = DAVectorSponge.maxNcentTOTAL;
-		DAVectorSponge.maxNcentCreated = 500 * DAVectorSponge.maxNcentperNode;
+		Program.maxNcentperNode = 100;
+		Program.targetNcentperPoint = Program.maxNcentperNode;
+		Program.maxNcentperPoint = Program.maxNcentperNode;
+		Program.targetMinimumNcentperPoint = 4;
+		Program.InitialNcent = 1;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentTOTALforParallelism_DA = Program.maxNcentTOTAL;
+		Program.maxNcentCreated = 500 * Program.maxNcentperNode;
 
-		DAVectorSponge.NumberDataPoints = 85399;
-		DAVectorSponge.StartPointPositiononInputLine = 0;
-		DAVectorSponge.ParameterVectorDimension = 54;
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
-		DAVectorSponge.MaxNumberSplitClusters = 4;
+		Program.NumberDataPoints = 85399;
+		Program.StartPointPositiononInputLine = 0;
+		Program.ParameterVectorDimension = 54;
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = -1;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
+		Program.MaxNumberSplitClusters = 4;
 		85399 54D */
 
 
 		/*  Cmeans FLAME Test
-		DAVectorSponge.MaxNumberSplitClusters = 1;
-		DAVectorSponge.UseTriangleInequality_DA = 1;
+		Program.MaxNumberSplitClusters = 1;
+		Program.UseTriangleInequality_DA = 1;
 
-		DAVectorSponge.maxNcentperNode = 5;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetMinimumNcentperPoint = 5;
-		DAVectorSponge.InitialNcent = 1;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentTOTALforParallelism_DA = DAVectorSponge.maxNcentTOTAL;
-		DAVectorSponge.maxNcentCreated = 500 * DAVectorSponge.maxNcentperNode;
+		Program.maxNcentperNode = 5;
+		Program.targetNcentperPoint = Program.maxNcentperNode;
+		Program.maxNcentperPoint = Program.maxNcentperNode;
+		Program.targetMinimumNcentperPoint = 5;
+		Program.InitialNcent = 1;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentTOTALforParallelism_DA = Program.maxNcentTOTAL;
+		Program.maxNcentCreated = 500 * Program.maxNcentperNode;
 
-		DAVectorSponge.NumberDataPoints = 22014;
-		DAVectorSponge.StartPointPositiononInputLine = 1;
-		DAVectorSponge.ParameterVectorDimension = 4;
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
+		Program.NumberDataPoints = 22014;
+		Program.StartPointPositiononInputLine = 1;
+		Program.ParameterVectorDimension = 4;
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = -1;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
 
-		DAVectorSponge.UseTriangleInequality_DA = 0;
+		Program.UseTriangleInequality_DA = 0;
 		*/
 		/* Lung
-		DAVectorSponge.MaxNumberSplitClusters = 1;
-		DAVectorSponge.UseTriangleInequality_DA = 1;
+		Program.MaxNumberSplitClusters = 1;
+		Program.UseTriangleInequality_DA = 1;
 
-		DAVectorSponge.maxNcentperNode = 20;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetMinimumNcentperPoint = 5;
-		DAVectorSponge.InitialNcent = 1;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentTOTALforParallelism_DA = DAVectorSponge.maxNcentTOTAL;
-		DAVectorSponge.maxNcentCreated = 500 * DAVectorSponge.maxNcentperNode;
+		Program.maxNcentperNode = 20;
+		Program.targetNcentperPoint = Program.maxNcentperNode;
+		Program.maxNcentperPoint = Program.maxNcentperNode;
+		Program.targetMinimumNcentperPoint = 5;
+		Program.InitialNcent = 1;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentTOTALforParallelism_DA = Program.maxNcentTOTAL;
+		Program.maxNcentCreated = 500 * Program.maxNcentperNode;
 
-		DAVectorSponge.NumberDataPoints = 20054;
-		DAVectorSponge.StartPointPositiononInputLine = 0;
-		DAVectorSponge.ParameterVectorDimension = 4;
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
+		Program.NumberDataPoints = 20054;
+		Program.StartPointPositiononInputLine = 0;
+		Program.ParameterVectorDimension = 4;
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = -1;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
 
-		DAVectorSponge.UseTriangleInequality_DA = 1;
+		Program.UseTriangleInequality_DA = 1;
 		Lung */ 
 
 		//  1000 point Dating Run
-		DAVectorSponge.MaxNumberSplitClusters = 4;
-		DAVectorSponge.Waititerations = 4;
-		DAVectorSponge.InitialCoolingFactor1 = 0.995;
-		DAVectorSponge.FineCoolingFactor1 = 0.9995;
-		DAVectorSponge.InitialCoolingFactor2 = 0.995;
-		DAVectorSponge.FineCoolingFactor2 = 0.9995;
-		DAVectorSponge.ToosmalltoSplit = 15.0;
+		Program.MaxNumberSplitClusters = 4;
+		Program.Waititerations = 4;
+		Program.InitialCoolingFactor1 = 0.995;
+		Program.FineCoolingFactor1 = 0.9995;
+		Program.InitialCoolingFactor2 = 0.995;
+		Program.FineCoolingFactor2 = 0.9995;
+		Program.ToosmalltoSplit = 15.0;
 
-		DAVectorSponge.maxNcentperNode = 30;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetMinimumNcentperPoint = 30;
-		DAVectorSponge.InitialNcent = 1;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentTOTALforParallelism_DA = DAVectorSponge.maxNcentTOTAL;
-		DAVectorSponge.maxNcentCreated = 500 * DAVectorSponge.maxNcentperNode;
+		Program.maxNcentperNode = 30;
+		Program.targetNcentperPoint = Program.maxNcentperNode;
+		Program.maxNcentperPoint = Program.maxNcentperNode;
+		Program.targetMinimumNcentperPoint = 30;
+		Program.InitialNcent = 1;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentTOTALforParallelism_DA = Program.maxNcentTOTAL;
+		Program.maxNcentCreated = 500 * Program.maxNcentperNode;
 
-		DAVectorSponge.NumberDataPoints = 1000;
-		DAVectorSponge.StartPointPositiononInputLine = 1;
-		DAVectorSponge.ParameterVectorDimension = 3;
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
+		Program.NumberDataPoints = 1000;
+		Program.StartPointPositiononInputLine = 1;
+		Program.ParameterVectorDimension = 3;
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = -1;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
 
-		DAVectorSponge.UseTriangleInequality_DA = 0;
+		Program.UseTriangleInequality_DA = 0;
 
 	} // End SetupDA
 
 	public static void SetupKmeans()
 	{
-		if (!DAVectorSponge.DoKmeans)
+		if (!Program.DoKmeans)
 		{
 			return;
 		}
 
-		DAVectorSponge.RW3DData = 3; // Read and Write Plotviz
+		Program.RW3DData = 3; // Read and Write Plotviz
 
 		//  Avoid Distributed Execution
-		DAVectorSponge.TemperatureLimitforDistribution = -1.0;
-		DAVectorSponge.ClusterLimitforDistribution = -1;
-		DAVectorSponge.SelectedInputLabel = 0;
+		Program.TemperatureLimitforDistribution = -1.0;
+		Program.ClusterLimitforDistribution = -1;
+		Program.SelectedInputLabel = 0;
 
-		DAVectorSponge.CalculateEigenvaluesfromMatrix = false;
-		DAVectorSponge.UseSponge = false;
-		DAVectorSponge.ContinuousClustering = false;
-		DAVectorSponge.SigmaMethod = 0;
-		DAVectorSponge.targetNcentperPoint = 124;
+		Program.CalculateEigenvaluesfromMatrix = false;
+		Program.UseSponge = false;
+		Program.ContinuousClustering = false;
+		Program.SigmaMethod = 0;
+		Program.targetNcentperPoint = 124;
 
-		DAVectorSponge.maxNcentperNode = 140;
-		DAVectorSponge.maxNcentperNode = 10;
-		DAVectorSponge.InitialNcent = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetMinimumNcentperPoint = 8;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentCreated = 200;
-		DAVectorSponge.maxNcentTOTALforParallelism_Kmeans = 20;
+		Program.maxNcentperNode = 140;
+		Program.maxNcentperNode = 10;
+		Program.InitialNcent = Program.maxNcentperNode;
+		Program.targetNcentperPoint = Program.maxNcentperNode;
+		Program.maxNcentperPoint = Program.maxNcentperNode;
+		Program.targetMinimumNcentperPoint = 8;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentCreated = 200;
+		Program.maxNcentTOTALforParallelism_Kmeans = 20;
 
-		DAVectorSponge.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
-		DAVectorSponge.UseTriangleInequality_Kmeans = 1; // 0 is Pure K means
+		Program.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
+		Program.UseTriangleInequality_Kmeans = 1; // 0 is Pure K means
 
-		DAVectorSponge.MaxClusterLBsperPoint_Kmeans = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.MaxCentersperCenter_Kmeans = DAVectorSponge.maxNcentperNode;
+		Program.MaxClusterLBsperPoint_Kmeans = Program.maxNcentperNode;
+		Program.MaxCentersperCenter_Kmeans = Program.maxNcentperNode;
 
-		DAVectorSponge.NumberDataPoints = 200000;
-		DAVectorSponge.ClusterIndexonInputLine = 75;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.ParameterVectorDimension = 74;
-		DAVectorSponge.StartPointPositiononInputLine = 0;
-		DAVectorSponge.FirstClusterValue = 0;
+		Program.NumberDataPoints = 200000;
+		Program.ClusterIndexonInputLine = 75;
+		Program.ClusterIndexonInputLine = -1;
+		Program.ParameterVectorDimension = 74;
+		Program.StartPointPositiononInputLine = 0;
+		Program.FirstClusterValue = 0;
 
-		DAVectorSponge.KmeansCenterChangeStop = 0.00001;
-		DAVectorSponge.KmeansIterationLimit = 1000;
-		DAVectorSponge.TriangleInequality_Delta1_old_Kmeans = 0.2;
-		DAVectorSponge.TriangleInequality_Delta1_current_Kmeans = 0.2;
+		Program.KmeansCenterChangeStop = 0.00001;
+		Program.KmeansIterationLimit = 1000;
+		Program.TriangleInequality_Delta1_old_Kmeans = 0.2;
+		Program.TriangleInequality_Delta1_current_Kmeans = 0.2;
 
         // Dating-1000-1
-        DAVectorSponge.ContinuousClustering = true;
-        DAVectorSponge.InitialNcent = 1;
-        DAVectorSponge.maxNcentperNode = 3;
-        DAVectorSponge.targetNcentperPoint = DAVectorSponge.maxNcentperNode;
-        DAVectorSponge.maxNcentperPoint = DAVectorSponge.maxNcentperNode;
-        DAVectorSponge.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
-        DAVectorSponge.NumberDataPoints = 1000;
-        DAVectorSponge.ParameterVectorDimension = 3;
+        Program.ContinuousClustering = true;
+        Program.InitialNcent = 1;
+        Program.maxNcentperNode = 3;
+        Program.targetNcentperPoint = Program.maxNcentperNode;
+        Program.maxNcentperPoint = Program.maxNcentperNode;
+        Program.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
+        Program.NumberDataPoints = 1000;
+        Program.ParameterVectorDimension = 3;
 
 		// Small Crandall Data
-		/*DAVectorSponge.RW3DData = -1;
-		DAVectorSponge.ParameterVectorDimension = 2048;
-		DAVectorSponge.StartPointPositiononInputLine = 4;
-		DAVectorSponge.ClusterCountOutput = -1; // No output
+		/*Program.RW3DData = -1;
+		Program.ParameterVectorDimension = 2048;
+		Program.StartPointPositiononInputLine = 4;
+		Program.ClusterCountOutput = -1; // No output
 
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
-		DAVectorSponge.FirstClusterValue = -1;
+		Program.SelectedInputLabel = 0;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
+		Program.FirstClusterValue = -1;
 
-		DAVectorSponge.NumberDataPoints = 76800;
+		Program.NumberDataPoints = 76800;
 
-		DAVectorSponge.maxNcentperNode = 3200;
-		DAVectorSponge.InitialNcent = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.targetNcentperPoint = 1;
-		DAVectorSponge.maxNcentperPoint = 1;
-		DAVectorSponge.targetMinimumNcentperPoint = 1;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentCreated = DAVectorSponge.maxNcentperNode;
-		DAVectorSponge.maxNcentTOTALforParallelism_Kmeans = 20;
+		Program.maxNcentperNode = 3200;
+		Program.InitialNcent = Program.maxNcentperNode;
+		Program.targetNcentperPoint = 1;
+		Program.maxNcentperPoint = 1;
+		Program.targetMinimumNcentperPoint = 1;
+		Program.maxNcentTOTAL = Program.maxNcentperNode;
+		Program.maxNcentCreated = Program.maxNcentperNode;
+		Program.maxNcentTOTALforParallelism_Kmeans = 20;
 
-		DAVectorSponge.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
-		DAVectorSponge.ClusterIndexonInputLine = -3;
-		DAVectorSponge.OldCenterOption_Kmeans = 100;
-		DAVectorSponge.DoBackwardFacingTests_Kmeans = false;
+		Program.UseTriangleInequality_Kmeans = 0; // 0 is Pure K means
+		Program.ClusterIndexonInputLine = -3;
+		Program.OldCenterOption_Kmeans = 100;
+		Program.DoBackwardFacingTests_Kmeans = false;
 
 		int CutBounds1 = 8;
 		int CutBounds2 = 8;
-		DAVectorSponge.MaxClusterLBsperPoint_Kmeans = DAVectorSponge.maxNcentperNode / CutBounds1;
-		DAVectorSponge.MaxCentersperCenter_Kmeans = DAVectorSponge.maxNcentperNode / CutBounds2;*/
+		Program.MaxClusterLBsperPoint_Kmeans = Program.maxNcentperNode / CutBounds1;
+		Program.MaxCentersperCenter_Kmeans = Program.maxNcentperNode / CutBounds2;*/
 
 		/*  Cmeans/Flame
-		DAVectorSponge.NumberDataPoints = 22014;
-		DAVectorSponge.StartPointPositiononInputLine = 1;
-		DAVectorSponge.ParameterVectorDimension = 4;
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = 5;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
-		DAVectorSponge.FirstClusterValue = 1;
+		Program.NumberDataPoints = 22014;
+		Program.StartPointPositiononInputLine = 1;
+		Program.ParameterVectorDimension = 4;
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = 5;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
+		Program.FirstClusterValue = 1;
 
 
-		DAVectorSponge.InitialNcent = 5;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.InitialNcent;
-		DAVectorSponge.maxNcentperNode = DAVectorSponge.InitialNcent;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.InitialNcent;
-		DAVectorSponge.maxNcentTOTALforParallelism_Kmeans = DAVectorSponge.InitialNcent + 1;
-		DAVectorSponge.maxNcentCreated = DAVectorSponge.InitialNcent;
+		Program.InitialNcent = 5;
+		Program.targetNcentperPoint = Program.InitialNcent;
+		Program.maxNcentperNode = Program.InitialNcent;
+		Program.maxNcentTOTAL = Program.InitialNcent;
+		Program.maxNcentTOTALforParallelism_Kmeans = Program.InitialNcent + 1;
+		Program.maxNcentCreated = Program.InitialNcent;
 
-		DAVectorSponge.UseTriangleInequality_Kmeans = 0;
+		Program.UseTriangleInequality_Kmeans = 0;
 		*/
 
 		/* Lung Data
 
-		DAVectorSponge.InitialNcent = 100;
-		DAVectorSponge.targetNcentperPoint = DAVectorSponge.InitialNcent;
-		DAVectorSponge.maxNcentperNode = DAVectorSponge.InitialNcent;
-		DAVectorSponge.maxNcentTOTAL = DAVectorSponge.InitialNcent;
-		DAVectorSponge.maxNcentTOTALforParallelism_Kmeans = DAVectorSponge.InitialNcent + 1;
-		DAVectorSponge.maxNcentCreated = DAVectorSponge.InitialNcent;
+		Program.InitialNcent = 100;
+		Program.targetNcentperPoint = Program.InitialNcent;
+		Program.maxNcentperNode = Program.InitialNcent;
+		Program.maxNcentTOTAL = Program.InitialNcent;
+		Program.maxNcentTOTALforParallelism_Kmeans = Program.InitialNcent + 1;
+		Program.maxNcentCreated = Program.InitialNcent;
 
-		DAVectorSponge.NumberDataPoints = 85399;
-		DAVectorSponge.StartPointPositiononInputLine = 0;
-		DAVectorSponge.ParameterVectorDimension = 54;
+		Program.NumberDataPoints = 85399;
+		Program.StartPointPositiononInputLine = 0;
+		Program.ParameterVectorDimension = 54;
 
-		DAVectorSponge.SelectedInputLabel = 0;
-		DAVectorSponge.ClusterIndexonInputLine = -1;
-		DAVectorSponge.InputFileType = 0;
-		DAVectorSponge.Replicate = 1;
-		DAVectorSponge.MaxNumberSplitClusters = 4;
-		DAVectorSponge.RW3DData = 3;   // Read and Write Plotviz
+		Program.SelectedInputLabel = 0;
+		Program.ClusterIndexonInputLine = -1;
+		Program.InputFileType = 0;
+		Program.Replicate = 1;
+		Program.MaxNumberSplitClusters = 4;
+		Program.RW3DData = 3;   // Read and Write Plotviz
 		*/
 
 		/* Read Plot file
-		DAVectorSponge.ParameterVectorDimension = 3;
-		DAVectorSponge.StartPointPositiononInputLine = 1;
+		Program.ParameterVectorDimension = 3;
+		Program.StartPointPositiononInputLine = 1;
 		*/
 
 	} // End SetupKmeans()
@@ -1667,7 +1669,7 @@ public class DAVectorSponge
 	public static void SetupLCMS()
 	{ // Set up LC MS 2D analysis
 
-		if (!DAVectorSponge.DoLCMS)
+		if (!Program.DoLCMS)
 		{
 			return;
 		}

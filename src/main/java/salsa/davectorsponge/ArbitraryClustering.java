@@ -57,7 +57,7 @@ public class ArbitraryClustering
 				continue;
 			}
 			this.ClusterIDtoIndex[RawClusterIndex]++;
-			if (DAVectorSponge.GoldenPeaks.PointstoClusterIDs[GlobalPointIndex] >= 0)
+			if (Program.GoldenPeaks.PointstoClusterIDs[GlobalPointIndex] >= 0)
 			{
 				this.ClusterIDtoGoldenIndex[RawClusterIndex]++;
 			}
@@ -189,7 +189,7 @@ public class ArbitraryClustering
 				else
 				{ // Singletons
 					++NSingle;
-					PWHammySingle += 0.5 * DAVectorSponge.SpongeFactor * DAVectorSponge.SpongeFactor;
+					PWHammySingle += 0.5 * Program.SpongeFactor * Program.SpongeFactor;
 				}
 
 			}
@@ -320,8 +320,8 @@ public class ArbitraryClustering
 
 		Center[0] = Center[0] / PointsinCluster;
 		Center[1] = Center[1] / PointsinCluster;
-		Sigma[0] = DAVectorSponge.SigmaVectorParameters_i_[0] * Center[0];
-		Sigma[1] = DAVectorSponge.SigmaVectorParameters_i_[1];
+		Sigma[0] = Program.SigmaVectorParameters_i_[0] * Center[0];
+		Sigma[1] = Program.SigmaVectorParameters_i_[1];
 
 		for (int GlobalPointIndex = 0; GlobalPointIndex < this.NumberofPoints; GlobalPointIndex++)
 		{
@@ -456,9 +456,9 @@ public class ArbitraryClustering
 
 	public final void HistogramPeaks(int ClusterCountCut)
 	{
-		GeneralClusterOneDHistogram = new int[DAVectorSponge.ParameterVectorDimension][];
+		GeneralClusterOneDHistogram = new int[Program.ParameterVectorDimension][];
 		GeneralClusterTwoDHistogram = new int[GoldenExamination.TwoDHistogramSize];
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			GeneralClusterOneDHistogram[VectorIndex] = new int[GoldenExamination.OneDHistogramSize];
 		}
@@ -479,7 +479,7 @@ public class ArbitraryClustering
 			double[][] ThisPeakPositions = new double[this.ClusterCountsbyIndex[ThisClusterLoop]][];
 			for (int LocalPointIndex = 0; LocalPointIndex < this.ClusterCountsbyIndex[ThisClusterLoop]; LocalPointIndex++)
 			{
-				ThisPeakPositions[LocalPointIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+				ThisPeakPositions[LocalPointIndex] = new double[Program.ParameterVectorDimension];
 			}
 			int localcount = 0;
 			for (int GlobalPointIndex = 0; GlobalPointIndex < this.NumberofPoints; GlobalPointIndex++)
@@ -494,8 +494,8 @@ public class ArbitraryClustering
 			}
 
 			//  Set Sigmas
-			double[] Sigma = new double[DAVectorSponge.ParameterVectorDimension];
-			double[] Center = new double[DAVectorSponge.ParameterVectorDimension];
+			double[] Sigma = new double[Program.ParameterVectorDimension];
+			double[] Center = new double[Program.ParameterVectorDimension];
 			Box<double[]> tempRef_Center = new Box<>(Center);
 			Box<double[]> tempRef_Sigma = new Box<>(Sigma);
 			this.SetCenter_Sigma(ThisPeakPositions, TotalThisPeaks, tempRef_Center, tempRef_Sigma);
@@ -546,8 +546,8 @@ public class ArbitraryClustering
 		}
 		Center.content[0] = Center.content[0] / NumberofPoints;
 		Center.content[1] = Center.content[1] / NumberofPoints;
-		Sigma.content[0] = DAVectorSponge.SigmaVectorParameters_i_[0] * Center.content[0];
-		Sigma.content[1] = DAVectorSponge.SigmaVectorParameters_i_[1];
+		Sigma.content[0] = Program.SigmaVectorParameters_i_[0] * Center.content[0];
+		Sigma.content[1] = Program.SigmaVectorParameters_i_[1];
 
 	} // End SetCenterSigma
 

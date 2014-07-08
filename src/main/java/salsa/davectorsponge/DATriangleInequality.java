@@ -343,7 +343,7 @@ public class DATriangleInequality
         DATriangleInequality.UseParallelismoverCenters = true;
         DAVectorUtility.SALSAPrint(0, "Center Parallelism used as well as Point Parallelism in Triangle Inequality");
 
-        //  Disable Node Parallelism for Centers as this will be inherited from DAVectorSponge
+        //  Disable Node Parallelism for Centers as this will be inherited from Program
         DATriangleInequality.FakeCenterStart_Process = 0;
         DATriangleInequality.FakeCenterCount_Process = DATriangleInequality.MaxNcent_Global;
         DATriangleInequality.FakeCenterCount_Largest = DATriangleInequality.MaxNcent_Global;
@@ -482,7 +482,7 @@ public class DATriangleInequality
     { // Set up DA Clustering wrt to Triangle Equality
 
         DATriangleInequality.Ncent_TotalAvailable = ClusteringSolution.NumberAvailableActiveClusters;
-        DATriangleInequality.ExponentialxTemperature = DAVectorSponge.ExpArgumentCut4 * DATriangleInequality.Solution.Temperature;
+        DATriangleInequality.ExponentialxTemperature = Program.ExpArgumentCut4 * DATriangleInequality.Solution.Temperature;
         DATriangleInequality.ActiveSpongexIndex = -1;
         DATriangleInequality.SpongeFactor = 0.0;
         if (DATriangleInequality.Ncent_RealTotal != DATriangleInequality.Solution.Ncent_ThisNode)
@@ -497,7 +497,7 @@ public class DATriangleInequality
             {
                 DATriangleInequality.ActiveSpongexIndex = ActiveIndices;
                 DATriangleInequality.RealSpongeIndex = RealClusterIndex;
-                DATriangleInequality.SpongeFactor = DAVectorSponge.SpongeFactor * DAVectorSponge.SpongeFactor;
+                DATriangleInequality.SpongeFactor = Program.SpongeFactor * Program.SpongeFactor;
             }
             if (DATriangleInequality.CenterStatus[RealClusterIndex] < 0)
             { // Deleted Clusters are not allowed
@@ -1829,12 +1829,12 @@ public class DATriangleInequality
         }
 
         BestDistce = DATriangleInequality.LB_Current_alpha_ClusterPointer[alpha].NearestDistance;
-        double TestDistce = BestDistce * BestDistce + DAVectorSponge.ExpArgumentCut2 * DATriangleInequality.Solution.Temperature;
+        double TestDistce = BestDistce * BestDistce + Program.ExpArgumentCut2 * DATriangleInequality.Solution.Temperature;
 
         boolean toomany = false;
         for (int CentersinLBList = 0; CentersinLBList < NumberCenters.content; CentersinLBList++)
         {
-            if (CentersinLBList >= DAVectorSponge.maxNcentperPoint)
+            if (CentersinLBList >= Program.maxNcentperPoint)
             {
                 toomany = true;
                 NumberCenters.content = CentersinLBList;
@@ -1855,11 +1855,11 @@ public class DATriangleInequality
             DAVectorUtility.printAndThrowRuntimeException("No valid Centers out of " + (DATriangleInequality.Ncent_RealTotal) + " Num point list centers " + (DATriangleInequality.LB_Current_alpha_ClusterPointer[alpha].NumCenters) + " Point " + (alpha + DAVectorUtility.PointStart_Process) + " Rank " + (DAVectorUtility.MPI_Rank));
 
         }
-        if (NumberCenters.content < DAVectorSponge.targetMinimumNcentperPoint)
+        if (NumberCenters.content < Program.targetMinimumNcentperPoint)
         {
             return 1;
         }
-        if (NumberCenters.content < DAVectorSponge.targetNcentperPoint)
+        if (NumberCenters.content < Program.targetNcentperPoint)
         {
             return 2;
         }

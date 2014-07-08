@@ -24,7 +24,7 @@ public class VectorAnnealIterate
 	public static int[] ListofClusterstoSplit; // List of Clusters to Split
 	public static double[] EigsofClusterstoSplit; // List of Eigenvalues of Clusters to Split
 	public static int[] PrioritiesofClusterstoSplit; // Priorities
-	public static int Numberthatcanbesplit = 0; // Length of entries in ListofClusterstoSplit which is at most DAVectorSponge.MaxNumberSplitClusters
+	public static int Numberthatcanbesplit = 0; // Length of entries in ListofClusterstoSplit which is at most Program.MaxNumberSplitClusters
 
 	public static double Tmin; //minimal temperature
 	public static int ActualMaxNcent; // Maximum reduced if small clusters
@@ -77,57 +77,57 @@ public class VectorAnnealIterate
 		//allocate memory on first and indeed only call
 		if (!initialized)
 		{
-			if (!DAVectorSponge.ContinuousClustering)
+			if (!Program.ContinuousClustering)
 			{
 				DAVectorUtility.printAndThrowRuntimeException(" Invalid Continuous Clustering");
 
 			}
 
 			initialized = true;
-			int cachelinesize = DAVectorSponge.cachelinesize;
+			int cachelinesize = Program.cachelinesize;
 
-			ParallelClustering.runningSolution = new ClusteringSolution(DAVectorSponge.UseSponge);
-			ParallelClustering.savedSolution = new ClusteringSolution(DAVectorSponge.UseSponge);
-			ParallelClustering.bestSolution = new ClusteringSolution(DAVectorSponge.UseSponge);
+			ParallelClustering.runningSolution = new ClusteringSolution(Program.UseSponge);
+			ParallelClustering.savedSolution = new ClusteringSolution(Program.UseSponge);
+			ParallelClustering.bestSolution = new ClusteringSolution(Program.UseSponge);
 			DAVectorUtility.SALSAPrint(0, "Clustering Solutions Created");
 
-			DAVectorSponge.InitialNcent = 1; //  We only support starting with one center (plus sponge if needed)
-			if (DAVectorSponge.UseSponge)
+			Program.InitialNcent = 1; //  We only support starting with one center (plus sponge if needed)
+			if (Program.UseSponge)
 			{
-				++DAVectorSponge.InitialNcent;
+				++Program.InitialNcent;
 			}
 
-			DAVectorSponge.MaxNumberSplitClusters = Math.max(DAVectorSponge.MaxNumberSplitClusters, 1);
-			VectorAnnealIterate.ListofClusterstoSplit = new int[DAVectorSponge.MaxNumberSplitClusters];
-			VectorAnnealIterate.PrioritiesofClusterstoSplit = new int[DAVectorSponge.MaxNumberSplitClusters];
-			VectorAnnealIterate.EigsofClusterstoSplit = new double[DAVectorSponge.MaxNumberSplitClusters];
+			Program.MaxNumberSplitClusters = Math.max(Program.MaxNumberSplitClusters, 1);
+			VectorAnnealIterate.ListofClusterstoSplit = new int[Program.MaxNumberSplitClusters];
+			VectorAnnealIterate.PrioritiesofClusterstoSplit = new int[Program.MaxNumberSplitClusters];
+			VectorAnnealIterate.EigsofClusterstoSplit = new double[Program.MaxNumberSplitClusters];
 
 		} //end Initialization
 
 		//  Do EM calculation
-		VectorAnnealIterate.ActualMaxNcent = DAVectorSponge.maxNcentperNode;
+		VectorAnnealIterate.ActualMaxNcent = Program.maxNcentperNode;
 		VectorAnnealIterate.OnLastleg = false;
 
 		//  Set up Triangle Inequality
-		if (DAVectorSponge.UseTriangleInequality_DA > 0)
+		if (Program.UseTriangleInequality_DA > 0)
 		{
-			DAVectorUtility.SALSAPrint(0, "Triangle Inequality Initialized Option " + DAVectorSponge.UseTriangleInequality_DA);
-			DATriangleInequality.SetTriangleInequalityParameters(DAVectorSponge.UseTriangleInequality_DA, DAVectorSponge.MaxClusterLBsperPoint_DA, DAVectorSponge.MaxCentersperCenter_DA, DAVectorSponge.TriangleInequality_Delta1_old_DA, DAVectorSponge.TriangleInequality_Delta1_current_DA, DAVectorSponge.OldCenterOption_DA);
+			DAVectorUtility.SALSAPrint(0, "Triangle Inequality Initialized Option " + Program.UseTriangleInequality_DA);
+			DATriangleInequality.SetTriangleInequalityParameters(Program.UseTriangleInequality_DA, Program.MaxClusterLBsperPoint_DA, Program.MaxCentersperCenter_DA, Program.TriangleInequality_Delta1_old_DA, Program.TriangleInequality_Delta1_current_DA, Program.OldCenterOption_DA);
 
-			DATriangleInequality.InitializeTriangleInequality(DAVectorSponge.PointPosition, ParallelClustering.runningSolution.Y_k_i_, ParallelClustering.runningSolution.Sigma_k_i_, ParallelClustering.runningSolution.LocalStatus, ClusteringSolution.RealClusterIndices, ParallelClustering.runningSolution, DAVectorSponge.maxNcentTOTAL, DAVectorSponge.maxNcentTOTALforParallelism_DA, DAVectorSponge.ParameterVectorDimension);
+			DATriangleInequality.InitializeTriangleInequality(Program.PointPosition, ParallelClustering.runningSolution.Y_k_i_, ParallelClustering.runningSolution.Sigma_k_i_, ParallelClustering.runningSolution.LocalStatus, ClusteringSolution.RealClusterIndices, ParallelClustering.runningSolution, Program.maxNcentTOTAL, Program.maxNcentTOTALforParallelism_DA, Program.ParameterVectorDimension);
 
 			DATriangleInequality.SetExternalFunctions(ParallelClustering.runningSolution::SetClusterRadius);
 		}
 
 		// Initialize Clusters
-		if (DAVectorSponge.RestartTemperature > 0.0)
+		if (Program.RestartTemperature > 0.0)
 		{
 			// Restart from Previous Runs
 			VectorAnnealIterate.Restart();
 			ClusteringSolution.CopySolution(ParallelClustering.runningSolution, ParallelClustering.bestSolution);
 
 			//  Set up initial cluster and Sponge if it exists
-			if (DAVectorSponge.UseTriangleInequality_DA > 0)
+			if (Program.UseTriangleInequality_DA > 0)
 			{
 				for (int RealClusterIndex = 0; RealClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; RealClusterIndex++)
 				{
@@ -135,11 +135,11 @@ public class VectorAnnealIterate
 				}
 			}
 			DistributedClusteringSolution.ManageMajorSynchronization(true);
-			VectorAnnealIterate.ActualWaititerations = 10 * DAVectorSponge.Waititerations;
-			ParallelClustering.runningSolution.ActualCoolingFactor = DAVectorSponge.FineCoolingFactor1;
-			if (ParallelClustering.runningSolution.Temperature < DAVectorSponge.CoolingTemperatureSwitch)
+			VectorAnnealIterate.ActualWaititerations = 10 * Program.Waititerations;
+			ParallelClustering.runningSolution.ActualCoolingFactor = Program.FineCoolingFactor1;
+			if (ParallelClustering.runningSolution.Temperature < Program.CoolingTemperatureSwitch)
 			{
-				ParallelClustering.runningSolution.ActualCoolingFactor = DAVectorSponge.FineCoolingFactor2;
+				ParallelClustering.runningSolution.ActualCoolingFactor = Program.FineCoolingFactor2;
 			}
 		}
 		else
@@ -148,7 +148,7 @@ public class VectorAnnealIterate
 			VectorAnnealIterate.InitializeSolution(ParallelClustering.runningSolution);
 
 			//  Set up initial cluster and Sponge if it exists
-			if (DAVectorSponge.UseTriangleInequality_DA > 0)
+			if (Program.UseTriangleInequality_DA > 0)
 			{
 				for (int RealClusterIndex = 0; RealClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; RealClusterIndex++)
 				{
@@ -157,7 +157,7 @@ public class VectorAnnealIterate
 			}
 
 			DistributedClusteringSolution.ManageMajorSynchronization(true);
-			VectorAnnealIterate.ActualWaititerations = DAVectorSponge.Waititerations; // Wait this number of Temperature iterations before splitting
+			VectorAnnealIterate.ActualWaititerations = Program.Waititerations; // Wait this number of Temperature iterations before splitting
 			// This is changed in special circumstances where more convergence needed
 		}
 
@@ -184,18 +184,18 @@ public class VectorAnnealIterate
 
 		//  Proper Deterministic Annealing
 		//	Loop over EM calculations
-		while (DAVectorSponge.Refinement)
+		while (Program.Refinement)
 		{
 			VectorAnnealIterate.EMIterationCount++; // Increment EM Loop Count
 			VectorAnnealIterate.EMIterationStepCount++; // Iterate within a fixed temperature converging M and p
 
 			//  Set Cooling Factors
-			DAVectorSponge.InitialCoolingFactor = DAVectorSponge.InitialCoolingFactor1;
-			DAVectorSponge.FineCoolingFactor = DAVectorSponge.FineCoolingFactor1;
-			if (ParallelClustering.runningSolution.Temperature < DAVectorSponge.CoolingTemperatureSwitch)
+			Program.InitialCoolingFactor = Program.InitialCoolingFactor1;
+			Program.FineCoolingFactor = Program.FineCoolingFactor1;
+			if (ParallelClustering.runningSolution.Temperature < Program.CoolingTemperatureSwitch)
 			{
-				DAVectorSponge.InitialCoolingFactor = DAVectorSponge.InitialCoolingFactor2;
-				DAVectorSponge.FineCoolingFactor = DAVectorSponge.FineCoolingFactor2;
+				Program.InitialCoolingFactor = Program.InitialCoolingFactor2;
+				Program.FineCoolingFactor = Program.FineCoolingFactor2;
 			}
 
 			DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming3);
@@ -213,10 +213,10 @@ public class VectorAnnealIterate
 
 			//	Now see if we are done
 			String ReasonforConvergence = null;
-			double MvalueChange = DAVectorSponge.Malpha_MaxChange;
+			double MvalueChange = Program.Malpha_MaxChange;
 			if (VectorAnnealIterate.FinalLoop)
 			{
-				MvalueChange = DAVectorSponge.Malpha_MaxChange1;
+				MvalueChange = Program.Malpha_MaxChange1;
 			}
 			Box<String> tempRef_ReasonforConvergence = new Box<>(ReasonforConvergence);
 			convergence = VectorAnnealIterate.convergenceTest(MvalueChange, tempRef_ReasonforConvergence);
@@ -232,28 +232,28 @@ public class VectorAnnealIterate
 
 			if (VectorAnnealIterate.EMIterationStepCount1 == -2)
 			{
-				++DAVectorSponge.NumberMfailures;
+				++Program.NumberMfailures;
 			}
 			if (VectorAnnealIterate.EMIterationStepCount1 >= 0)
 			{
-				DAVectorSponge.AccumulateMvalues += VectorAnnealIterate.EMIterationStepCount1;
-				++DAVectorSponge.NumberMsuccesses;
+				Program.AccumulateMvalues += VectorAnnealIterate.EMIterationStepCount1;
+				++Program.NumberMsuccesses;
 			}
 			VectorAnnealIterate.EMIterationStepCount1 = -1;
 			if (VectorAnnealIterate.EMIterationStepCount2 == -2)
 			{
-				++DAVectorSponge.NumberYfailures;
+				++Program.NumberYfailures;
 			}
 			if (VectorAnnealIterate.EMIterationStepCount2 >= 0)
 			{
-				DAVectorSponge.AccumulateYvalues += VectorAnnealIterate.EMIterationStepCount2;
-				++DAVectorSponge.NumberYsuccesses;
+				Program.AccumulateYvalues += VectorAnnealIterate.EMIterationStepCount2;
+				++Program.NumberYsuccesses;
 			}
 			VectorAnnealIterate.EMIterationStepCount2 = -1;
 
 			// Case we are converged = 1 in middle or = 2 at end of refinement
-			DAVectorSponge.NumberIterationSteps++; // Accumulate diagnostic statistics
-			DAVectorSponge.IterationsperStepSum += VectorAnnealIterate.EMIterationStepCount;
+			Program.NumberIterationSteps++; // Accumulate diagnostic statistics
+			Program.IterationsperStepSum += VectorAnnealIterate.EMIterationStepCount;
 
 			//  Update Solution
 			DistributedClusteringSolution.ManageMajorSynchronization(true);
@@ -272,16 +272,16 @@ public class VectorAnnealIterate
 			//  Case when at end of stage (e.g. given number of clusters or of whole job). This still needs to be iterated to low Temperatures
 			if (convergence == 2 || VectorAnnealIterate.FinalLoop)
 			{
-				if (VectorAnnealIterate.countAfterFixingClusterCount < DAVectorSponge.Iterationatend) //    do Iterationatend iterations after reaching the maximum cluster#
+				if (VectorAnnealIterate.countAfterFixingClusterCount < Program.Iterationatend) //    do Iterationatend iterations after reaching the maximum cluster#
 				{
 					if (VectorAnnealIterate.countAfterFixingClusterCount == 0)
 					{ // First step of "justconverging stage"
 						HammyViolations = 0;
-						DAVectorSponge.ActualEndTemperature = ParallelClustering.runningSolution.Temperature;
+						Program.ActualEndTemperature = ParallelClustering.runningSolution.Temperature;
 						DAVectorUtility.InterimTiming();
-						DAVectorSponge.TimeatSplittingStop = DAVectorUtility.HPDuration;
-						DAVectorSponge.InitialCoolingFactor = DAVectorSponge.InitialCoolingFactor1;
-						ParallelClustering.runningSolution.ActualCoolingFactor = DAVectorSponge.InitialCoolingFactor;
+						Program.TimeatSplittingStop = DAVectorUtility.HPDuration;
+						Program.InitialCoolingFactor = Program.InitialCoolingFactor1;
+						ParallelClustering.runningSolution.ActualCoolingFactor = Program.InitialCoolingFactor;
 					}
 
 					//  Check Freezing measure -- only use to stop if Y_k_ and P(k) converged
@@ -298,7 +298,7 @@ public class VectorAnnealIterate
 						if (ParallelClustering.runningSolution.LocalStatus[RealClusterIndex] == 2)
 						{
 							freezemax2 = Math.max(freezemax2, ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex]);
-							if (ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex] > DAVectorSponge.FreezingLimit)
+							if (ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex] > Program.FreezingLimit)
 							{
 								++toobigfreezing2;
 							}
@@ -306,7 +306,7 @@ public class VectorAnnealIterate
 						else
 						{
 							freezemax01 = Math.max(freezemax01, ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex]);
-							if (ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex] > DAVectorSponge.FreezingLimit)
+							if (ParallelClustering.runningSolution.FreezingMeasure_k_[RealClusterIndex] > Program.FreezingLimit)
 							{
 								++toobigfreezing01;
 							}
@@ -342,11 +342,11 @@ public class VectorAnnealIterate
 					VectorAnnealIterate.countAfterFixingClusterCount++;
 					if (decreasing && (!TemperatureLimit))
 					{
-						VectorAnnealIterate.countAfterFixingClusterCount = Math.min(DAVectorSponge.Iterationatend - 10, VectorAnnealIterate.countAfterFixingClusterCount);
+						VectorAnnealIterate.countAfterFixingClusterCount = Math.min(Program.Iterationatend - 10, VectorAnnealIterate.countAfterFixingClusterCount);
 					}
 					String looptype = "Final Clean Up";
 					int printtype = -1;
-					if ((VectorAnnealIterate.countAfterFixingClusterCount == (DAVectorSponge.Iterationatend - 1)) || (toobigfreezing == 0) || (!decreasing))
+					if ((VectorAnnealIterate.countAfterFixingClusterCount == (Program.Iterationatend - 1)) || (toobigfreezing == 0) || (!decreasing))
 					{
 						printtype = ParallelClustering.runningSolution.IterationSetAt;
 					}
@@ -396,10 +396,10 @@ public class VectorAnnealIterate
 						StopReason3 = true;
 					}
 
-				} // End Convergence=2  or justconverging doing Final DAVectorSponge.Iterationatend iterations counted by countAfterFixingClusterCount
+				} // End Convergence=2  or justconverging doing Final Program.Iterationatend iterations counted by countAfterFixingClusterCount
 
 				else
-				{ // Case when DAVectorSponge.Iterationatend iterations counted by countAfterFixingClusterCount exceeded
+				{ // Case when Program.Iterationatend iterations counted by countAfterFixingClusterCount exceeded
 					StopReason6 = true;
 					CurrentJobFinished = true;
 				} // End Convergence=2 or justconverging case where extra iteration count completed
@@ -436,7 +436,7 @@ public class VectorAnnealIterate
 						ParallelClustering.runningSolution.DiffMalpha_k_Set = -1;
 						ParallelClustering.runningSolution.YPreviousSet = -1;
 						VectorAnnealIterate.OnLastleg = true;
-						VectorAnnealIterate.countAfterFixingClusterCount = Math.max(1, DAVectorSponge.Iterationatend - 100);
+						VectorAnnealIterate.countAfterFixingClusterCount = Math.max(1, Program.Iterationatend - 100);
 						VectorAnnealIterate.CountBetweenSplits = 0;
 						VectorAnnealIterate.HammyNotSet = true;
 						HammyViolations = 0;
@@ -447,30 +447,30 @@ public class VectorAnnealIterate
 
 					if (StopReason1)
 					{
-						DAVectorSponge.FinalReason += "Arithmetic Error ";
+						Program.FinalReason += "Arithmetic Error ";
 					}
 					if (StopReason2)
 					{
-						DAVectorSponge.FinalReason += "Stop as Hamiltonian Increasing with Change " + String.format("%1$5.4E", ChangeinHammy) + " ";
+						Program.FinalReason += "Stop as Hamiltonian Increasing with Change " + String.format("%1$5.4E", ChangeinHammy) + " ";
 					}
 					if (StopReason3)
 					{
-						DAVectorSponge.FinalReason += "Stop as Freezing Measures smaller than " + (DAVectorSponge
+						Program.FinalReason += "Stop as Freezing Measures smaller than " + (Program
                                 .FreezingLimit) + " ";
 					}
 					if (StopReason4)
 					{
-						DAVectorSponge.FinalReason += "Tmin Reached " + String.format("%1$5.4E", VectorAnnealIterate.Tmin) + " ";
+						Program.FinalReason += "Tmin Reached " + String.format("%1$5.4E", VectorAnnealIterate.Tmin) + " ";
 					}
 					if (StopReason5)
 					{
-						DAVectorSponge.FinalReason += "Consecutive Split Failures ";
+						Program.FinalReason += "Consecutive Split Failures ";
 					}
 					if (StopReason6)
 					{
-						DAVectorSponge.FinalReason += " Stop as Final Iteration Count larger than " + DAVectorSponge.Iterationatend + " ";
+						Program.FinalReason += " Stop as Final Iteration Count larger than " + Program.Iterationatend + " ";
 					}
-					DAVectorUtility.SALSAPrint(1, DAVectorSponge.FinalReason);
+					DAVectorUtility.SALSAPrint(1, Program.FinalReason);
 					break;
 				} // end case when task finished
 
@@ -483,7 +483,7 @@ public class VectorAnnealIterate
 			{ // Restart with small clusters removed
 				PrintIteration(" Restart After Cluster Removal ", -1);
 				CountBetweenSplits = 0;
-				VectorAnnealIterate.ActualWaititerations = DAVectorSponge.Waititerations_Converge;
+				VectorAnnealIterate.ActualWaititerations = Program.Waititerations_Converge;
 				HammyNotSet = true;
 				continue;
 			}
@@ -499,7 +499,7 @@ public class VectorAnnealIterate
 			if (CountBetweenSplits > VectorAnnealIterate.ActualWaititerations)
 			{
 				CountBetweenSplits = 0;
-				VectorAnnealIterate.ActualWaititerations = DAVectorSponge.Waititerations;
+				VectorAnnealIterate.ActualWaititerations = Program.Waititerations;
 			}
 			if ((CountBetweenSplits > 0) && (VectorAnnealIterate.ActualWaititerations > 0) && (ParallelClustering.runningSolution.Ncent_Global > 1))
 			{
@@ -543,7 +543,7 @@ public class VectorAnnealIterate
 
 			//  Diagnostic Output for splitting
 
-			if (ResultofSplittingTest && (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0))
+			if (ResultofSplittingTest && (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0))
 			{
 				this.diagnosticsplitprint(ResultofSplittingTest);
 			}
@@ -562,7 +562,7 @@ public class VectorAnnealIterate
 			{
 				if (ParallelClustering.runningSolution.Ncent_Global > 1)
 				{
-					if (DAVectorSponge.ClusterCountOutput > 0)
+					if (Program.ClusterCountOutput > 0)
 					{
 						VectorAnnealIterate.OutputClusteringResults("Inter2");
 					}
@@ -584,7 +584,7 @@ public class VectorAnnealIterate
 					}
 					VectorAnnealIterate.Numberthatcanbesplit = 0;
 				}
-				if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0)
+				if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0)
 				{
 					int TotalNumberSplit = ClusteringSolution.ClustersSplit;
 					if (ParallelClustering.runningSolution.DistributedExecutionMode)
@@ -613,7 +613,7 @@ public class VectorAnnealIterate
 
 				DistributedClusteringSolution.ManageMajorSynchronization(true);
 				VectorAnnealIterate.SplitFailures = 0;
-				VectorAnnealIterate.ActualWaititerations = DAVectorSponge.Waititerations;
+				VectorAnnealIterate.ActualWaititerations = Program.Waititerations;
 			} // End ResultofSplittingTest == true (either changed number of clusters or spun off a convergence task)
 
 			//  Final portion of loop changing Temperature if needed
@@ -623,7 +623,7 @@ public class VectorAnnealIterate
 			}
 			else
 			{ // Don't reduce T as clusters split
-				ParallelClustering.runningSolution.ActualCoolingFactor = DAVectorSponge.FineCoolingFactor;
+				ParallelClustering.runningSolution.ActualCoolingFactor = Program.FineCoolingFactor;
 				CountBetweenSplits = 0;
 			}
 
@@ -651,10 +651,10 @@ public class VectorAnnealIterate
 			DAVectorUtility.SALSAPrint(1, " Solution at Iteration " + ParallelClustering.bestSolution.IterationSetAt + " Taken rather than Iteration " + ParallelClustering.runningSolution.IterationSetAt + " Due to Arithmetic Error ");
 			ClusteringSolution.CopySolution(ParallelClustering.bestSolution, ParallelClustering.runningSolution);
 		}
-		int save = DAVectorSponge.ClusterPrintNumber;
-		DAVectorSponge.ClusterPrintNumber = ParallelClustering.runningSolution.Ncent_ThisNode;
+		int save = Program.ClusterPrintNumber;
+		Program.ClusterPrintNumber = ParallelClustering.runningSolution.Ncent_ThisNode;
 		PrintIteration(" Final Solution ", ParallelClustering.runningSolution.IterationSetAt);
-		DAVectorSponge.ClusterPrintNumber = save;
+		Program.ClusterPrintNumber = save;
 
 	} // End of ControlVectorSpongeDA()
 
@@ -669,13 +669,15 @@ public class VectorAnnealIterate
 		}
 		else
 		{
-			if (DAVectorSponge.ChangeSpongeFactor(ParallelClustering.runningSolution.ActualCoolingFactor, ParallelClustering.runningSolution))
+			if (Program.ChangeSpongeFactor(ParallelClustering.runningSolution.ActualCoolingFactor,
+                    ParallelClustering.runningSolution))
 			{
 				HammyNotSet = true;
 			}
 		}
 		//  Reduce Cluster Sigmas for those being Annealed
-		if (DAVectorSponge.ChangeClusterSigmas(ParallelClustering.runningSolution.ActualCoolingFactor, ParallelClustering.runningSolution))
+		if (Program.ChangeClusterSigmas(ParallelClustering.runningSolution.ActualCoolingFactor,
+                ParallelClustering.runningSolution))
 		{
 			ParallelClustering.runningSolution.SetClusterSizes();
 			ParallelClustering.runningSolution.SetClusterWidths();
@@ -685,7 +687,7 @@ public class VectorAnnealIterate
 		//  Switch into Distributed Mode if necessary
 		if (!ParallelClustering.runningSolution.DistributedExecutionMode)
 		{
-			boolean godistributed = (ParallelClustering.runningSolution.Temperature <= DAVectorSponge.TemperatureLimitforDistribution) || ((DAVectorSponge.ClusterLimitforDistribution > 0) && (ParallelClustering.runningSolution.Ncent_Global >= DAVectorSponge.ClusterLimitforDistribution));
+			boolean godistributed = (ParallelClustering.runningSolution.Temperature <= Program.TemperatureLimitforDistribution) || ((Program.ClusterLimitforDistribution > 0) && (ParallelClustering.runningSolution.Ncent_Global >= Program.ClusterLimitforDistribution));
 			godistributed = DAVectorUtility.SynchronizeMPIBoolean(godistributed);
 			if (godistributed)
 			{
@@ -693,17 +695,17 @@ public class VectorAnnealIterate
 				{
 					ParallelClustering.runningSolution.DistributedExecutionMode = true;
 
-					int newsplitnumber = DAVectorSponge.MaxNumberSplitClusters / DAVectorUtility.MPI_Size;
-					if ((newsplitnumber * DAVectorSponge.MaxNumberSplitClusters) < DAVectorSponge.MaxNumberSplitClusters)
+					int newsplitnumber = Program.MaxNumberSplitClusters / DAVectorUtility.MPI_Size;
+					if ((newsplitnumber * Program.MaxNumberSplitClusters) < Program.MaxNumberSplitClusters)
 					{
 						++newsplitnumber;
 					}
-					DAVectorSponge.MaxNumberSplitClusters = newsplitnumber;
+					Program.MaxNumberSplitClusters = newsplitnumber;
 					++DAVectorUtility.MPIREDUCETiming1;
-					DAVectorSponge.ActualTemperatureforDistribution = ParallelClustering.runningSolution.Temperature;
+					Program.ActualTemperatureforDistribution = ParallelClustering.runningSolution.Temperature;
 					DAVectorUtility.InterimTiming();
-					DAVectorSponge.TimeatDistribution = DAVectorUtility.HPDuration;
-					DAVectorSponge.ActualClusterNumberforDistribution = ParallelClustering.runningSolution.Ncent_Global;
+					Program.TimeatDistribution = DAVectorUtility.HPDuration;
+					Program.ActualClusterNumberforDistribution = ParallelClustering.runningSolution.Ncent_Global;
 					DAVectorUtility.SALSAPrint(1, "Start Distributed Execution Mode " + String.format("%1$3.2f", ParallelClustering.runningSolution.Temperature) + " Iteration Count " + ParallelClustering.runningSolution.IterationSetAt + " " + EMIterationCount + " Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Time " + String.format("%1$5.4E", DAVectorUtility.HPDuration));
 					DistributedClusteringSolution.ManageMajorSynchronization(false);
 					ParallelClustering.bestSolution.SolutionSet = false;
@@ -721,9 +723,9 @@ public class VectorAnnealIterate
 		}
 
 		//  Generate Magic Temperature Actions
-		if (DAVectorSponge.magicindex < DAVectorSponge.MagicTemperatures.length)
+		if (Program.magicindex < Program.MagicTemperatures.length)
 		{
-			boolean abracadabra = ParallelClustering.runningSolution.Temperature <= DAVectorSponge.MagicTemperatures[DAVectorSponge.magicindex];
+			boolean abracadabra = ParallelClustering.runningSolution.Temperature <= Program.MagicTemperatures[Program.magicindex];
 			abracadabra = DAVectorUtility.SynchronizeMPIBoolean(abracadabra);
 			if (abracadabra)
 			{
@@ -734,12 +736,12 @@ public class VectorAnnealIterate
 					DistributedClusteringSolution.ManageMajorSynchronization(true);
 				}
 				CountBetweenSplits = 0;
-				++DAVectorSponge.magicindex;
+				++Program.magicindex;
 				return;
 			}
 		}
 		ParallelClustering.runningSolution.Temperature = ParallelClustering.runningSolution.ActualCoolingFactor * ParallelClustering.runningSolution.Temperature;
-		++DAVectorSponge.NumberTemperatureSteps;
+		++Program.NumberTemperatureSteps;
 		DAVectorUtility.TemperatureValues.add(ParallelClustering.runningSolution.Temperature);
 		DAVectorUtility.ClusterCountValues.add(ParallelClustering.runningSolution.Ncent_Global);
 
@@ -749,7 +751,7 @@ public class VectorAnnealIterate
 	{
 		if (linecheck < 0)
 		{
-			if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval != 0)
+			if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval != 0)
 			{
 				return;
 			}
@@ -762,24 +764,24 @@ public class VectorAnnealIterate
 
 		DAVectorUtility.InterimTiming();
 		String endinfo = "";
-		if (!DAVectorSponge.CalculateIndividualWidths)
+		if (!Program.CalculateIndividualWidths)
 		{
 			endinfo = " Average Width " + String.format("%1$4.3E", ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth);
 		}
 		else
 		{
 			endinfo = " Average Widths ";
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				endinfo += String.format("%1$4.3E", ParallelClustering.runningSolution.AverageWidth[VectorIndex]) + " ";
 			}
 		}
-		if (DAVectorSponge.SigmaMethod == 3)
+		if (Program.SigmaMethod == 3)
 		{
-			endinfo += " Sigma[0] Coeff " + String.format("%1$5.4E", DAVectorSponge.SigmaVectorParameters_i_[0]);
+			endinfo += " Sigma[0] Coeff " + String.format("%1$5.4E", Program.SigmaVectorParameters_i_[0]);
 		}
 
-		DAVectorUtility.SALSAPrint(1, "B) Clusters " + ParallelClustering.runningSolution.Ncent_Global + " " + looptype + " Cluster # Chg " + String.format("%1$4.3E", VectorAnnealIterate.NumberCountChanges) + " M-Change " + String.format("%1$4.3E", VectorAnnealIterate.MalphaDiffAvg) + " Y Chg " + String.format("%1$4.3E", VectorAnnealIterate.AverageY_k_SquaredChange / ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth) + " Cnvg " + VectorAnnealIterate.convergence + " Iter " + VectorAnnealIterate.EMIterationCount + " Major " + DAVectorSponge.NumberMajorSynchs1 + " T " + String.format("%1$5.4E", ParallelClustering.runningSolution.Temperature) + " PWHammy " + String.format("%1$5.4E", ParallelClustering.runningSolution.PairwiseHammy) + " Useful Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUsefulCalcs) + " Useless Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUselessCalcs) + " Ignored Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalIgnoredCalcs) + " Arithmetic Error " + (Boolean.valueOf(
+		DAVectorUtility.SALSAPrint(1, "B) Clusters " + ParallelClustering.runningSolution.Ncent_Global + " " + looptype + " Cluster # Chg " + String.format("%1$4.3E", VectorAnnealIterate.NumberCountChanges) + " M-Change " + String.format("%1$4.3E", VectorAnnealIterate.MalphaDiffAvg) + " Y Chg " + String.format("%1$4.3E", VectorAnnealIterate.AverageY_k_SquaredChange / ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth) + " Cnvg " + VectorAnnealIterate.convergence + " Iter " + VectorAnnealIterate.EMIterationCount + " Major " + Program.NumberMajorSynchs1 + " T " + String.format("%1$5.4E", ParallelClustering.runningSolution.Temperature) + " PWHammy " + String.format("%1$5.4E", ParallelClustering.runningSolution.PairwiseHammy) + " Useful Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUsefulCalcs) + " Useless Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUselessCalcs) + " Ignored Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalIgnoredCalcs) + " Arithmetic Error " + (Boolean.valueOf(
                 VectorAnnealIterate.ArithmeticError)) + " Mean Cluster Count per point " + String.format("%1$3.2f", VectorAnnealIterate.MeanClusterCount) + " Pts with Just 1 Cluster " + String.format("%1$5.4E", VectorAnnealIterate.PointswithClusterCount1) + " Sum of C(k) " + String.format("%1$3.2f", VectorAnnealIterate.C_k_Sum) + endinfo + " Time " + String.format("%1$5.4E", DAVectorUtility.HPDuration));
 
 		clusterprint();
@@ -789,24 +791,24 @@ public class VectorAnnealIterate
 	public final void diagnosticsplitprint(boolean ResultofSplittingTest)
 	{
 		String endinfo = "";
-		if (!DAVectorSponge.CalculateIndividualWidths)
+		if (!Program.CalculateIndividualWidths)
 		{
 			endinfo = " Average Width " + String.format("%1$4.3E", ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth);
 		}
 		else
 		{
 			endinfo = " Average Widths ";
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				endinfo += String.format("%1$4.3E", ParallelClustering.runningSolution.AverageWidth[VectorIndex]) + " ";
 			}
 		}
-		if (DAVectorSponge.SigmaMethod == 3)
+		if (Program.SigmaMethod == 3)
 		{
-			endinfo += " Sigma[0] Coeff " + String.format("%1$5.4E", DAVectorSponge.SigmaVectorParameters_i_[0]);
+			endinfo += " Sigma[0] Coeff " + String.format("%1$5.4E", Program.SigmaVectorParameters_i_[0]);
 		}
 		DAVectorUtility.InterimTiming();
-		String nextline1 = "A) Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Iter " + VectorAnnealIterate.EMIterationCount + " Major " + DAVectorSponge.NumberMajorSynchs1 + " T " + String.format("%1$5.4E", ParallelClustering.runningSolution.Temperature) + " PWHammy " + String.format("%1$5.4E", ParallelClustering.runningSolution.PairwiseHammy) + " Useful Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUsefulCalcs) + " Useless Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUselessCalcs) + " Ignored Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalIgnoredCalcs) + " Arithmetic Error " + (Boolean.valueOf(
+		String nextline1 = "A) Clusters " + ParallelClustering.runningSolution.Ncent_Global + " Iter " + VectorAnnealIterate.EMIterationCount + " Major " + Program.NumberMajorSynchs1 + " T " + String.format("%1$5.4E", ParallelClustering.runningSolution.Temperature) + " PWHammy " + String.format("%1$5.4E", ParallelClustering.runningSolution.PairwiseHammy) + " Useful Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUsefulCalcs) + " Useless Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalUselessCalcs) + " Ignored Calcs " + String.format("%1$5.4E", VectorAnnealIterate.LocalIgnoredCalcs) + " Arithmetic Error " + (Boolean.valueOf(
                 VectorAnnealIterate.ArithmeticError)) + " Mean Cluster Count per point " + String.format("%1$3.2f", VectorAnnealIterate.MeanClusterCount) + " Pts with Just 1 Cluster " + String.format("%1$5.4E", VectorAnnealIterate.PointswithClusterCount1) + " Sum of C(k) " + String.format("%1$3.2f", VectorAnnealIterate.C_k_Sum) + endinfo + " Time " + String.format("%1$5.4E", DAVectorUtility.HPDuration);
 		if (ParallelClustering.runningSolution.ClustertoSplit >= 0)
 		{
@@ -848,7 +850,7 @@ public class VectorAnnealIterate
 						ClusterIndex++;
 						continue;
 					}
-					spongelabel = "Sponge " + String.format("%1$3.2f", DAVectorSponge.SpongeFactor) + " ";
+					spongelabel = "Sponge " + String.format("%1$3.2f", Program.SpongeFactor) + " ";
 					Pformat = "E3";
 				}
 				double tmp = ParallelClustering.runningSolution.ClusterScaledSquaredWidth_k_[ClusterIndex];
@@ -857,12 +859,12 @@ public class VectorAnnealIterate
 					nextline += "* ";
 				}
 				nextline += spongelabel + ClusterIndex + "(" + ParallelClustering.runningSolution.LocalCreatedIndex[ClusterIndex] + ") C " + String.format("%1$2.1f", ParallelClustering.runningSolution.C_k_[ClusterIndex]) + " (Frz " + String.format("%1$7.6f", ParallelClustering.runningSolution.FreezingMeasure_k_[ClusterIndex]) + ") " + "[Wdth " + String.format("%1$5.4f", tmp) + "] ";
-				if (DAVectorSponge.ContinuousClustering)
+				if (Program.ContinuousClustering)
 				{
 					nextline += "P " + String.format(Pformat, ParallelClustering.runningSolution.P_k_[ClusterIndex]) + " ";
 				}
 			}
-			if ((count >= DAVectorSponge.ClusterPrintNumber) || (ClusterIndex >= ParallelClustering.runningSolution.Ncent_ThisNode-1))
+			if ((count >= Program.ClusterPrintNumber) || (ClusterIndex >= ParallelClustering.runningSolution.Ncent_ThisNode-1))
 			{
 				break;
 			}
@@ -876,7 +878,7 @@ public class VectorAnnealIterate
 				ClusterIndex++;
 			}
 		}
-		int ClusterLimit = Math.max(ClusterIndex + 1, ParallelClustering.runningSolution.Ncent_ThisNode - DAVectorSponge.ClusterPrintNumber);
+		int ClusterLimit = Math.max(ClusterIndex + 1, ParallelClustering.runningSolution.Ncent_ThisNode - Program.ClusterPrintNumber);
 		for (int ClusterEndIndex = ClusterLimit; ClusterEndIndex < ParallelClustering.runningSolution.Ncent_ThisNode; ClusterEndIndex++)
 		{
 			if (ClusterEndIndex == ParallelClustering.runningSolution.SpongeCluster)
@@ -893,7 +895,7 @@ public class VectorAnnealIterate
 				nextline += "* ";
 			}
 			nextline += ClusterEndIndex + "(" + ParallelClustering.runningSolution.LocalCreatedIndex[ClusterEndIndex] + ") C " + String.format("%1$2.1f", ParallelClustering.runningSolution.C_k_[ClusterEndIndex]) + " (Frz " + String.format("%1$7.6f", ParallelClustering.runningSolution.FreezingMeasure_k_[ClusterEndIndex]) + ") " + "[Wdth " + String.format("%1$5.4f", tmp) + "] ";
-			if (DAVectorSponge.ContinuousClustering)
+			if (Program.ContinuousClustering)
 			{
 				nextline += "P " + String.format("%1$5.4f", ParallelClustering.runningSolution.P_k_[ClusterEndIndex]) + " ";
 			}
@@ -1031,7 +1033,7 @@ public class VectorAnnealIterate
         final double SpongeTerm;
         if (ParallelClustering.runningSolution.SpongeCluster >= 0)
         {
-            SpongeTerm = DAVectorSponge.SpongeFactor * DAVectorSponge.SpongeFactor;
+            SpongeTerm = Program.SpongeFactor * Program.SpongeFactor;
         } else {
             SpongeTerm = 0.0;
         }
@@ -1180,7 +1182,7 @@ public class VectorAnnealIterate
                     for (int IndirectClusterIndex = 0; IndirectClusterIndex < IndirectSize; IndirectClusterIndex++) {
                         double ExponentiatedTerm;
                         double SubtractedTerm_NegativeExponential = Save_Term_NegativeExponential[IndirectClusterIndex] - MinimumTerm_NegativeExponential;
-                        if (SubtractedTerm_NegativeExponential < (2.0 * DAVectorSponge.ExpArgumentCut1)) {
+                        if (SubtractedTerm_NegativeExponential < (2.0 * Program.ExpArgumentCut1)) {
                             NumUseful += 1.0;
                             ExponentiatedTerm = Math.exp(-0.5 * SubtractedTerm_NegativeExponential);
                             if (Double.isNaN(ExponentiatedTerm) || Double.isInfinite(ExponentiatedTerm)) {
@@ -1321,9 +1323,9 @@ public class VectorAnnealIterate
         VectorAnnealIterate.LocalUsefulCalcs = FindUsefulCalcs.Total;
         VectorAnnealIterate.LocalUselessCalcs = FindUselessCalcs.Total;
         VectorAnnealIterate.LocalIgnoredCalcs = FindIgnoredCalcs.Total;
-        DAVectorSponge.SumUsefulCalcs += VectorAnnealIterate.LocalUsefulCalcs;
-        DAVectorSponge.SumUselessCalcs += VectorAnnealIterate.LocalUselessCalcs;
-        DAVectorSponge.SumIgnoredCalcs += VectorAnnealIterate.LocalIgnoredCalcs;
+        Program.SumUsefulCalcs += VectorAnnealIterate.LocalUsefulCalcs;
+        Program.SumUselessCalcs += VectorAnnealIterate.LocalUselessCalcs;
+        Program.SumIgnoredCalcs += VectorAnnealIterate.LocalIgnoredCalcs;
 
         if (ParallelClustering.runningSolution.DistributedExecutionMode)
         { // Distributed Mode Cluster Accumulations
@@ -1377,7 +1379,7 @@ public class VectorAnnealIterate
             boolean zerosizecluster = false;
             if (RealClusterIndex != ParallelClustering.runningSolution.SpongeCluster)
             {
-                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.CountforCluster_C_ktobezero;
+                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.CountforCluster_C_ktobezero;
             }
             ZeroSizeClusters[CountGlobalClusters] = zerosizecluster;
             ++CountGlobalClusters;
@@ -1397,7 +1399,7 @@ public class VectorAnnealIterate
             for (int LocalActiveClusterIndex = 0; LocalActiveClusterIndex < ClusteringSolution.NumberLocalActiveClusters; LocalActiveClusterIndex++)
             {
                 int RealClusterIndex = ClusteringSolution.RealClusterIndices[LocalActiveClusterIndex];
-                boolean largeenoughcluster = (ParallelClustering.runningSolution.C_k_[RealClusterIndex] > DAVectorSponge.CountforCluster_C_ktobezero);
+                boolean largeenoughcluster = (ParallelClustering.runningSolution.C_k_[RealClusterIndex] > Program.CountforCluster_C_ktobezero);
                 if (ParallelClustering.runningSolution.LocalStatus[RealClusterIndex] < 2)
                 {
                     largeenoughcluster = !ZeroSizeClusters[CountGlobalClusters];
@@ -1474,10 +1476,10 @@ public class VectorAnnealIterate
 
         }
 
-        if ((ParallelClustering.runningSolution.SpongeCluster != -1) && (DAVectorSponge.SpongePoption == 1))
+        if ((ParallelClustering.runningSolution.SpongeCluster != -1) && (Program.SpongePoption == 1))
         {
             wgt = 1.0 - ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster];
-            ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster] = DAVectorSponge.SpongePWeight / ParallelClustering.runningSolution.Ncent_Global;
+            ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster] = Program.SpongePWeight / ParallelClustering.runningSolution.Ncent_Global;
             wgt = (1.0 - ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster]) / wgt;
             for (int RealClusterIndex = 0; RealClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; RealClusterIndex++)
             {
@@ -1496,18 +1498,18 @@ public class VectorAnnealIterate
 
         //  Set Y_k_
         GlobalReductions.FindIndirectVectorDoubleSum[] FindY_k_;
-        FindY_k_ = new GlobalReductions.FindIndirectVectorDoubleSum[DAVectorSponge.ParameterVectorDimension];
+        FindY_k_ = new GlobalReductions.FindIndirectVectorDoubleSum[Program.ParameterVectorDimension];
         final DistributedReductions.FindIndirectMultiVectorDoubleSum FindY_k_Component;
         final int BeginFindY_k_;
         if (ParallelClustering.runningSolution.DistributedExecutionMode)
         {
             FindY_k_Component = new DistributedReductions.FindIndirectMultiVectorDoubleSum();
-            BeginFindY_k_ = FindY_k_Component.AddComponents(DAVectorSponge.ParameterVectorDimension);
+            BeginFindY_k_ = FindY_k_Component.AddComponents(Program.ParameterVectorDimension);
             FindY_k_Component.NodeInitialize();
         }
         else
         {
-            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
             {
                 FindY_k_[VectorIndex] = new GlobalReductions.FindIndirectVectorDoubleSum(DAVectorUtility.ThreadCount, ClusteringSolution.NumberLocalActiveClusters);
             }
@@ -1522,18 +1524,18 @@ public class VectorAnnealIterate
                 if (ParallelClustering.runningSolution.DistributedExecutionMode) {
                     FindY_k_Component.ThreadInitialize(threadIndex);
                 } else {
-                    for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                    for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                         FindY_k_[VectorIndex].startthread(threadIndex);
                     }
                 }
                 int ArraySize = Math.min(ClusteringSolution.NumberAvailableActiveClusters,
                         ClusteringSolution.MaximumClustersperPoint);
                 int[] ActiveClustersperPoint = new int[ArraySize];
-                double[][] CenterPositionsperCluster = new double[DAVectorSponge.ParameterVectorDimension][];
-                for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                double[][] CenterPositionsperCluster = new double[Program.ParameterVectorDimension][];
+                for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                     CenterPositionsperCluster[VectorIndex] = new double[ArraySize];
                 }
-                double[] TerminY_k_ = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] TerminY_k_ = new double[Program.ParameterVectorDimension];
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
@@ -1562,18 +1564,18 @@ public class VectorAnnealIterate
                         if ((ParallelClustering.runningSolution.SpongeCluster >= 0) && (RealClusterIndex == ParallelClustering.runningSolution.SpongeCluster)) {
                             continue;
                         }
-                        for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
-                            TerminY_k_[VectorIndex] = DAVectorSponge.PointPosition[alpha][VectorIndex] * ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][IndirectClusterIndex];
+                        for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
+                            TerminY_k_[VectorIndex] = Program.PointPosition[alpha][VectorIndex] * ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][IndirectClusterIndex];
                             CenterPositionsperCluster[VectorIndex][IndirectClusterIndex] = TerminY_k_[VectorIndex];
                         }
                         if (ParallelClustering.runningSolution.DistributedExecutionMode) {
                             FindY_k_Component.addapoint(threadIndex, ThreadStorePosition, BeginFindY_k_,
-                                    DAVectorSponge.ParameterVectorDimension, TerminY_k_);
+                                    Program.ParameterVectorDimension, TerminY_k_);
                             int CreatedIndex = ParallelClustering.runningSolution.Map_alpha_PointertoCreatedIndex[alpha][IndirectClusterIndex];
                         }
                     }
                     if (!ParallelClustering.runningSolution.DistributedExecutionMode) {
-                        for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                        for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                             FindY_k_[VectorIndex].addapoint(threadIndex, IndirectSize, ActiveClustersperPoint,
                                     CenterPositionsperCluster[VectorIndex]);
                         }
@@ -1591,7 +1593,7 @@ public class VectorAnnealIterate
         }
         else
         {
-            for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+            for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
             {
                 FindY_k_[VectorIndex].sumoverthreadsandmpi();
             }
@@ -1615,7 +1617,7 @@ public class VectorAnnealIterate
             }
             else if (ParallelClustering.runningSolution.DistributedExecutionMode)
             {
-                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.CountforCluster_C_ktobezero;
+                zerosizecluster = ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.CountforCluster_C_ktobezero;
             }
 
             if (RealClusterIndex == ParallelClustering.runningSolution.SpongeCluster)
@@ -1628,7 +1630,7 @@ public class VectorAnnealIterate
                 if (ParallelClustering.runningSolution.DistributedExecutionMode)
                 {
                     int NodeAccumulationIndex = ClusteringSolution.LocalNodeAccPosition[ActiveClusterIndex];
-                    for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+                    for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         if (ParallelClustering.runningSolution.YPreviousSet > -1)
                         {
@@ -1640,7 +1642,7 @@ public class VectorAnnealIterate
                 }
                 else
                 {
-                    for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+                    for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         if (ParallelClustering.runningSolution.YPreviousSet > -1)
                         {
@@ -1651,10 +1653,10 @@ public class VectorAnnealIterate
                     }
                 }
 
-                if (DAVectorSponge.SigmaMethod > 1)
+                if (Program.SigmaMethod > 1)
                 {
                     Box<double[]> tempRef_Object = new Box<>(ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex]);
-                    DAVectorSponge.CalculateSigma(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], tempRef_Object);
+                    Program.CalculateSigma(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], tempRef_Object);
                     ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex] = tempRef_Object.content;
                 }
             }
@@ -1722,7 +1724,7 @@ public class VectorAnnealIterate
 	// The change of sum(points) Delta(Malpha)/# Points should be less than argument ChangeLimit summed over points/clusters
 	//  Return 0 if not converged; 1 if converged and can continue; 2 if converged but no refinement
 	//  Note divided by number of points here not in calculation
-	// Note hitting DAVectorSponge.ConvergenceLoopLimit limit is NOT fatal. Just continues
+	// Note hitting Program.ConvergenceLoopLimit limit is NOT fatal. Just continues
 	public static int convergenceTest(double ChangeLimit, Box<String> ReasonforConvergence) throws MPIException {
 		ReasonforConvergence.content = "Not Converged";
 		if (VectorAnnealIterate.ArithmeticError)
@@ -1762,8 +1764,8 @@ public class VectorAnnealIterate
 		}
 		VectorAnnealIterate.MalphaDiffAvg = (MalphaDiffAvg01 + MalphaDiffAvg2) / DAVectorUtility.PointCount_Global;
 
-		++DAVectorSponge.NumberMdiffSums; // Accumulate diagnostic statistics
-		DAVectorSponge.MdiffSum += VectorAnnealIterate.MalphaDiffAvg;
+		++Program.NumberMdiffSums; // Accumulate diagnostic statistics
+		Program.MdiffSum += VectorAnnealIterate.MalphaDiffAvg;
 
 		boolean notconverged1 = VectorAnnealIterate.MalphaDiffAvg > ChangeLimit;
 		if (VectorAnnealIterate.EMIterationStepCount1 < 0)
@@ -1781,7 +1783,7 @@ public class VectorAnnealIterate
 		if (VectorAnnealIterate.FinalLoop)
 		{
 			YchangeTest = ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth;
-			notconverged2 = VectorAnnealIterate.AverageY_k_SquaredChange > DAVectorSponge.YChangeSquared * YchangeTest;
+			notconverged2 = VectorAnnealIterate.AverageY_k_SquaredChange > Program.YChangeSquared * YchangeTest;
 			if (VectorAnnealIterate.EMIterationStepCount2 < 0)
 			{
 				VectorAnnealIterate.EMIterationStepCount2 = -2;
@@ -1804,7 +1806,7 @@ public class VectorAnnealIterate
 			{
 				ReasonforConvergence.content += "Converging Center Change " + String.format("%1$5.4E", VectorAnnealIterate.AverageY_k_SquaredChange) + " " + String.format("%1$5.4E", YchangeTest);
 			}
-			if (VectorAnnealIterate.EMIterationStepCount > DAVectorSponge.ConvergenceLoopLimit)
+			if (VectorAnnealIterate.EMIterationStepCount > Program.ConvergenceLoopLimit)
 			{
 				if (notconverged)
 				{
@@ -1824,7 +1826,7 @@ public class VectorAnnealIterate
 			return 2;
 		}
 
-		boolean toomanyclusters = (ParallelClustering.runningSolution.Ncent_ThisNode >= VectorAnnealIterate.ActualMaxNcent) || (ParallelClustering.runningSolution.Ncent_Global >= DAVectorSponge.maxNcentTOTAL);
+		boolean toomanyclusters = (ParallelClustering.runningSolution.Ncent_ThisNode >= VectorAnnealIterate.ActualMaxNcent) || (ParallelClustering.runningSolution.Ncent_Global >= Program.maxNcentTOTAL);
 		DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming3);
         if (DAVectorUtility.MPI_Size > 1){
             // Note - MPI Call - Allreduce - boolean - logical OR
@@ -1882,7 +1884,7 @@ public class VectorAnnealIterate
 	public final boolean shouldweSplit() throws MPIException {
 		//	Calculate Cluster with minimum eigenvalue -- find cluster number and eigenvalue (which could be positive)
 		VectorAnnealIterate.Numberthatcanbesplit = 0;
-		int LimitonSplits = Math.min(DAVectorSponge.MaxNumberSplitClusters, VectorAnnealIterate.ActualMaxNcent - ParallelClustering.runningSolution.Ncent_ThisNode);
+		int LimitonSplits = Math.min(Program.MaxNumberSplitClusters, VectorAnnealIterate.ActualMaxNcent - ParallelClustering.runningSolution.Ncent_ThisNode);
 		ParallelClustering.runningSolution.ClustertoSplit = -1;
 		boolean eigenvaluesexist = false;
 
@@ -1911,7 +1913,7 @@ public class VectorAnnealIterate
 				ParallelClustering.runningSolution.Splittable_k_[RealClusterIndex] = 0;
 			}
 
-			if ((ParallelClustering.runningSolution.ClusterScaledSquaredWidth_k_[RealClusterIndex] <= DAVectorSponge.MinimumScaledWidthsquaredtosplit) || (ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= DAVectorSponge.ToosmalltoSplit) || (RealClusterIndex == ParallelClustering.runningSolution.SpongeCluster))
+			if ((ParallelClustering.runningSolution.ClusterScaledSquaredWidth_k_[RealClusterIndex] <= Program.MinimumScaledWidthsquaredtosplit) || (ParallelClustering.runningSolution.C_k_[RealClusterIndex] <= Program.ToosmalltoSplit) || (RealClusterIndex == ParallelClustering.runningSolution.SpongeCluster))
 			{
 				ParallelClustering.runningSolution.Splittable_k_[RealClusterIndex] = 0;
 			}
@@ -1928,7 +1930,7 @@ public class VectorAnnealIterate
 		}
 
 		//  Set up eigenvalues
-		if (!DAVectorSponge.CalculateEigenvaluesfromMatrix)
+		if (!Program.CalculateEigenvaluesfromMatrix)
 		{
 			vc.SetAllEigenvaluesIteratively(ParallelClustering.runningSolution);
 		}
@@ -1948,12 +1950,12 @@ public class VectorAnnealIterate
 				ParallelClustering.runningSolution.Eigenvalue_k[ClusterToRefine] = 0.0;
 				continue;
 			}
-			if (DAVectorSponge.CalculateEigenvaluesfromMatrix)
+			if (Program.CalculateEigenvaluesfromMatrix)
 			{
-				double[][] secondderivmatrix = new double[DAVectorSponge.ParameterVectorDimension][DAVectorSponge.ParameterVectorDimension];
-				for (int VectorIndex1 = 0; VectorIndex1 < DAVectorSponge.ParameterVectorDimension; VectorIndex1++)
+				double[][] secondderivmatrix = new double[Program.ParameterVectorDimension][Program.ParameterVectorDimension];
+				for (int VectorIndex1 = 0; VectorIndex1 < Program.ParameterVectorDimension; VectorIndex1++)
 				{
-					for (int VectorIndex2 = 0; VectorIndex2 < DAVectorSponge.ParameterVectorDimension; VectorIndex2++)
+					for (int VectorIndex2 = 0; VectorIndex2 < Program.ParameterVectorDimension; VectorIndex2++)
 					{
 						secondderivmatrix[VectorIndex1][VectorIndex2] = -ParallelClustering.runningSolution.Correlation_k_i_j[ClusterToRefine][VectorIndex1][VectorIndex2];
 						if (VectorIndex1 == VectorIndex2)
@@ -1972,11 +1974,11 @@ public class VectorAnnealIterate
 			if (vc.EigenStatus > 0)
 			{
 				eigenvaluesexist = true;
-				if (DAVectorSponge.CalculateEigenvaluesfromMatrix)
+				if (Program.CalculateEigenvaluesfromMatrix)
 				{ // In iterative case, data already stored
                     System.arraycopy(vc.Eigenvector, 0,
                             ParallelClustering.runningSolution.Eigenvector_k_i[ClusterToRefine], 0,
-                            DAVectorSponge.ParameterVectorDimension);
+                            Program.ParameterVectorDimension);
 					ParallelClustering.runningSolution.Eigenvalue_k[ClusterToRefine] = vc.Eigenvalue;
 				}
 
@@ -2057,27 +2059,27 @@ public class VectorAnnealIterate
 				}
 				double CurrentClusterMinimumEigenvalue = ParallelClustering.runningSolution.Eigenvalue_k[ClusterToRefine];
 
-				if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0)
+				if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0)
 				{
 					String correlationmessage = "";
-					if (DAVectorSponge.CalculateCorrelationMatrix && DAVectorSponge.ParameterVectorDimension == 2)
+					if (Program.CalculateCorrelationMatrix && Program.ParameterVectorDimension == 2)
 					{
 						correlationmessage = " Correls " + String.format("%1$5.4E", ParallelClustering.runningSolution.Correlation_k_i_j[ClusterToRefine][0][0]) + " " + String.format("%1$5.4E", ParallelClustering.runningSolution.Correlation_k_i_j[ClusterToRefine][1][1]) + " " + String.format("%1$5.4E", ParallelClustering.runningSolution.Correlation_k_i_j[ClusterToRefine][0][1]);
 					}
 					String eigenvectormessageY = "";
 					String eigenvectormessageDeltaY = "";
-					if (DAVectorSponge.Printeigenvectors)
+					if (Program.Printeigenvectors)
 					{
 						eigenvectormessageY = " Y ";
 						eigenvectormessageDeltaY = "Delta Y ";
-						for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+						for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 						{
 							eigenvectormessageY += String.format("%1$5.4E", ParallelClustering.runningSolution.Y_k_i_[ClusterToRefine][VectorIndex]) + " ";
 							eigenvectormessageDeltaY += String.format("%1$5.4E", ParallelClustering.runningSolution.DC_k_DY_k_i_[ClusterToRefine][VectorIndex]) + " ";
 						}
 					}
 
-					if ((ClusterToRefine < DAVectorSponge.ClusterPrintNumber) || (ClusterToRefine >= (ParallelClustering.runningSolution.Ncent_ThisNode - DAVectorSponge.ClusterPrintNumber)))
+					if ((ClusterToRefine < Program.ClusterPrintNumber) || (ClusterToRefine >= (ParallelClustering.runningSolution.Ncent_ThisNode - Program.ClusterPrintNumber)))
 					{
 						DAVectorUtility.SALSAPrint(1, "       Cluster " + ClusterToRefine + "(" + ParallelClustering.runningSolution.LocalCreatedIndex[ClusterToRefine] + ")" + " Status " + eigenvaluestatus[ClusterToRefine] + " Priority " + CurrentClusterPriority + " Eigen " + String.format("%1$5.4E", CurrentClusterMinimumEigenvalue) + " Size " + String.format("%1$2.1f", ParallelClustering.runningSolution.C_k_[ClusterToRefine]) + eigenvectormessageY + "  " + eigenvectormessageDeltaY + correlationmessage);
 					}
@@ -2224,7 +2226,7 @@ public class VectorAnnealIterate
 		//  Calculate Perturbed center positions
 		// First Estimate Scale as minumum of one that produces .05 change in population of new centers and one that shifts 0.1 times cluster width
 		double ambitiousscale = 0.0;
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			ambitiousscale += ParallelClustering.runningSolution.Eigenvector_k_i[OldCenterIndex][VectorIndex] * ParallelClustering.runningSolution.DC_k_DY_k_i_[OldCenterIndex][VectorIndex];
 		}
@@ -2232,7 +2234,7 @@ public class VectorAnnealIterate
 		double actualscale = Math.min(ambitiousscale, 0.2 * Math.sqrt(ParallelClustering.runningSolution.ClusterScaledSquaredWidth_k_[OldCenterIndex]));
 		actualscale = Math.max(actualscale, 0.05 * Math.sqrt(ParallelClustering.runningSolution.ClusterScaledSquaredWidth_k_[OldCenterIndex]));
 
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			double tmp1 = ParallelClustering.runningSolution.Y_k_i_[OldCenterIndex][VectorIndex];
 			double tmp2 = ParallelClustering.runningSolution.Eigenvector_k_i[OldCenterIndex][VectorIndex] * actualscale * Math.sqrt(ParallelClustering.runningSolution.Sigma_k_i_[OldCenterIndex][VectorIndex]);
@@ -2242,7 +2244,7 @@ public class VectorAnnealIterate
 		ParallelClustering.runningSolution.YPreviousActuallySet[OldCenterIndex] = false;
 		ParallelClustering.runningSolution.YPreviousActuallySet[NewCenterIndex] = false;
 		Box<double[]> tempRef_Object = new Box<>(ParallelClustering.runningSolution.Sigma_k_i_[NewCenterIndex]);
-		DAVectorSponge.CalculateSigma(ParallelClustering.runningSolution.Y_k_i_[NewCenterIndex], tempRef_Object);
+		Program.CalculateSigma(ParallelClustering.runningSolution.Y_k_i_[NewCenterIndex], tempRef_Object);
 		ParallelClustering.runningSolution.Sigma_k_i_[NewCenterIndex] = tempRef_Object.content;
 		ParallelClustering.runningSolution.DiffMalpha_k_Set = -1;
 
@@ -2273,7 +2275,7 @@ public class VectorAnnealIterate
 		}
 
 		ParallelClustering.runningSolution.SetActiveClusters();
-		if (DAVectorSponge.UseTriangleInequality_DA > 0)
+		if (Program.UseTriangleInequality_DA > 0)
 		{
 			DATriangleInequality.SplitCenter(OldCenterIndex, ParallelClustering.runningSolution.LocalCreatedIndex[OldCenterIndex], NewCenterIndex, CreatedIndex_child);
 		}
@@ -2317,7 +2319,7 @@ public class VectorAnnealIterate
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
-                double[] workingvector = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] workingvector = new double[Program.ParameterVectorDimension];
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
@@ -2336,7 +2338,7 @@ public class VectorAnnealIterate
 
         if (NumberChanged.TotalInt != 0)
         {
-            if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0)
+            if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0)
             {
                 DAVectorUtility.SALSAPrint(1, " Points Changed " + NumberChanged.TotalInt);
             }
@@ -2353,7 +2355,7 @@ public class VectorAnnealIterate
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
-                double[] workingvector = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] workingvector = new double[Program.ParameterVectorDimension];
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
@@ -2374,7 +2376,7 @@ public class VectorAnnealIterate
 	public static void InitializeSolution(ClusteringSolution StartSolution) throws MPIException {
 
 		//  Deterministic Annealing
-		double[] Initial_Y = new double[DAVectorSponge.ParameterVectorDimension];
+		double[] Initial_Y = new double[Program.ParameterVectorDimension];
 		int SpongePosition = StartSolution.SpongeCluster;
 		final double InitialM;
 		StartSolution.P_k_[0] = 1.0;
@@ -2395,8 +2397,8 @@ public class VectorAnnealIterate
 		StartSolution.LocalStatus[FirstRealCluster] = 1;
 		int CreatedIndex = ClusteringSolution.SetCreatedIndex(FirstRealCluster);
 
-		GlobalReductions.FindArrayMean SystemCoG = new GlobalReductions.FindArrayMean(DAVectorUtility.ThreadCount, DAVectorSponge.ParameterVectorDimension);
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		GlobalReductions.FindArrayMean SystemCoG = new GlobalReductions.FindArrayMean(DAVectorUtility.ThreadCount, Program.ParameterVectorDimension);
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			if (SpongePosition >= 0)
 			{
@@ -2411,7 +2413,7 @@ public class VectorAnnealIterate
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
-                    SystemCoG.addapoint(threadIndex, DAVectorSponge.PointPosition[alpha]);
+                    SystemCoG.addapoint(threadIndex, Program.PointPosition[alpha]);
                     StartSolution.Map_alpha_PointertoCreatedIndex[alpha][FirstRealCluster] = CreatedIndex;
                     StartSolution.M_alpha_kpointer_[alpha][FirstRealCluster] = InitialM;
                     if (SpongePosition >= 0) {
@@ -2426,13 +2428,13 @@ public class VectorAnnealIterate
         }
 
         SystemCoG.sumoverthreadsandmpi();
-		for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 		{
 			Initial_Y[VectorIndex] = SystemCoG.Totalmean[VectorIndex];
 			StartSolution.Y_k_i_[FirstRealCluster][VectorIndex] = Initial_Y[VectorIndex];
 		}
 		Box<double[]> tempRef_Object = new Box<>(StartSolution.Sigma_k_i_[FirstRealCluster]);
-		DAVectorSponge.CalculateSigma(Initial_Y, tempRef_Object);
+		Program.CalculateSigma(Initial_Y, tempRef_Object);
 		StartSolution.Sigma_k_i_[FirstRealCluster] = tempRef_Object.content;
 
 		GlobalReductions.FindDoubleMean InitialAverages = new GlobalReductions.FindDoubleMean(DAVectorUtility.ThreadCount);
@@ -2458,19 +2460,19 @@ public class VectorAnnealIterate
 		//  Estimate of Initial Temperature is average scaled squared distance
 		//  Fudge factor of 1.5 over estimated critical temperature for first split
 		StartSolution.Temperature = 1.5 * InitialAverages.Totalmean;
-		if (DAVectorSponge.Tminimum > 0.0)
+		if (Program.Tminimum > 0.0)
 		{
-			VectorAnnealIterate.Tmin = DAVectorSponge.Tminimum;
+			VectorAnnealIterate.Tmin = Program.Tminimum;
 		}
 		else
 		{
-			VectorAnnealIterate.Tmin = StartSolution.Temperature / Math.abs(DAVectorSponge.Tminimum);
+			VectorAnnealIterate.Tmin = StartSolution.Temperature / Math.abs(Program.Tminimum);
 		}
-		DAVectorSponge.ActualStartTemperature = StartSolution.Temperature; // For Output
-		DAVectorSponge.TargetEndTemperature = VectorAnnealIterate.Tmin; // For Output
+		Program.ActualStartTemperature = StartSolution.Temperature; // For Output
+		Program.TargetEndTemperature = VectorAnnealIterate.Tmin; // For Output
 		DAVectorUtility.SALSAPrint(1, "Points " + DAVectorUtility.PointCount_Global + " Initial Temperature " + String.format("%1$5.4f", StartSolution.Temperature) + " Minimum " + String.format("%1$5.4f", VectorAnnealIterate.Tmin));
 
-		StartSolution.ActualCoolingFactor = DAVectorSponge.InitialCoolingFactor;
+		StartSolution.ActualCoolingFactor = Program.InitialCoolingFactor;
 
 		StartSolution.PairwiseHammy = 0.0;
 		for (int RealClusterIndex = 0; RealClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; RealClusterIndex++)
@@ -2484,28 +2486,28 @@ public class VectorAnnealIterate
 	//  Assumes that second run processes sponge from first
 	public static void Restart() throws MPIException {
 		//  Reset Input File selection
-		DAVectorSponge.SelectedInputLabel = DAVectorSponge.RestartSelectedInputLabel;
-		DAVectorSponge.InputFileType = 1;
+		Program.SelectedInputLabel = Program.RestartSelectedInputLabel;
+		Program.InputFileType = 1;
 
 		// Read old Center Positions
-		DAVectorSponge.Replicate = 1;
+		Program.Replicate = 1;
 		ParallelClustering.runningSolution.Ncent_Global = 0;
 		if (ParallelClustering.runningSolution.SpongeCluster >= 0)
 		{
 			ParallelClustering.runningSolution.Ncent_Global = 1;
 		}
 		--ParallelClustering.runningSolution.Ncent_ThisNode;
-		DAVectorReadData.ReadDataFromFile(DAVectorSponge.RestartClusterFile, 2);
+		DAVectorReadData.ReadDataFromFile(Program.RestartClusterFile, 2);
 		int InitialClusterCount = ParallelClustering.runningSolution.Ncent_Global;
 		int ExtraClusterCount = 0;
-		if (DAVectorSponge.config.LabelFile.length() > 0)
+		if (Program.config.LabelFile.length() > 0)
 		{
-			DAVectorReadData.ReadDataFromFile(DAVectorSponge.config.LabelFile, 1);
-			DAVectorReadData.ReadDataFromFile(DAVectorSponge.config.LabelFile, 2);
+			DAVectorReadData.ReadDataFromFile(Program.config.LabelFile, 1);
+			DAVectorReadData.ReadDataFromFile(Program.config.LabelFile, 2);
 			ExtraClusterCount = ParallelClustering.runningSolution.Ncent_Global - InitialClusterCount;
 		}
 		ParallelClustering.runningSolution.Ncent_ThisNode = ParallelClustering.runningSolution.Ncent_Global;
-		DAVectorSponge.InitialNcent = ParallelClustering.runningSolution.Ncent_Global;
+		Program.InitialNcent = ParallelClustering.runningSolution.Ncent_Global;
 
 		// Set up Clusters including CreatedIndex. This is in Global not Distributed mode
 		for (int RealClusterIndex = 0; RealClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; RealClusterIndex++)
@@ -2520,24 +2522,24 @@ public class VectorAnnealIterate
 			{
 				ParallelClustering.runningSolution.LocalStatus[RealClusterIndex] = 1;
 				Box<double[]> tempRef_Object = new Box<>(ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex]);
-				DAVectorSponge.CalculateSigma(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], tempRef_Object);
+				Program.CalculateSigma(ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex], tempRef_Object);
 				ParallelClustering.runningSolution.Sigma_k_i_[RealClusterIndex] = tempRef_Object.content;
 			}
 			int CreatedIndex = ClusteringSolution.SetCreatedIndex(RealClusterIndex); // Sets LocalCreatedIndex
 			ParallelClustering.runningSolution.OccupationCounts_k_[RealClusterIndex] = 0;
 		}
 
-		ParallelClustering.runningSolution.Temperature = DAVectorSponge.RestartTemperature;
-		if (DAVectorSponge.Tminimum > 0.0)
+		ParallelClustering.runningSolution.Temperature = Program.RestartTemperature;
+		if (Program.Tminimum > 0.0)
 		{
-			VectorAnnealIterate.Tmin = DAVectorSponge.Tminimum;
+			VectorAnnealIterate.Tmin = Program.Tminimum;
 		}
 		else
 		{
-			VectorAnnealIterate.Tmin = ParallelClustering.runningSolution.Temperature / Math.abs(DAVectorSponge.Tminimum);
+			VectorAnnealIterate.Tmin = ParallelClustering.runningSolution.Temperature / Math.abs(Program.Tminimum);
 		}
-		DAVectorSponge.ActualStartTemperature = ParallelClustering.runningSolution.Temperature; // For Output
-		DAVectorSponge.TargetEndTemperature = VectorAnnealIterate.Tmin; // For Output
+		Program.ActualStartTemperature = ParallelClustering.runningSolution.Temperature; // For Output
+		Program.TargetEndTemperature = VectorAnnealIterate.Tmin; // For Output
 
 		ParallelClustering.runningSolution.SetActiveClusters();
 
@@ -2550,7 +2552,7 @@ public class VectorAnnealIterate
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
                     int NumClustersperPoint = 0;
-                    int AssignedCluster = DAVectorSponge.PointLabel[alpha];
+                    int AssignedCluster = Program.PointLabel[alpha];
                     if (AssignedCluster >= ParallelClustering.runningSolution.Ncent_Global) {
                         DAVectorUtility.printAndThrowRuntimeException(
                                 " Illegal Cluster Number " + AssignedCluster + " At Point " + (alpha + DAVectorUtility.PointStart_Process) + " Total " + ParallelClustering.runningSolution.Ncent_Global);
@@ -2602,10 +2604,10 @@ public class VectorAnnealIterate
 		}
 		DAVectorUtility.SALSAPrint(1, message);
 
-		if ((ParallelClustering.runningSolution.SpongeCluster != -1) && (DAVectorSponge.SpongePoption == 1))
+		if ((ParallelClustering.runningSolution.SpongeCluster != -1) && (Program.SpongePoption == 1))
 		{
 			wgt = 1.0 - ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster];
-			ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster] = DAVectorSponge.SpongePWeight / ParallelClustering.runningSolution.Ncent_Global;
+			ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster] = Program.SpongePWeight / ParallelClustering.runningSolution.Ncent_Global;
 			wgt = (1.0 - ParallelClustering.runningSolution.P_k_[ParallelClustering.runningSolution.SpongeCluster]) / wgt;
 			for (int RealClusterIndex = 0; RealClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; RealClusterIndex++)
 			{
@@ -2621,16 +2623,16 @@ public class VectorAnnealIterate
 		}
 		ParallelClustering.runningSolution.SetClusterWidths();
 		double AverageClusterwidth = ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth;
-		double[] oldwidth = new double[DAVectorSponge.ParameterVectorDimension];
-		if (DAVectorSponge.CalculateIndividualWidths)
+		double[] oldwidth = new double[Program.ParameterVectorDimension];
+		if (Program.CalculateIndividualWidths)
 		{
             System.arraycopy(ParallelClustering.runningSolution.AverageWidth, 0, oldwidth, 0,
-                    DAVectorSponge.ParameterVectorDimension);
+                    Program.ParameterVectorDimension);
 		}
-		DAVectorSponge.ActualSpongeTemperature = ParallelClustering.runningSolution.Temperature;
-		DAVectorSponge.ActualWidth = AverageClusterwidth;
+		Program.ActualSpongeTemperature = ParallelClustering.runningSolution.Temperature;
+		Program.ActualWidth = AverageClusterwidth;
 		DAVectorUtility.InterimTiming();
-		DAVectorSponge.TimeatSponge = DAVectorUtility.HPDuration;
+		Program.TimeatSponge = DAVectorUtility.HPDuration;
 
 		VectorAnnealIterate.DistributeNextTime = true;
 		ParallelClustering.runningSolution.DiffMalpha_k_Set = -1;
@@ -2638,9 +2640,9 @@ public class VectorAnnealIterate
 		VectorAnnealIterate.CompleteCleanUp();
 		ParallelClustering.runningSolution.SetClusterWidths();
 		String widthmessage = "";
-		if (DAVectorSponge.CalculateIndividualWidths)
+		if (Program.CalculateIndividualWidths)
 		{
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				widthmessage += VectorIndex + " Component Widths " + String.format("%1$5.4E", oldwidth[VectorIndex]) + " " + String.format("%1$5.4E", ParallelClustering.runningSolution.AverageWidth[VectorIndex]) + " ";
 			}
@@ -2678,7 +2680,7 @@ public class VectorAnnealIterate
 				continue;
 			}
 			double TestDistce = DAVectorParallelism.getSquaredScaledDistanceTweenActiveClusters(LocalActiveClusterIndex1, LocalActiveClusterIndex2, ParallelClustering.runningSolution);
-			if (TestDistce < DAVectorSponge.ScaledSquaredDistanceatClosenessTest)
+			if (TestDistce < Program.ScaledSquaredDistanceatClosenessTest)
 			{
 				return true;
 			}
@@ -2718,7 +2720,7 @@ public class VectorAnnealIterate
 		}
 
 		boolean CheckCloseness = false;
-		if (ParallelClustering.runningSolution.Temperature < DAVectorSponge.TemperatureforClosenessTest)
+		if (ParallelClustering.runningSolution.Temperature < Program.TemperatureforClosenessTest)
 		{
 			if ((VectorAnnealIterate.TemperatureatLastCloseTest < 0.0) || (ParallelClustering.runningSolution.Temperature < VectorAnnealIterate.TemperatureatLastCloseTest - 0.25))
 			{
@@ -2738,10 +2740,10 @@ public class VectorAnnealIterate
 		double ProbabilitySum2 = 0.0;
 		String documentit = "";
 		ParallelClustering.runningSolution.FindOccupationCounts();
-		double C_k_Test = DAVectorSponge.MinimumCountforCluster_C_k;
+		double C_k_Test = Program.MinimumCountforCluster_C_k;
 		if (ParallelClustering.runningSolution.SpongeCluster >= 0)
 		{
-			C_k_Test = DAVectorSponge.MinimumCountforCluster_C_kwithSponge;
+			C_k_Test = Program.MinimumCountforCluster_C_kwithSponge;
 		}
 		int NumberSmall_C = 0;
 		int NumberSmall_OccCount = 0;
@@ -2769,7 +2771,7 @@ public class VectorAnnealIterate
 					RemoveCluster[RealClusterIndex] = true;
 					++NumberSmall_C;
 				}
-				else if (ParallelClustering.runningSolution.OccupationCounts_k_[RealClusterIndex] < DAVectorSponge.MinimumCountforCluster_Points)
+				else if (ParallelClustering.runningSolution.OccupationCounts_k_[RealClusterIndex] < Program.MinimumCountforCluster_Points)
 				{
 					RemoveCluster[RealClusterIndex] = true;
 					++NumberSmall_OccCount;
@@ -2811,9 +2813,9 @@ public class VectorAnnealIterate
             }
 			DAVectorUtility.StopSubTimer(DAVectorUtility.MPIBROADCASTTiming);
 		}
-		DAVectorSponge.TotalClustersDeleted_CSmall += NumberSmall_C;
-		DAVectorSponge.TotalClustersDeleted_OccCount += NumberSmall_OccCount;
-		DAVectorSponge.TotalClustersDeleted_Close += NumberClose;
+		Program.TotalClustersDeleted_CSmall += NumberSmall_C;
+		Program.TotalClustersDeleted_OccCount += NumberSmall_OccCount;
+		Program.TotalClustersDeleted_Close += NumberClose;
 
 		for (int LocalActiveClusterIndex = 0; LocalActiveClusterIndex < ClusteringSolution.NumberLocalActiveClusters; LocalActiveClusterIndex++)
 		{
@@ -2829,7 +2831,7 @@ public class VectorAnnealIterate
 					++Numbertoosmall01;
 				}
 				documentit += RealClusterIndex + "(" + ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex] + ") C_k_ " + String.format("%1$2.1f", ParallelClustering.runningSolution.C_k_[RealClusterIndex]) + " Points " + ParallelClustering.runningSolution.OccupationCounts_k_[RealClusterIndex];
-				if (DAVectorSponge.ParameterVectorDimension == 2)
+				if (Program.ParameterVectorDimension == 2)
 				{
 					documentit += " Y " + String.format("%1$4.3f", ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex][0]) + " " + String.format("%1$4.3f", ParallelClustering.runningSolution.Y_k_i_[RealClusterIndex][1]) + " * ";
 				}
@@ -2870,7 +2872,7 @@ public class VectorAnnealIterate
 		}
 
 		//  Need to change solution as one or more clusters too small
-		if (VectorAnnealIterate.EMIterationCount % DAVectorSponge.PrintInterval == 0)
+		if (VectorAnnealIterate.EMIterationCount % Program.PrintInterval == 0)
 		{
 			if (ParallelClustering.runningSolution.DistributedExecutionMode)
 			{
@@ -2887,7 +2889,7 @@ public class VectorAnnealIterate
 			int RealClusterIndex = ClusteringSolution.RealClusterIndices[LocalActiveClusterIndex];
 			if (!RemoveCluster[RealClusterIndex])
 			{
-				if (DAVectorSponge.ContinuousClustering)
+				if (Program.ContinuousClustering)
 				{
 					ParallelClustering.runningSolution.P_k_[RealClusterIndex] = ParallelClustering.runningSolution.P_k_[RealClusterIndex] / ProbabilitySum;
 				}
@@ -2926,17 +2928,17 @@ public class VectorAnnealIterate
 			return false;
 		}
 		int CurrentMax = ParallelClustering.runningSolution.Ncent_ThisNode;
-		if (CurrentMax >= DAVectorSponge.maxNcentperNode)
+		if (CurrentMax >= Program.maxNcentperNode)
 		{
 			return false;
 		}
 
 		double AverageClusterwidth = ParallelClustering.runningSolution.TotaloverVectorIndicesAverageWidth;
 
-		boolean Addasponge = (DAVectorSponge.CreateSpongeScaledSquaredWidth > 0.0) && (AverageClusterwidth <= DAVectorSponge.CreateSpongeScaledSquaredWidth);
+		boolean Addasponge = (Program.CreateSpongeScaledSquaredWidth > 0.0) && (AverageClusterwidth <= Program.CreateSpongeScaledSquaredWidth);
 		if (!Addasponge)
 		{
-			Addasponge = (DAVectorSponge.SpongeTemperature1 > 0.0) && (ParallelClustering.runningSolution.Temperature < DAVectorSponge.SpongeTemperature1);
+			Addasponge = (Program.SpongeTemperature1 > 0.0) && (ParallelClustering.runningSolution.Temperature < Program.SpongeTemperature1);
 		}
 		Addasponge = DAVectorUtility.SynchronizeMPIBoolean(Addasponge);
 		if (!Addasponge)
@@ -2972,11 +2974,11 @@ public class VectorAnnealIterate
 			SpongeCreatedIndex = ClusteringSolution.SetCreatedIndex(CurrentMax);
 		}
 
-		DAVectorSponge.ActualSpongeTemperature = ParallelClustering.runningSolution.Temperature;
-		DAVectorSponge.ActualWidth = AverageClusterwidth;
+		Program.ActualSpongeTemperature = ParallelClustering.runningSolution.Temperature;
+		Program.ActualWidth = AverageClusterwidth;
 		DAVectorUtility.InterimTiming();
-		DAVectorSponge.TimeatSponge = DAVectorUtility.HPDuration;
-		DAVectorUtility.SALSAPrint(1, "Sponge added with Created Index " + SpongeCreatedIndex + " Time " + String.format("%1$5.4E", DAVectorSponge.TimeatSponge));
+		Program.TimeatSponge = DAVectorUtility.HPDuration;
+		DAVectorUtility.SALSAPrint(1, "Sponge added with Created Index " + SpongeCreatedIndex + " Time " + String.format("%1$5.4E", Program.TimeatSponge));
 
 		//  Add Sponge to every point!
         // Note - parallel for
@@ -2984,7 +2986,7 @@ public class VectorAnnealIterate
         try {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
-                double[] workingvector = new double[DAVectorSponge.ParameterVectorDimension];
+                double[] workingvector = new double[Program.ParameterVectorDimension];
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
@@ -3008,7 +3010,7 @@ public class VectorAnnealIterate
 		ParallelClustering.runningSolution.LocalStatus[CurrentMax] = 0;
 		ParallelClustering.runningSolution.LocalSplitCreatedIndex[CurrentMax] = 0;
 
-		ParallelClustering.runningSolution.P_k_[CurrentMax] = DAVectorSponge.SpongePWeight / ParallelClustering.runningSolution.Ncent_Global;
+		ParallelClustering.runningSolution.P_k_[CurrentMax] = Program.SpongePWeight / ParallelClustering.runningSolution.Ncent_Global;
 		double wgt = (1.0 - ParallelClustering.runningSolution.P_k_[CurrentMax]);
 		for (int ClusterIndex = 0; ClusterIndex < ParallelClustering.runningSolution.Ncent_ThisNode; ClusterIndex++)
 		{
@@ -3028,7 +3030,7 @@ public class VectorAnnealIterate
 	} // End AddSpongeCluster()
 
 	public static void CalculateClusterStatus() throws MPIException {
-		if (DAVectorSponge.DoLCMS)
+		if (Program.DoLCMS)
 		{
 			LCMSAnalyze.LCMSCalculateClusterStatus();
 		}
@@ -3042,13 +3044,13 @@ public class VectorAnnealIterate
 			DoFileOutput = false;
 		}
 
-		DAVectorSponge.ClusterNumberOutput = ParallelClustering.runningSolution.Ncent_Global;
+		Program.ClusterNumberOutput = ParallelClustering.runningSolution.Ncent_Global;
 
 		//  Set Global Counts and Positions
 		double[][] GlobalCenters = new double[ParallelClustering.runningSolution.Ncent_Global][];
 		for (int GlobalClusterIndex = 0; GlobalClusterIndex < ParallelClustering.runningSolution.Ncent_Global; GlobalClusterIndex++)
 		{
-			GlobalCenters[GlobalClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+			GlobalCenters[GlobalClusterIndex] = new double[Program.ParameterVectorDimension];
 		}
 		ClusteringSolution.SetGlobalClusterNumbers();
 
@@ -3081,12 +3083,12 @@ public class VectorAnnealIterate
                     }
                     labels[alpha] = position;
                     Extralabels[alpha] = "";
-                    if (DAVectorSponge.CompareSolution > 0) {
+                    if (Program.CompareSolution > 0) {
                         // Add older clustering labels
-                        int MedeaIndex = DAVectorSponge.MedeaClusters.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
-                        int MclustIndex = DAVectorSponge.MclustClusters.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
-                        int GoldenIndex = DAVectorSponge.GoldenPeaks.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
-                        int OurIndex = DAVectorSponge.OurClusters.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
+                        int MedeaIndex = Program.MedeaClusters.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
+                        int MclustIndex = Program.MclustClusters.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
+                        int GoldenIndex = Program.GoldenPeaks.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
+                        int OurIndex = Program.OurClusters.PointstoClusterIDs[alpha + DAVectorUtility.PointStart_Process];
                         Extralabels[alpha] = OurIndex + " " + MedeaIndex + " " + MclustIndex + " " + GoldenIndex;
                     }
                 }
@@ -3097,8 +3099,9 @@ public class VectorAnnealIterate
         }
 
 
-        String directory = Paths.get(DAVectorSponge.config.ClusterFile).getParent().toString();
-		String file = Files.getNameWithoutExtension(DAVectorSponge.config.ClusterFile) + FileLabel + "-M" + DAVectorSponge.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global + "." + Files.getFileExtension(DAVectorSponge.config.ClusterFile);
+        String directory = Paths.get(Program.config.ClusterFile).getParent().toString();
+		String file = Files.getNameWithoutExtension(Program.config.ClusterFile) + FileLabel + "-M" + Program.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global + "." + Files.getFileExtension(
+                Program.config.ClusterFile);
 		String ClusternumberFileName = Paths.get(directory, file).toString();
 
 		int MPItag = 100;
@@ -3106,7 +3109,7 @@ public class VectorAnnealIterate
 		{
 			if (DoFileOutput)
 			{
-				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, labels, DAVectorSponge.PointPosition, Extralabels, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, false);
+				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, labels, Program.PointPosition, Extralabels, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, false);
 			}
 
             // Note - parallel for
@@ -3115,7 +3118,7 @@ public class VectorAnnealIterate
                 {
                     int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                     int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
-                    System.arraycopy(labels, beginpoint, DAVectorSponge.ClusterAssignments,
+                    System.arraycopy(labels, beginpoint, Program.ClusterAssignments,
                             beginpoint + DAVectorUtility.PointStart_Process, indexlen + beginpoint - beginpoint);
 
                 }); // End Parallel Section setting cluster assignments in process 0
@@ -3132,16 +3135,16 @@ public class VectorAnnealIterate
                 int firstPoint = fromsource.getFirstPoint();
                 for (int index = 0; index < AwayArraySize; index++)
 				{
-                    DAVectorSponge.ClusterAssignments[index + firstPoint] = fromsource.getMArrayIntAt(index);
+                    Program.ClusterAssignments[index + firstPoint] = fromsource.getMArrayIntAt(index);
 				}
 
 				double[][] AwayPointPositions = new double[AwayArraySize][];
 				for (int index = 0; index < AwayArraySize; index++)
 				{
-					AwayPointPositions[index] = new double[DAVectorSponge.ParameterVectorDimension];
+					AwayPointPositions[index] = new double[Program.ParameterVectorDimension];
 				}
 				MPIPacket fromsourcedouble;
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					fromsourcedouble = DAVectorUtility.mpiOps.receive(MPISource, MPItag, MPIPacket.Type.Double);
 					for (int LocalPointIndex = 0; LocalPointIndex < AwayArraySize; LocalPointIndex++)
@@ -3167,18 +3170,18 @@ public class VectorAnnealIterate
 			int decrement = 0;
 			for (int StrippedClusterIndex = 0; StrippedClusterIndex < CenterLabelSize; StrippedClusterIndex++)
 			{
-				CenterPositions[StrippedClusterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+				CenterPositions[StrippedClusterIndex] = new double[Program.ParameterVectorDimension];
 				if (ClusteringSolution.TotalClusterSummary.SpongeCluster == StrippedClusterIndex)
 				{
 					decrement = 1;
 				}
 				int ClusterIndex = StrippedClusterIndex + decrement;
                 System.arraycopy(ClusteringSolution.TotalClusterSummary.CenterPosition[ClusterIndex], 0,
-                        CenterPositions[StrippedClusterIndex], 0, DAVectorSponge.ParameterVectorDimension);
+                        CenterPositions[StrippedClusterIndex], 0, Program.ParameterVectorDimension);
 				CenterLabel[StrippedClusterIndex] = Math.max(100000000, CenterLabelSize);
 				int OtherIndices = -1;
 				ExtraCenterlabels[StrippedClusterIndex] = "";
-				if (DAVectorSponge.CompareSolution > 0)
+				if (Program.CompareSolution > 0)
 				{
                     ExtraCenterlabels[StrippedClusterIndex] = ClusterIndex + " " + OtherIndices + " " + OtherIndices + " " + OtherIndices;
 				}
@@ -3204,13 +3207,13 @@ public class VectorAnnealIterate
             // Note - MPI Call - Send - MPIPacket<Integer>
 			DAVectorUtility.mpiOps.send(tosend, 0, MPItag);
 			MPIPacket tosenddouble = MPIPacket.newDoublePacket(DAVectorUtility.PointCount_Process);
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				tosenddouble.setFirstPoint(DAVectorUtility.PointStart_Process);
 				tosenddouble.setNumberOfPoints(DAVectorUtility.PointCount_Process);
 				for (int LocalPointIndex = 0; LocalPointIndex < DAVectorUtility.PointCount_Process; LocalPointIndex++)
 				{
-					tosenddouble.setMArrayDoubleAt(LocalPointIndex, DAVectorSponge.PointPosition[LocalPointIndex][VectorIndex]);
+					tosenddouble.setMArrayDoubleAt(LocalPointIndex, Program.PointPosition[LocalPointIndex][VectorIndex]);
 				}
                 // Note - MPI Call - Send - MPIPacket<Double>
 				DAVectorUtility.mpiOps.send(tosenddouble, 0, MPItag);
@@ -3218,7 +3221,7 @@ public class VectorAnnealIterate
 		}
         // Note - MPI Call - Broadcast - int
 //		DAVectorUtility.MPI_communicator.<Integer>Broadcast(tempRef_ClusterAssignments, 0);
-        DAVectorUtility.mpiOps.broadcast(DAVectorSponge.ClusterAssignments, 0);
+        DAVectorUtility.mpiOps.broadcast(Program.ClusterAssignments, 0);
         // Note - MPI Call - Barrier
 		DAVectorUtility.mpiOps.barrier();
 
@@ -3234,16 +3237,17 @@ public class VectorAnnealIterate
 		{
 			return;
 		}
-		if (DAVectorSponge.RW3DData <= 0)
+		if (Program.RW3DData <= 0)
 		{
 			return;
 		}
 
-        String directory = Paths.get(DAVectorSponge.config.ClusterFile).getParent().toString();
-		String file = Files.getNameWithoutExtension(DAVectorSponge.config.ClusterFile) + "-Plot3D" + "-M" + DAVectorSponge.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global + "." + Files.getFileExtension(DAVectorSponge.config.ClusterFile);
+        String directory = Paths.get(Program.config.ClusterFile).getParent().toString();
+		String file = Files.getNameWithoutExtension(Program.config.ClusterFile) + "-Plot3D" + "-M" + Program.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global + "." + Files.getFileExtension(
+                Program.config.ClusterFile);
 		String ClusternumberFileName = Paths.get(directory, extraname + "-" + file).toString();
 
-		Write3DClusterFile(ClusternumberFileName, DAVectorSponge.ClusterAssignments, 0, false);
+		Write3DClusterFile(ClusternumberFileName, Program.ClusterAssignments, 0, false);
 	} // End Output3DClusterLabels()
 
     public static void WriteClusterFile(String fname, int[] labels, double[][] PointPositions, String[] ExtraLabels, int dataPoints, int startposition, boolean append){
@@ -3258,10 +3262,10 @@ public class VectorAnnealIterate
                 java.nio.file.Files.newBufferedWriter(Paths.get(fname), Charset.defaultCharset(), mode), true)) {
             for (int i = 0; i < dataPoints; i++) {
                 String line = String.valueOf(i + startposition);
-                for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++) {
+                for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                     line += " " + String.format("%1$7.6f", PointPositions[i][VectorIndex]);
                 }
-                if (DAVectorSponge.ParameterVectorDimension == 2) {
+                if (Program.ParameterVectorDimension == 2) {
                     line += " 0.0";
                 }
                 line += " " + labels.get(i) + " " + ExtraLabels[i];
@@ -3272,7 +3276,7 @@ public class VectorAnnealIterate
             System.err.format("Failed writing cluster file due to I/O exception: %s%n", e);
         }
 
-		if (DAVectorSponge.SigmaMethod > 0)
+		if (Program.SigmaMethod > 0)
 		{
 			fname = fname.replace(".txt", "Scaled.txt");
             try (PrintWriter writer = new PrintWriter(
@@ -3281,17 +3285,17 @@ public class VectorAnnealIterate
                 for (int i = 0; i < dataPoints; i++)
                 {
                     String line = String.valueOf(i + startposition);
-                    for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+                    for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         tmp = PointPositions[i][VectorIndex];
-                        if ((DAVectorSponge.SigmaMethod >= 2) && (VectorIndex == 0) && (tmp != 0.0))
+                        if ((Program.SigmaMethod >= 2) && (VectorIndex == 0) && (tmp != 0.0))
                         {
                             tmp = Math.log(tmp);
                         }
-                        tmp = tmp / DAVectorSponge.SigmaVectorParameters_i_[VectorIndex];
+                        tmp = tmp / Program.SigmaVectorParameters_i_[VectorIndex];
                         line += " " + String.format("%1$7.6f", tmp);
                     }
-                    if (DAVectorSponge.ParameterVectorDimension == 2)
+                    if (Program.ParameterVectorDimension == 2)
                     {
                         line += " 0.0";
                     }
@@ -3313,11 +3317,11 @@ public class VectorAnnealIterate
             for (int i = 0; i < DAVectorUtility.PointCount_Global; i++)
             {
                 String line = String.valueOf(i + startposition);
-                for (int VectorIndex = 0; VectorIndex < DAVectorSponge.RW3DData; VectorIndex++)
+                for (int VectorIndex = 0; VectorIndex < Program.RW3DData; VectorIndex++)
                 {
-                    line += " " + String.format("%1$7.6f", DAVectorSponge.FullPoint3DPosition[i][VectorIndex]);
+                    line += " " + String.format("%1$7.6f", Program.FullPoint3DPosition[i][VectorIndex]);
                 }
-                if (DAVectorSponge.RW3DData == 2)
+                if (Program.RW3DData == 2)
                 {
                     line += " 0.0";
                 }
@@ -3331,18 +3335,19 @@ public class VectorAnnealIterate
 
 	// Unlike Earlier versions, cluster labels are 0-based
 	public static void SimpleOutputClusteringResults(String FileLabel, double[][] ClusterCenters) throws MPIException { // Output using precalculated Cluster Assignment Array
-        String directory = Paths.get(DAVectorSponge.config.ClusterFile).getParent().toString();
-		String file = Files.getNameWithoutExtension(DAVectorSponge.config.ClusterFile) + FileLabel + "-M" + DAVectorSponge.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global+ "." + Files.getFileExtension(DAVectorSponge.config.ClusterFile);
+        String directory = Paths.get(Program.config.ClusterFile).getParent().toString();
+		String file = Files.getNameWithoutExtension(Program.config.ClusterFile) + FileLabel + "-M" + Program.maxNcentperNode + "-C" + ParallelClustering.runningSolution.Ncent_Global+ "." + Files.getFileExtension(
+                Program.config.ClusterFile);
 		String ClusternumberFileName = Paths.get(directory, file).toString();
 
 		int MPItag = 100;
 		if (DAVectorUtility.MPI_Rank == 0)
 		{
-			Box<int[]> tempRef_ClusterAssignments = new Box<>(DAVectorSponge.ClusterAssignments);
-			Box<double[][]> tempRef_PointPosition = new Box<>(DAVectorSponge.PointPosition);
+			Box<int[]> tempRef_ClusterAssignments = new Box<>(Program.ClusterAssignments);
+			Box<double[][]> tempRef_PointPosition = new Box<>(Program.PointPosition);
 			VectorAnnealIterate.SimpleWriteClusterFile(ClusternumberFileName, tempRef_ClusterAssignments, tempRef_PointPosition, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, DAVectorUtility.PointStart_Process, false);
-			DAVectorSponge.ClusterAssignments = tempRef_ClusterAssignments.content;
-			DAVectorSponge.PointPosition = tempRef_PointPosition.content;
+			Program.ClusterAssignments = tempRef_ClusterAssignments.content;
+			Program.PointPosition = tempRef_PointPosition.content;
 
             // Note - MPI Call Block (with MPI_Size = 1 this loop will not happen)
 			for (int MPISource = 1; MPISource < DAVectorUtility.MPI_Size; MPISource++)
@@ -3354,10 +3359,10 @@ public class VectorAnnealIterate
 				double[][] AwayPointPositions = new double[AwayArraySize][];
 				for (int index = 0; index < AwayArraySize; index++)
 				{
-					AwayPointPositions[index] = new double[DAVectorSponge.ParameterVectorDimension];
+					AwayPointPositions[index] = new double[Program.ParameterVectorDimension];
 				}
 				MPIPacket fromsourcedouble;
-				for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
                     // Note - MPI Call - Receive - MPIPacket<Double>
 					fromsourcedouble = DAVectorUtility.mpiOps.receive(MPISource, MPItag, MPIPacket.Type.Double);
@@ -3366,10 +3371,10 @@ public class VectorAnnealIterate
 						AwayPointPositions[LocalPointIndex][VectorIndex] = fromsourcedouble.getMArrayDoubleAt(LocalPointIndex);
 					}
 				}
-				Box<int[]> tempRef_ClusterAssignments2 = new Box<>(DAVectorSponge.ClusterAssignments);
+				Box<int[]> tempRef_ClusterAssignments2 = new Box<>(Program.ClusterAssignments);
 				Box<double[][]> tempRef_AwayPointPositions = new Box<>(AwayPointPositions);
 				VectorAnnealIterate.SimpleWriteClusterFile(ClusternumberFileName, tempRef_ClusterAssignments2, tempRef_AwayPointPositions, AwayArraySize, fromsource.getFirstPoint(), fromsource.getFirstPoint(), true);
-				DAVectorSponge.ClusterAssignments = tempRef_ClusterAssignments2.content;
+				Program.ClusterAssignments = tempRef_ClusterAssignments2.content;
 				AwayPointPositions = tempRef_AwayPointPositions.content;
 			}
 
@@ -3409,18 +3414,18 @@ public class VectorAnnealIterate
             int firstPoint = tosend.getFirstPoint();
             for (int index = 0; index < numberOfPoints; index++)
 			{
-                tosend.setMArrayIntAt(index,DAVectorSponge.ClusterAssignments[index + firstPoint]);
+                tosend.setMArrayIntAt(index, Program.ClusterAssignments[index + firstPoint]);
 			}
             // Note - MPI Call - Send - MPIPacket<Integer>
 			DAVectorUtility.mpiOps.send(tosend, 0, MPItag);
 			MPIPacket tosenddouble = MPIPacket.newDoublePacket(DAVectorUtility.PointCount_Process);
-			for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				tosenddouble.setFirstPoint(DAVectorUtility.PointStart_Process);
 				tosenddouble.setNumberOfPoints(DAVectorUtility.PointCount_Process);
 				for (int LocalPointIndex = 0; LocalPointIndex < DAVectorUtility.PointCount_Process; LocalPointIndex++)
 				{
-					tosenddouble.setMArrayDoubleAt(LocalPointIndex, DAVectorSponge.PointPosition[LocalPointIndex][VectorIndex]);
+					tosenddouble.setMArrayDoubleAt(LocalPointIndex, Program.PointPosition[LocalPointIndex][VectorIndex]);
 				}
                 // Note - MPI Call - Send - MPIPacket<Double>
 				DAVectorUtility.mpiOps.send(tosenddouble, 0, MPItag);
@@ -3443,11 +3448,11 @@ public class VectorAnnealIterate
             for (int i = 0; i < dataPoints; i++)
             {
                 String line = String.valueOf(i + startposition1);
-                for (int VectorIndex = 0; VectorIndex < DAVectorSponge.ParameterVectorDimension; VectorIndex++)
+                for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                 {
                     line += " " + String.format("%1$7.6f", PointPositions.content[i][VectorIndex]);
                 }
-                if (DAVectorSponge.ParameterVectorDimension == 2)
+                if (Program.ParameterVectorDimension == 2)
                 {
                     line += " 0.0";
                 }

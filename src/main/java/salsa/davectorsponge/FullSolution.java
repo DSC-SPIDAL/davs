@@ -21,7 +21,7 @@ public class FullSolution
 		CenterPosition = new double[MaxCenters][];
 		for (int CenterIndex = 0; CenterIndex < MaxCenters; CenterIndex++)
 		{
-			CenterPosition[CenterIndex] = new double[DAVectorSponge.ParameterVectorDimension];
+			CenterPosition[CenterIndex] = new double[Program.ParameterVectorDimension];
 		}
 		CreatedIndex = new int[MaxCenters];
 		CurrentNode = new int[MaxCenters];

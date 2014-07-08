@@ -42,12 +42,12 @@ public class DAVectorReadData {
                 }
 
                 Integer parsedInt = Ints.tryParse(splits[SplitPosition]);
-                if (parsedInt == null || parsedInt != DAVectorSponge.SelectedInputLabel) continue;
+                if (parsedInt == null || parsedInt != Program.SelectedInputLabel) continue;
 
                 parsedInt = Ints.tryParse(splits[GoldenIDPosition]);
                 parsedInt = parsedInt == null ? -1 : parsedInt;
 
-                DAVectorSponge.GoldenPeaks.PointstoClusterIDs[count] = parsedInt;
+                Program.GoldenPeaks.PointstoClusterIDs[count] = parsedInt;
                 GoldenExamination.GoldenID[count] = parsedInt;
                 GoldenExamination.GoldenLabel[count] = splits[GoldenLabelPosition];
                 GoldenExamination.PeakPosition[count][0] = Double.parseDouble(splits[1]);
@@ -63,7 +63,7 @@ public class DAVectorReadData {
                         parsedInt = (int) Math.floor(tryagain + 0.001);
                     }
                 }
-                DAVectorSponge.MclustClusters.PointstoClusterIDs[count] = parsedInt;
+                Program.MclustClusters.PointstoClusterIDs[count] = parsedInt;
 
                 parsedInt = Ints.tryParse(splits[MedeaPosition]);
                 if (parsedInt == null) {
@@ -75,7 +75,7 @@ public class DAVectorReadData {
                         parsedInt = (int) Math.floor(tryagain + 0.001);
                     }
                 }
-                DAVectorSponge.MedeaClusters.PointstoClusterIDs[count] = parsedInt;
+                Program.MedeaClusters.PointstoClusterIDs[count] = parsedInt;
                 count++;
             }
             success = true;
@@ -86,9 +86,9 @@ public class DAVectorReadData {
         if (!success) {
             DAVectorUtility.printAndThrowRuntimeException("DA Vector File Analyze error " + fname);
         }
-        DAVectorSponge.GoldenPeaks.setup();
-        DAVectorSponge.MclustClusters.setup();
-        DAVectorSponge.MedeaClusters.setup();
+        Program.GoldenPeaks.setup();
+        Program.MclustClusters.setup();
+        Program.MedeaClusters.setup();
 
     } // End ReadLabelsFromFile
 
@@ -101,9 +101,9 @@ public class DAVectorReadData {
         for (int ChargeIndex = 0; ChargeIndex < Maxcounts; ChargeIndex++) {
             CountLabels[ChargeIndex] = 0;
         }
-        int MinSplitSize = DAVectorSponge.ParameterVectorDimension + 3;
-        int SplitPosition = 1 + DAVectorSponge.ParameterVectorDimension;
-        if (DAVectorSponge.InputFileType == 1) {
+        int MinSplitSize = Program.ParameterVectorDimension + 3;
+        int SplitPosition = 1 + Program.ParameterVectorDimension;
+        if (Program.InputFileType == 1) {
             MinSplitSize = 5;
             SplitPosition = 4;
         }
@@ -129,7 +129,7 @@ public class DAVectorReadData {
                 }
 
                 Integer parsedInt = Ints.tryParse(splits[SplitPosition]);
-                if (parsedInt == null || ((DAVectorSponge.SelectedInputLabel < 0) && (parsedInt == -DAVectorSponge
+                if (parsedInt == null || ((Program.SelectedInputLabel < 0) && (parsedInt == -Program
                         .SelectedInputLabel))) {
                     continue;
                 }
@@ -140,8 +140,8 @@ public class DAVectorReadData {
                 count++;
             }
             success = true;
-            if (DAVectorSponge.SelectedInputLabel >= 0) {
-                DAVectorUtility.PointCount_Global = CountLabels[1 + DAVectorSponge.SelectedInputLabel];
+            if (Program.SelectedInputLabel >= 0) {
+                DAVectorUtility.PointCount_Global = CountLabels[1 + Program.SelectedInputLabel];
             } else {
                 DAVectorUtility.PointCount_Global = 0;
                 for (int selection = 0; selection < Maxcounts; selection++) {
@@ -150,7 +150,7 @@ public class DAVectorReadData {
             }
             DAVectorUtility.SALSAPrint(1, "File Analyzed " + fname + " Total " + count);
             String label = "Charge";
-            if (DAVectorSponge.InputFileType == 1) {
+            if (Program.InputFileType == 1) {
                 label = "Cluster";
             }
             if (CountLabels[0] > 0) {
@@ -188,11 +188,11 @@ public class DAVectorReadData {
             BeginLabel = ParallelClustering.runningSolution.Ncent_Global - 1;
         }
 
-        int MinSplitSize = DAVectorSponge.ParameterVectorDimension + 3;
-        int SplitPosition = 1 + DAVectorSponge.ParameterVectorDimension;
-        int LabelPosition = 4 + DAVectorSponge.ParameterVectorDimension;
+        int MinSplitSize = Program.ParameterVectorDimension + 3;
+        int SplitPosition = 1 + Program.ParameterVectorDimension;
+        int LabelPosition = 4 + Program.ParameterVectorDimension;
 
-        if (DAVectorSponge.InputFileType == 1) {
+        if (Program.InputFileType == 1) {
             MinSplitSize = 5;
             SplitPosition = 4;
             LabelPosition = 4;
@@ -224,23 +224,23 @@ public class DAVectorReadData {
                 if (parsedInt == null) {
                     continue;
                 }
-                if (DAVectorSponge.SelectedInputLabel >= 0) {
-                    if (parsedInt != DAVectorSponge.SelectedInputLabel) {
+                if (Program.SelectedInputLabel >= 0) {
+                    if (parsedInt != Program.SelectedInputLabel) {
                         continue;
                     }
                 } else {
                     if (ReadVectorsOption >= 2) {
-                        if (parsedInt != -DAVectorSponge.SelectedInputLabel) {
+                        if (parsedInt != -Program.SelectedInputLabel) {
                             continue;
                         }
                     } else {
-                        if (parsedInt == -DAVectorSponge.SelectedInputLabel) {
+                        if (parsedInt == -Program.SelectedInputLabel) {
                             continue;
                         }
                     }
                 }
                 if ((ReadVectorsOption <= 0) && (CountLinesinFile < FirstPointPosition)) {
-                    CountLinesinFile += DAVectorSponge.Replicate;
+                    CountLinesinFile += Program.Replicate;
                     continue;
                 }
 
@@ -256,7 +256,7 @@ public class DAVectorReadData {
                             enditall = true;
                             break;
                         }
-                        double CurrentPointY0 = DAVectorSponge.PointPosition[CurrentLocalPointtoUse][0];
+                        double CurrentPointY0 = Program.PointPosition[CurrentLocalPointtoUse][0];
                         if (CurrentLineY0 < (CurrentPointY0 - 0.000001)) {
                             endinputline = true;
                             break;
@@ -264,16 +264,16 @@ public class DAVectorReadData {
                         if (CurrentLineY0 > (CurrentPointY0 + 0.000001)) {
                             ++CurrentLocalPointtoUse;
                         } else {
-                            if (Math.abs(DAVectorSponge.PointPosition[CurrentLocalPointtoUse][1] - Double.parseDouble
+                            if (Math.abs(Program.PointPosition[CurrentLocalPointtoUse][1] - Double.parseDouble
                                     (splits[2])) > 0.00001) {
                                 ++CurrentLocalPointtoUse;
                                 continue;
                             }
-                            if (DAVectorSponge.PointLabel[CurrentLocalPointtoUse] != 0) {
+                            if (Program.PointLabel[CurrentLocalPointtoUse] != 0) {
                                 DAVectorUtility.printAndThrowRuntimeException(fname + " Position " +
                                         (CurrentLocalPointtoUse + FirstPointPosition) + " Inconsistent Cluster Number" +
-                                        " " + DAVectorSponge.PointLabel[CurrentLocalPointtoUse] + " Y0 " + String
-                                        .format("%1$6.5f", DAVectorSponge.PointPosition[CurrentLocalPointtoUse][0]) + "" +
+                                        " " + Program.PointLabel[CurrentLocalPointtoUse] + " Y0 " + String
+                                        .format("%1$6.5f", Program.PointPosition[CurrentLocalPointtoUse][0]) + "" +
                                         " " + line);
                             }
                             ActualPointPosition = CurrentLocalPointtoUse;
@@ -288,14 +288,14 @@ public class DAVectorReadData {
                         break;
                     }
                 }
-                for (int CountReplicas = 0; CountReplicas < DAVectorSponge.Replicate; CountReplicas++) {
+                for (int CountReplicas = 0; CountReplicas < Program.Replicate; CountReplicas++) {
                     if (ReadVectorsOption >= 2) {
                         ParallelClustering.runningSolution.Y_k_i_[ParallelClustering.runningSolution.Ncent_Global][0]
                                 = Double.parseDouble(splits[1]);
                         ParallelClustering.runningSolution.Y_k_i_[ParallelClustering.runningSolution.Ncent_Global][1]
                                 = Double.parseDouble(splits[2]);
-                        if (DAVectorSponge.ParameterVectorDimension > 2) {
-                            for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension;
+                        if (Program.ParameterVectorDimension > 2) {
+                            for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension;
                                  VectorIndex++) {
                                 ParallelClustering.runningSolution.Y_k_i_[ParallelClustering.runningSolution
                                         .Ncent_Global][VectorIndex] = Double.parseDouble(splits[VectorIndex + 1]);
@@ -304,13 +304,13 @@ public class DAVectorReadData {
                         ++ParallelClustering.runningSolution.Ncent_Global;
                     } else {
                         if (ReadVectorsOption == 0) {
-                            DAVectorSponge.PointPosition[ActualPointPosition][0] = Double.parseDouble(splits[1]);
-                            DAVectorSponge.PointPosition[ActualPointPosition][1] = Double.parseDouble(splits[2]);
-                            DAVectorSponge.PointOriginalIndex[ActualPointPosition] = Integer.parseInt(splits[0]);
-                            if (DAVectorSponge.ParameterVectorDimension > 2) {
-                                for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension;
+                            Program.PointPosition[ActualPointPosition][0] = Double.parseDouble(splits[1]);
+                            Program.PointPosition[ActualPointPosition][1] = Double.parseDouble(splits[2]);
+                            Program.PointOriginalIndex[ActualPointPosition] = Integer.parseInt(splits[0]);
+                            if (Program.ParameterVectorDimension > 2) {
+                                for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension;
                                      VectorIndex++) {
-                                    DAVectorSponge.PointPosition[ActualPointPosition][VectorIndex] = Double
+                                    Program.PointPosition[ActualPointPosition][VectorIndex] = Double
                                             .parseDouble(splits[VectorIndex + 1]);
                                 }
                             }
@@ -320,14 +320,14 @@ public class DAVectorReadData {
                         if (parsedDouble == null) {
                             parsedDouble = 0.0;
                         }
-                        DAVectorSponge.PointLabel[ActualPointPosition] = (int) (parsedDouble + 0.001);
-                        if (DAVectorSponge.PointLabel[ActualPointPosition] != 0) {
-                            DAVectorSponge.PointLabel[ActualPointPosition] += BeginLabel;
+                        Program.PointLabel[ActualPointPosition] = (int) (parsedDouble + 0.001);
+                        if (Program.PointLabel[ActualPointPosition] != 0) {
+                            Program.PointLabel[ActualPointPosition] += BeginLabel;
                         }
                     }
                     ++ActualPointPosition;
                 }
-                CountLinesinFile += DAVectorSponge.Replicate;
+                CountLinesinFile += Program.Replicate;
                 if ((ReadVectorsOption <= 0) && (CountLinesinFile >= (FirstPointPosition + TotalNumberPointstoRead))) {
                     break;
                 }
@@ -359,7 +359,7 @@ public class DAVectorReadData {
 
         int MinSplitSize = ClusterPosition + 1;
         if (StartPointPosition >= 0) {
-            MinSplitSize = Math.max(MinSplitSize, StartPointPosition + DAVectorSponge.ParameterVectorDimension);
+            MinSplitSize = Math.max(MinSplitSize, StartPointPosition + Program.ParameterVectorDimension);
         }
 
         boolean success = false;
@@ -397,16 +397,16 @@ public class DAVectorReadData {
 
                 if (StartPointPosition >= 0) {
                     stringtest = "0 *" + splits[StartPointPosition];
-                    DAVectorSponge.PointPosition[ActualPointPosition][0] = Double.parseDouble
+                    Program.PointPosition[ActualPointPosition][0] = Double.parseDouble
                             (splits[StartPointPosition]);
                     stringtest = "1 *" + splits[StartPointPosition + 1];
-                    DAVectorSponge.PointPosition[ActualPointPosition][1] = Double.parseDouble
+                    Program.PointPosition[ActualPointPosition][1] = Double.parseDouble
                             (splits[StartPointPosition + 1]);
-                    if (DAVectorSponge.ParameterVectorDimension > 2) {
-                        for (int VectorIndex = 2; VectorIndex < DAVectorSponge.ParameterVectorDimension;
+                    if (Program.ParameterVectorDimension > 2) {
+                        for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension;
                              VectorIndex++) {
                             stringtest = VectorIndex + " *" + splits[StartPointPosition + VectorIndex];
-                            DAVectorSponge.PointPosition[ActualPointPosition][VectorIndex] = Double.parseDouble
+                            Program.PointPosition[ActualPointPosition][VectorIndex] = Double.parseDouble
                                     (splits[VectorIndex + StartPointPosition]);
                         }
                     }
@@ -482,13 +482,13 @@ public class DAVectorReadData {
 
                 int ActualPointPosition = CountLinesinFile - FirstPointPosition;
                 if (StartPointPosition >= 0) {
-                    DAVectorSponge.FullPoint3DPosition[ActualPointPosition][0] = Double.parseDouble
+                    Program.FullPoint3DPosition[ActualPointPosition][0] = Double.parseDouble
                             (splits[StartPointPosition]);
-                    DAVectorSponge.FullPoint3DPosition[ActualPointPosition][1] = Double.parseDouble
+                    Program.FullPoint3DPosition[ActualPointPosition][1] = Double.parseDouble
                             (splits[StartPointPosition + 1]);
                     if (VectorSize > 2) {
                         for (int VectorIndex = 2; VectorIndex < VectorSize; VectorIndex++) {
-                            DAVectorSponge.FullPoint3DPosition[ActualPointPosition][VectorIndex] = Double.parseDouble
+                            Program.FullPoint3DPosition[ActualPointPosition][VectorIndex] = Double.parseDouble
                                     (splits[VectorIndex + StartPointPosition]);
                         }
                     }

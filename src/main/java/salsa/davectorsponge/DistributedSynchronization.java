@@ -58,7 +58,7 @@ public class DistributedSynchronization
             //  Place where received data stored
             int FinalDataLocationIndex = -1;
 
-            ++DAVectorSponge.NumberPipelineGroups; // Increment calls of this routine
+            ++Program.NumberPipelineGroups; // Increment calls of this routine
 
             int[] DownbySteps = new int[DAVectorUtility.MPI_Size];
             int[] UpbySteps = new int[DAVectorUtility.MPI_Size];
@@ -248,13 +248,13 @@ public class DistributedSynchronization
 
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPISENDRECEIVETiming);
 
-                ++DAVectorSponge.NumberPipelineSteps;
-                DAVectorSponge.NumberofPipelineClusters += SendBuffer.getNumberOfClusters();
+                ++Program.NumberPipelineSteps;
+                Program.NumberofPipelineClusters += SendBuffer.getNumberOfClusters();
 
                 //  Examine Data passed from lower ranked processor
                 //  Set new LocalTotal and Store Data
                 ReceivedTotal = TransportComponent.getNumberOfClusters();
-                DAVectorSponge.ActualMaxMPITransportBuffer = Math.max(DAVectorSponge.ActualMaxMPITransportBuffer, ReceivedTotal);
+                Program.ActualMaxMPITransportBuffer = Math.max(Program.ActualMaxMPITransportBuffer, ReceivedTotal);
                 LocalTotal = 0; // Count Number of Clusters on next step
 
                 if (NumberofDoubleComponents != TransportComponent.getNumberOfDoubleComponents()) {
@@ -490,12 +490,12 @@ public class DistributedSynchronization
                     TransportComponent = SendBuffer;
                 }
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPISENDRECEIVETiming);
-                ++DAVectorSponge.NumberPipelineSteps;
-                DAVectorSponge.NumberofPipelineClusters += SendBuffer.getNumberOfClusters();
+                ++Program.NumberPipelineSteps;
+                Program.NumberofPipelineClusters += SendBuffer.getNumberOfClusters();
 
                 //  Examine Data passed from higher ranked processor
                 ReceivedTotal = TransportComponent.getNumberOfClusters();
-                DAVectorSponge.ActualMaxMPITransportBuffer = Math.max(DAVectorSponge.ActualMaxMPITransportBuffer, ReceivedTotal);
+                Program.ActualMaxMPITransportBuffer = Math.max(Program.ActualMaxMPITransportBuffer, ReceivedTotal);
                 LocalTotal = 0;
 
                 if (NumberofDoubleComponents != TransportComponent.getNumberOfDoubleComponents()) {

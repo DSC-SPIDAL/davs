@@ -17,18 +17,18 @@ public class ControlKmeans
 		//allocate memory on first and indeed only call
 		if (!initialized)
 		{
-			if (!DAVectorSponge.DoKmeans)
+			if (!Program.DoKmeans)
 			{
 				DAVectorUtility.printAndThrowRuntimeException(" Invalid Kmeans Request");
 			}
 
 			initialized = true;
 
-			DAVectorSponge.UseSponge = false;
-			DAVectorSponge.ContinuousClustering = false;
-			DAVectorSponge.MaxNumberSplitClusters = Math.max(DAVectorSponge.MaxNumberSplitClusters, 1);
+			Program.UseSponge = false;
+			Program.ContinuousClustering = false;
+			Program.MaxNumberSplitClusters = Math.max(Program.MaxNumberSplitClusters, 1);
 
-			ParallelClustering.runningSolution = new ClusteringSolution(DAVectorSponge.UseSponge);
+			ParallelClustering.runningSolution = new ClusteringSolution(Program.UseSponge);
 			ParallelClustering.savedSolution = ParallelClustering.runningSolution;
 			ParallelClustering.bestSolution = ParallelClustering.runningSolution;
 			DAVectorUtility.SALSAPrint(0, "Clustering Solutions Created");
@@ -72,14 +72,14 @@ public class ControlKmeans
 		StartSolution.SpongeCluster = -1;
 
 		StartSolution.Temperature = 1.0;
-		DAVectorSponge.ActualStartTemperature = StartSolution.Temperature; // For Output
-		DAVectorSponge.TargetEndTemperature = StartSolution.Temperature; // For Output
+		Program.ActualStartTemperature = StartSolution.Temperature; // For Output
+		Program.TargetEndTemperature = StartSolution.Temperature; // For Output
 
 		DAVectorUtility.SALSAPrint(1, "Points " + DAVectorUtility.PointCount_Global + " Kmeans");
-		StartSolution.ActualCoolingFactor = DAVectorSponge.InitialCoolingFactor;
+		StartSolution.ActualCoolingFactor = Program.InitialCoolingFactor;
 
 		StartSolution.PairwiseHammy = 0.0;
-		ControlKmeans.SetSolution(StartSolution, DAVectorSponge.InitialNcent);
+		ControlKmeans.SetSolution(StartSolution, Program.InitialNcent);
 
     } // End InitializeSolution
 

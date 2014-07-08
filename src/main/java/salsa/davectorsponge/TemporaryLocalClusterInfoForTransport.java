@@ -21,7 +21,7 @@ public class TemporaryLocalClusterInfoForTransport {
         totalTransportedStatus = new int[maxStorage][];
         totalTransportedY_t_i = new double[maxStorage][];
         for (int TransportIndex = 0; TransportIndex < maxStorage; TransportIndex++) {
-            totalTransportedY_t_i[TransportIndex] = new double[DAVectorSponge.ParameterVectorDimension + 1];
+            totalTransportedY_t_i[TransportIndex] = new double[Program.ParameterVectorDimension + 1];
             totalTransportedStatus[TransportIndex] = new int[2];
         }
     }
