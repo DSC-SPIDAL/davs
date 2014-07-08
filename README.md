@@ -80,8 +80,8 @@ The following shell script may be used with necessary modifications to run the p
 ```sh
 #!/bin/bash
 
-# Java classpath. This should include paths to dapwc dependent jar files and the dapwc-1.0-ompi1.8.1.jar
-# The dependent jar files may be obtained by running mvn dependency:build-classpath command within dapwchome
+# Java classpath. This should include paths to davs dependent jar files and the davs-1.0-ompi1.8.1.jar
+# The dependent jar files may be obtained by running mvn dependency:build-classpath command within davshome
 cp=<classpath>
 
 # Obtain working directory
@@ -99,7 +99,7 @@ corespernode=8
 # Options for Java runtime
 jopts="-Xms64M -Xmx64M"
 
-# Number of threads to use within one dapwc process
+# Number of threads to use within one davs process
 tpn=<threads-per-process>
 # Number of processes per node
 ppn=<processes-per-node>
@@ -108,8 +108,8 @@ ppn=<processes-per-node>
 pat=$tpn$x$ppn$x$nodes
 
 echo "Running $pat on `date`" >> status.txt
-# Invoke MPI to run dapwc
-mpirun --report-bindings --mca btl ^tcp --hostfile $hostfile --map-by node:PE=$(($corespernode / $ppn)) -np $(($nodes*$ppn)) java $jopts -cp $cp edu.indiana.soic.edu.indiana.soic.spidal.davs.Program -c config$pat.properties -n $nodes -t $tpn | tee $pat/pwc-out.txt
+# Invoke MPI to run davs
+mpirun --report-bindings --mca btl ^tcp --hostfile $hostfile --map-by node:PE=$(($corespernode / $ppn)) -np $(($nodes*$ppn)) java $jopts -cp $cp edu.indiana.soic.spidal.davs.Program -c config$pat.properties -n $nodes -t $tpn | tee $pat/davs-out.txt
 echo "Finished $pat on `date`" >> status.txt
 ```
 The arguments listed in the `mpirun` command fall into three categories.
