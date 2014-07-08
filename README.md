@@ -68,13 +68,13 @@ Prerequisites
   ```
   * Few examples are available in `$OMPI_181/examples`. Please use `mpijavac` with other parameters similar to `javac` command to compile OpenMPI Java programs. Once compiled `mpirun [options] java -cp <classpath> class-name arguments` command with proper values set as arguments will run the program. 
 
-Building dapwc
+Building davs
 -----
-* Check all prerequisites are satisfied before building dapwc
-* Clone this git repository from `git@github.com:DSC-SPIDAL/dapwc.git` Let's call this directory `dapwchome`
-* Once above two steps are completed, building dapwc requires only one command, `mvn install`, issued within `dapwchome`.
+* Check all prerequisites are satisfied before building davs
+* Clone this git repository from `git@github.com:DSC-SPIDAL/davs.git` Let's call this directory `davshome`
+* Once above two steps are completed, building davs requires only one command, `mvn install`, issued within `davshome`.
 
-Running dapwc
+Running davs
 -----
 The following shell script may be used with necessary modifications to run the program.
 ```sh
@@ -109,7 +109,7 @@ pat=$tpn$x$ppn$x$nodes
 
 echo "Running $pat on `date`" >> status.txt
 # Invoke MPI to run dapwc
-mpirun --report-bindings --mca btl ^tcp --hostfile $hostfile --map-by node:PE=$(($corespernode / $ppn)) -np $(($nodes*$ppn)) java $jopts -cp $cp edu.indiana.soic.spidal.pairwiseclustering.Program -c config$pat.properties -n $nodes -t $tpn | tee $pat/pwc-out.txt
+mpirun --report-bindings --mca btl ^tcp --hostfile $hostfile --map-by node:PE=$(($corespernode / $ppn)) -np $(($nodes*$ppn)) java $jopts -cp $cp edu.indiana.soic.spidal.davs.Program -c config$pat.properties -n $nodes -t $tpn | tee $pat/pwc-out.txt
 echo "Finished $pat on `date`" >> status.txt
 ```
 The arguments listed in the `mpirun` command fall into three categories.
@@ -122,12 +122,12 @@ The arguments listed in the `mpirun` command fall into three categories.
 * Java Runtime Parameters
   * `$jopts` in this case lists initial and maximum heap sizes for a JVM instance. 
   * `-cp` indicates paths to find required classes where each entry is separated by a `:` (in Linux)
-* Program (dapwc) Parameters
-  * `-c` points to the configuration file. This is a Java properties files listing values for each parameter that dapwc requires. Details on these parameters will follow in a later section.
+* Program (davs) Parameters
+  * `-c` points to the configuration file. This is a Java properties files listing values for each parameter that davs requires. Details on these parameters will follow in a later section.
   * `-n` indicates the total number of nodes
-  * `-t` denotes the number of threads to use within one instance of dapwc
+  * `-t` denotes the number of threads to use within one instance of davs
 
-Configuring dapwc
+Configuring davs
 -----
 The following table summarizes the parameters used in davs.
 
