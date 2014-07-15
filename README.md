@@ -1,7 +1,7 @@
 davs
 ====
 
-Deterministic Annealing Vector Sponge is a scalable and parallel clustering program that operate on both vector space and non-vector spaces. 
+Deterministic Annealing Vector Sponge is a scalable and parallel clustering program that operate on both vector space and non-vector spaces. GitHub page for this project is available at http://dsc-spidal.github.io/davs/ 
 
 Publications
 -----
@@ -137,7 +137,7 @@ Acknowledgement
 -----
 We like to express our sincere gratitude to Prof. Vivek Sarkar 
 and his team at Rice University for giving us access and 
-continuous support for HJ library. We are equally thankful to Prof. Guillermo López Taboada for giving us free unrestricted access to commercially available FastMPJ MPI library, which we evaluated in an earlier internal version. We are also 
+continuous support for HJ library. We are equally thankful to Prof. Guillermo Lï¿½pez Taboada for giving us free unrestricted access to commercially available FastMPJ MPI library, which we evaluated in an earlier internal version. We are also 
 thankful to FutureGrid project and its support team for their support with HPC systems. Last but not least OpenMPI community deserves equal recognition for their valuable support.
 
 
