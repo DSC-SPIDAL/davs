@@ -32,9 +32,9 @@
     <div id="main_content_wrap" class="outer">
       <section id="main_content" class="inner">
         <h1>
-<a name="davs" class="anchor" href="#davs"><span class="octicon octicon-link"></span></a>DAVS</h1>
+<a name="davs" class="anchor" href="#davs"><span class="octicon octicon-link"></span></a>davs</h1>
 
-<p>Deterministic Annealing Vector Sponge (davs) is a scalable and parallel clustering program that operate on both vector space and non-vector spaces. </p>
+<p>Deterministic Annealing Vector Sponge is a scalable and parallel clustering program that operate on both vector space and non-vector spaces. GitHub page for this project is available at <a href="http://dsc-spidal.github.io/davs/">http://dsc-spidal.github.io/davs/</a> </p>
 
 <h2>
 <a name="publications" class="anchor" href="#publications"><span class="octicon octicon-link"></span></a>Publications</h2>
@@ -92,11 +92,11 @@ Available at <a href="http://grids.ucs.indiana.edu/ptliupages/publications/DAVS_
 <li>Habanero Java (HJ) Library
 
 <ul>
-<li>Download HJ-lib jar file from <a href="http://www.cs.rice.edu/%7Evs3/hjlib/habanero-java-lib.jar">http://www.cs.rice.edu/~vs3/hjlib/habanero-java-lib.jar</a>
+<li>Download HJ-lib jar file from <a href="http://www.cs.rice.edu/%7Evs3/hjlib/code/habanero-java-lib-0.1.1.jar">http://www.cs.rice.edu/~vs3/hjlib/code/habanero-java-lib-0.1.1.jar</a>
 </li>
 <li>Execute the following shell command from the directory containing the HJ-lib jar to install it as a Maven artifact</li>
 </ul>
-<div class="highlight highlight-sh"><pre>  mvn install:install-file -DcreateChecksum<span class="o">=</span><span class="nb">true</span> -Dpackaging<span class="o">=</span>jar -Dfile<span class="o">=</span>habanero-java-lib.jar -DgroupId<span class="o">=</span>habanero-java-lib -DartifactId<span class="o">=</span>habanero-java-lib -Dversion<span class="o">=</span>0.1-SNAPSHOT<span class="p">;</span>
+<div class="highlight highlight-sh"><pre>  mvn install:install-file -DcreateChecksum<span class="o">=</span><span class="nb">true</span> -Dpackaging<span class="o">=</span>jar -Dfile<span class="o">=</span>habanero-java-lib.jar -DgroupId<span class="o">=</span>habanero-java-lib -DartifactId<span class="o">=</span>habanero-java-lib -Dversion<span class="o">=</span>0.1.1<span class="p">;</span>
 </pre></div>
 
 <ul>
@@ -239,7 +239,7 @@ mpirun --report-bindings --mca btl ^tcp --hostfile <span class="nv">$hostfile</s
 
 <p>We like to express our sincere gratitude to Prof. Vivek Sarkar 
 and his team at Rice University for giving us access and 
-continuous support for HJ library. We are equally thankful to Prof. Guillermo López Taboada for giving us free unrestricted access to commercially available FastMPJ MPI library, which we evaluated in an earlier internal version. We are also 
+continuous support for HJ library. We are equally thankful to Prof. Guillermo L�pez Taboada for giving us free unrestricted access to commercially available FastMPJ MPI library, which we evaluated in an earlier internal version. We are also 
 thankful to FutureGrid project and its support team for their support with HPC systems. Last but not least OpenMPI community deserves equal recognition for their valuable support.</p>
       </section>
     </div>
