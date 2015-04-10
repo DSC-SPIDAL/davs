@@ -2,12 +2,12 @@ package edu.indiana.soic.spidal.davs;
 
 //	Class VectorClass **************************************************
 
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
+import mpi.MPIException;
 
 import java.util.Random;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 public class VectorClass
@@ -146,7 +146,7 @@ public class VectorClass
 
             final int NumPowerIterationsLoopVar = NumPowerIterations;
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                     FindNewPowerVectors.startthread(threadIndex);
                     double[] PartVector = new double[Program.ParameterVectorDimension];
@@ -192,9 +192,7 @@ public class VectorClass
                     } // End Loop over points
 
                 }); // End loop initialing Point dependent quantities
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             FindNewPowerVectors.sumoverthreadsandmpi();
 			for (int ClusterIndex = 0; ClusterIndex < this.CurrentSolution.Ncent_Global; ClusterIndex++)

@@ -6,6 +6,7 @@ import edu.indiana.soic.spidal.general.Box;
 
 import java.util.Arrays;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 
@@ -281,7 +282,7 @@ public class KmeansTriangleInequality
 		if (KmeansTriangleInequality.UseParallelismoverCenters)
 		{ // Centers Parallel over Threads NOT nodes
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int NumberCentersperThread = KmeansTriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -293,9 +294,7 @@ public class KmeansTriangleInequality
                     }
 
                 }); // End Sum over Threads
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
         }
 		else
 		{ // Centers Sequential
@@ -318,7 +317,7 @@ public class KmeansTriangleInequality
 		KmeansTriangleInequality.LB_Buffer2_alpha_ClusterPointer = new PointData[DAVectorUtility.PointCount_Process];
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -335,9 +334,7 @@ public class KmeansTriangleInequality
                 }
 
             }); // End Loop over Threads for points
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         KmeansTriangleInequality.LB_Current_alpha_ClusterPointer = KmeansTriangleInequality.LB_Buffer1_alpha_ClusterPointer;
 		KmeansTriangleInequality.LB_Last_alpha_ClusterPointer = null;
@@ -519,7 +516,7 @@ public class KmeansTriangleInequality
 		if (KmeansTriangleInequality.UseParallelismoverCenters)
 		{ // Centers Parallel over Threads NOT nodes
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int NumberCentersperThread = KmeansTriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -531,9 +528,7 @@ public class KmeansTriangleInequality
                     }
 
                 }); // End Sum over Threads
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
         }
 		else
 		{ // Centers Sequential
@@ -576,7 +571,7 @@ public class KmeansTriangleInequality
 			}
 
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int NumberCentersperThread = KmeansTriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -585,7 +580,8 @@ public class KmeansTriangleInequality
                         Box<Double> tempRef_Object = new Box<>(AccumulateCC[threadIndex]);
                         Box<Double> tempRef_Object2 = new Box<>(AccumulateTooBig[threadIndex]);
                         Box<Double> tempRef_Object3 = new Box<>(AccumulateRadius[threadIndex]);
-                        KmeansTriangleInequality.CFA_InitialCenterCalculation(CenterIndex, tempRef_Object, tempRef_Object2,
+                        KmeansTriangleInequality.CFA_InitialCenterCalculation(CenterIndex, tempRef_Object,
+                                tempRef_Object2,
                                 tempRef_Object3);
                         AccumulateCC[threadIndex] = tempRef_Object.content;
                         AccumulateTooBig[threadIndex] = tempRef_Object2.content;
@@ -593,9 +589,7 @@ public class KmeansTriangleInequality
                     }
 
                 }); // End Sum over Threads
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             for (int ThreadIndex = 0; ThreadIndex < DAVectorUtility.ThreadCount; ThreadIndex++)
 			{
@@ -664,7 +658,7 @@ public class KmeansTriangleInequality
 
 			//  Parallel Center Processing
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int NumberCentersToProcess = KmeansTriangleInequality.FullParallel_CentersperThread[threadIndex];
@@ -679,9 +673,7 @@ public class KmeansTriangleInequality
                     }
 
                 }); // End Loop over Threads
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             IntSendTransport[0] = KmeansTriangleInequality.CenterStart_Process;
 			IntSendTransport[1] = KmeansTriangleInequality.CenterCount_Process;
@@ -969,7 +961,7 @@ public class KmeansTriangleInequality
         //  If best center loop exhausted it reverts to ploughing through center list
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -1061,7 +1053,8 @@ public class KmeansTriangleInequality
                         LookedAt[ExaminedCenter] = true;
                     }
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, BreakReason);
-                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumCentersToGo, 19);
+                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumCentersToGo,
+                            19);
                     BreakLimit = Math.max(BestScore, BreakLimit);
                     Arrays.sort(smallers, 0, ActualNumber);
                     if (Num_LBValuesforPoint < ActualNumber) {
@@ -1080,14 +1073,16 @@ public class KmeansTriangleInequality
                         } else {
                             DAVectorUtility.printAndThrowRuntimeException(
                                     "Point " + (alpha + DAVectorUtility.PointStart_Process) + " in Process " + DAVectorUtility.MPI_Rank + " Inconsistent Best Centers 1 " + smallers[0].index + " " + BestCenter + " " + String.format(
-                                            "%1$5.4f", smallers[0].value) + " " + String.format("%1$5.4f", BestScore));
+                                            "%1$5.4f", smallers[0].value) + " " + String.format("%1$5.4f", BestScore)
+                            );
 
                         }
                     }
                     if (Math.abs(BestScore - smallers[0].value) > 0.001 * BestScore) {
                         DAVectorUtility.printAndThrowRuntimeException(
                                 "Point " + (alpha + DAVectorUtility.PointStart_Process) + " in Process " + DAVectorUtility.MPI_Rank + " Incorrect Score " + String.format(
-                                        "%1$5.4f", BestScore) + " " + String.format("%1$5.4f", smallers[0].value));
+                                        "%1$5.4f", BestScore) + " " + String.format("%1$5.4f", smallers[0].value)
+                        );
 
                     }
                     if (BestCenter < 0) {
@@ -1122,7 +1117,8 @@ public class KmeansTriangleInequality
                     KmeansTriangleInequality.Distance_NearestCentertoPoint[alpha] = BestScore;
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) ActualNumber, 4);
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BestScore, 5);
-                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BreakLimit - BestScore, 25);
+                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BreakLimit - BestScore,
+                            25);
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
                             smallers[ActualNumber - 1].value, 6);
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
@@ -1130,9 +1126,7 @@ public class KmeansTriangleInequality
                 }   // End loop over Points
 
             }); // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
     } // End InitialPointAnalysis()
 
 	public static void InitialPointAnalysis_FullOld()
@@ -1140,7 +1134,7 @@ public class KmeansTriangleInequality
 		//  Set Associated Cluster and initial lower bounds before any previous point data available
 		//  This version cycles through all centers and does not try to be quick
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -1210,9 +1204,7 @@ public class KmeansTriangleInequality
                 } // End loop over Points
 
             });  // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
     } // End InitialPointAnalysis_FullOld()
 
 	public static void PointDependentAnalysis()
@@ -1229,7 +1221,7 @@ public class KmeansTriangleInequality
         //  If best center loop exhausted it reverts to ploughing through center list
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -1482,7 +1474,8 @@ public class KmeansTriangleInequality
                                     if (TestLimit > BestScore) {
                                         --NumCentersToGo;
                                         LookedAt[ExaminedCenter] = true;
-                                        KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 2);
+                                        KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                2);
                                         if (BreakLimit < -0.5) {
                                             BreakLimit = TestLimit;
                                         } else {
@@ -1490,14 +1483,16 @@ public class KmeansTriangleInequality
                                         }
                                         continue;
                                     } else {
-                                        KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 13);
+                                        KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                13);
                                     }
                                 } else {
                                     double TestLimit = KmeansTriangleInequality.LB_Old_alpha_ClusterPointer[alpha].LimitforRest - CurrentInterCenter[ExaminedCenter].OldCenterChange;
                                     if (TestLimit > BestScore) {
                                         --NumCentersToGo;
                                         LookedAt[ExaminedCenter] = true;
-                                        KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 26);
+                                        KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                26);
                                         if (BreakLimit < -0.5) {
                                             BreakLimit = TestLimit;
                                         } else {
@@ -1521,7 +1516,8 @@ public class KmeansTriangleInequality
                         Box<Integer> tempRef_ActualNumber3 = new Box<>(ActualNumber);
                         Box<Double> tempRef_Minrejected3 = new Box<>(Minrejected);
                         KmeansTriangleInequality.FindMinimumSetwithRemainder(PointCenterDistce, ExaminedCenter,
-                                tempRef_currentcut3, smallers, ActuallyUse, tempRef_ActualNumber3, tempRef_Minrejected3);
+                                tempRef_currentcut3, smallers, ActuallyUse, tempRef_ActualNumber3,
+                                tempRef_Minrejected3);
                         currentcut = tempRef_currentcut3.content;
                         ActualNumber = tempRef_ActualNumber3.content;
                         Minrejected = tempRef_Minrejected3.content;
@@ -1537,7 +1533,8 @@ public class KmeansTriangleInequality
                             if (KmeansTriangleInequality.DoBackwardFacingTests) {
                                 Box<Integer> tempRef_NumCentersToGo = new Box<>(NumCentersToGo);
                                 KmeansTriangleInequality.BackwardTest(threadIndex,
-                                        KmeansTriangleInequality.CurrentInterCenter[ExaminedCenter], tempRef_NumCentersToGo,
+                                        KmeansTriangleInequality.CurrentInterCenter[ExaminedCenter],
+                                        tempRef_NumCentersToGo,
                                         LookedAt, PointCenterDistce, BestScore, BreakLimit);
                                 NumCentersToGo = tempRef_NumCentersToGo.content;
                             }
@@ -1547,7 +1544,8 @@ public class KmeansTriangleInequality
                             if (KmeansTriangleInequality.DoBackwardFacingTests) {
                                 Box<Integer> tempRef_NumCentersToGo2 = new Box<>(NumCentersToGo);
                                 KmeansTriangleInequality.BackwardTest(threadIndex,
-                                        KmeansTriangleInequality.CurrentInterCenter[BestCenter], tempRef_NumCentersToGo2,
+                                        KmeansTriangleInequality.CurrentInterCenter[BestCenter],
+                                        tempRef_NumCentersToGo2,
                                         LookedAt, PointCenterDistce, BestScore, BreakLimit);
                                 NumCentersToGo = tempRef_NumCentersToGo2.content;
                             }
@@ -1576,7 +1574,8 @@ public class KmeansTriangleInequality
 
                     }
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, BreakReason);
-                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumCentersToGo, 19);
+                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumCentersToGo,
+                            19);
 
                     //  Combine Last and Current Lower Bounds (stored above in Small values/indices and store back into Current
                     BreakLimit = Math.max(BreakLimit, BestScore);
@@ -1595,7 +1594,8 @@ public class KmeansTriangleInequality
                         Box<Integer> tempRef_currentcut4 = new Box<>(currentcut);
                         Box<Integer> tempRef_ActualNumber4 = new Box<>(ActualNumber);
                         Box<Double> tempRef_Minrejected4 = new Box<>(Minrejected);
-                        KmeansTriangleInequality.FindMinimumSetwithRemainder(lowerbound, CenterIndex, tempRef_currentcut4,
+                        KmeansTriangleInequality.FindMinimumSetwithRemainder(lowerbound, CenterIndex,
+                                tempRef_currentcut4,
                                 smallers, ActuallyUse, tempRef_ActualNumber4, tempRef_Minrejected4);
                         currentcut = tempRef_currentcut4.content;
                         ActualNumber = tempRef_ActualNumber4.content;
@@ -1627,7 +1627,8 @@ public class KmeansTriangleInequality
                     KmeansTriangleInequality.Distance_NearestCentertoPoint[alpha] = BestScore;
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) ActualNumber, 4);
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BestScore, 5);
-                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BreakLimit - BestScore, 25);
+                    KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BreakLimit - BestScore,
+                            25);
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
                             smallers[ActualNumber - 1].value, 6);
                     KmeansTriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
@@ -1635,9 +1636,7 @@ public class KmeansTriangleInequality
                 }
 
             }); // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
     } // End PointDependentAnalysis()
 
@@ -1692,7 +1691,7 @@ public class KmeansTriangleInequality
 
 		//  Parallel Center Processing
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int NumberCentersToProcess = KmeansTriangleInequality.FullParallel_CentersperThread[threadIndex];
@@ -1740,9 +1739,7 @@ public class KmeansTriangleInequality
                 }
 
             }); // End Loop over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         FindInCCBounds.sumoverthreadsandmpi();
 		FindActualCCBounds.sumoverthreadsandmpi();
@@ -1780,7 +1777,7 @@ public class KmeansTriangleInequality
 
 		//   Loop over points
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 // Set up Look up array
@@ -1834,9 +1831,7 @@ public class KmeansTriangleInequality
                 } // End loop over Points
 
             }); // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         FindInsideCenter.sumoverthreadsandmpi();
 		FindOutsideCenterbutinLB.sumoverthreadsandmpi();
@@ -2009,7 +2004,7 @@ public class KmeansTriangleInequality
 		//  When a new best center is found, it changes to loop over its associated centers
 		//  If best center loop exhausted it reverts to ploughing through center list
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 // Set up Look up arrays
@@ -2036,9 +2031,7 @@ public class KmeansTriangleInequality
                 } // End loop over Points
 
             }); // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
     } // End PureKmeans()
 

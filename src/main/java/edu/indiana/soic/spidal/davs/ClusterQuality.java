@@ -1,9 +1,8 @@
 package edu.indiana.soic.spidal.davs;
 
 import com.google.common.io.Files;
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
+import mpi.MPIException;
 
 import java.io.File;
 import java.io.IOException;
@@ -12,6 +11,7 @@ import java.nio.charset.Charset;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 //  Data structure to record quality of clusters
@@ -95,7 +95,7 @@ public class ClusterQuality
         Range[] ParallelClusterRange = RangePartitioner.Partition(NumberClusters, DAVectorUtility.ThreadCount);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 PointsperCluster.startthread(threadIndex);
                 DistancesfromCluster.startthread(threadIndex);
@@ -145,9 +145,7 @@ public class ClusterQuality
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
         TotalClustersinCut.sumoverthreadsandmpi();
 
         double ClusterSum = NumberClusters;
@@ -187,7 +185,7 @@ public class ClusterQuality
         //  Remove Sponge Confused Points
         //  Not in Sponge
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 double[] ClusterSigma = new double[Program.ParameterVectorDimension];
                 AccumulateSpongePoints.startthread(threadIndex);
@@ -290,9 +288,7 @@ public class ClusterQuality
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         AccumulateSpongePoints.sumoverthreadsandmpi();
 		AccumulateNonSpongePoints.sumoverthreadsandmpi();
@@ -321,7 +317,7 @@ public class ClusterQuality
 		Range[] ParallelClusterRange = RangePartitioner.Partition(NumberClusters, DAVectorUtility.ThreadCount);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 int beginindex = ParallelClusterRange[threadIndex].getStartIndex();
                 int indexlength = ParallelClusterRange[threadIndex].getLength();
@@ -374,9 +370,7 @@ public class ClusterQuality
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
     } // End SetNearbyClusters()
 

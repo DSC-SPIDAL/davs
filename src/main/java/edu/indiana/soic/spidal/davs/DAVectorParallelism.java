@@ -1,17 +1,13 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.runtime.config.HjConfiguration;
+import edu.indiana.soic.spidal.mpi.MpiOps;
 import mpi.MPI;
 import mpi.MPIException;
-import edu.indiana.soic.spidal.mpi.MpiOps;
 
 
 public class DAVectorParallelism
 {
 	public static void SetupParallelism(String[] args) throws MPIException {
-        // Set up threads
-        HjConfiguration.initializeRuntime();
-
 		//  Set up MPI
         MPI.Init(args);
 		DAVectorUtility.MPI_communicator = MPI.COMM_WORLD; //initializing MPI world communicator
@@ -39,9 +35,6 @@ public class DAVectorParallelism
 	} // End SetupParallelism
 
 	public static void TearDownParallelism() throws MPIException {
-        // Finalize threads
-        HjConfiguration.finalizeRuntime();
-
         // End MPI
         MPI.Finalize();
 	} // End TearDownParallelism

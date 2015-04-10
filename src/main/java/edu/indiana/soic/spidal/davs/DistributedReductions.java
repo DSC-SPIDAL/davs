@@ -1,10 +1,10 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.api.SuspendableException;
+import edu.indiana.soic.spidal.general.Box;
 import mpi.MPI;
 import mpi.MPIException;
-import edu.indiana.soic.spidal.general.Box;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 //  These algorithms use distributed cluster formalism with both clusters and points in parallel
@@ -95,7 +95,7 @@ public class DistributedReductions
 
 		public final void sumoverthreadsandmpi() throws MPIException {
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int beginindex = DistributedClusteringSolution.ParallelNodeAccumulationRanges[threadIndex].getStartIndex();
@@ -112,9 +112,7 @@ public class DistributedReductions
                     }
 
                 }); // End Sum over Threads
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             //  Sum over nodes using pipelined transport
 			if (DAVectorUtility.MPI_Size > 1)

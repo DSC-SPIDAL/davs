@@ -3,9 +3,8 @@ package edu.indiana.soic.spidal.davs;
 import com.google.common.base.Strings;
 import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Ints;
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
+import mpi.MPIException;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,6 +13,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 
@@ -87,7 +87,7 @@ public class Kmeans {
     public static void SetupKmeans(int[] FullAssignment) { // Set up initial assignment from existing array
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
 
             {
@@ -98,9 +98,7 @@ public class Kmeans {
                         indexlen + beginpoint - beginpoint); //  End loop over Points
 
             }); // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
     } // End SetupKmeans
 
@@ -278,7 +276,7 @@ public class Kmeans {
                 new GlobalReductions.FindVectorDoubleSum(DAVectorUtility.ThreadCount, Kmeans.Ncent_Global);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 FindCenterVectorSums.startthread(threadIndex);
@@ -288,11 +286,12 @@ public class Kmeans {
                 for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
                     int ClusterIndex = NearestCentertoPoint[alpha];
                     if ((ClusterIndex >= Kmeans.Ncent_Global) || (ClusterIndex < 0)) {
-                        DAVectorUtility.printAndThrowRuntimeException("Illegal Cluster Index " + ClusterIndex + " Number " +
-                                "" + Kmeans.Ncent_Global + " Point " +
-                                (alpha + DAVectorUtility.PointStart_Process) +
-                                " " +
-                                "Rank " + DAVectorUtility.MPI_Rank);
+                        DAVectorUtility.printAndThrowRuntimeException(
+                                "Illegal Cluster Index " + ClusterIndex + " Number " +
+                                        "" + Kmeans.Ncent_Global + " Point " +
+                                        (alpha + DAVectorUtility.PointStart_Process) +
+                                        " " +
+                                        "Rank " + DAVectorUtility.MPI_Rank);
 
                     }
                     FindCenterVectorSums.addapoint(threadIndex, PointPosition[alpha], ClusterIndex);
@@ -305,9 +304,7 @@ public class Kmeans {
                 } // End loop over Points
 
             }); // End Sum over Threads
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         FindCenterVectorSums.sumoverthreadsandmpi();
         FindCenterSizeSums.sumoverthreadsandmpi();
@@ -330,7 +327,7 @@ public class Kmeans {
             }
 
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int indexlen = KmeansTriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -355,9 +352,10 @@ public class Kmeans {
                             }
                         } else {
                             if (begin) {
-                                DAVectorUtility.printAndThrowRuntimeException("Empty Input Cluster " + CenterIndex + " " +
-                                        "Number " + Kmeans.Ncent_Global +
-                                        " Rank " + DAVectorUtility.MPI_Rank);
+                                DAVectorUtility.printAndThrowRuntimeException(
+                                        "Empty Input Cluster " + CenterIndex + " " +
+                                                "Number " + Kmeans.Ncent_Global +
+                                                " Rank " + DAVectorUtility.MPI_Rank);
 
                             }
                             System.arraycopy(LastClusterCenter[CenterIndex], 0, Kmeans.ClusterCenter[CenterIndex], 0,
@@ -368,9 +366,7 @@ public class Kmeans {
                     }
 
                 }); // End Sum over Threads
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             if (!begin) {
                 for (int ThreadIndex = 0; ThreadIndex < DAVectorUtility.ThreadCount; ThreadIndex++) {

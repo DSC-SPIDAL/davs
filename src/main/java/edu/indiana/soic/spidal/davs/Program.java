@@ -3,13 +3,12 @@ package edu.indiana.soic.spidal.davs;
 // MPI Import
 //import MPI.*;
 import com.google.common.base.Optional;
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPI;
-import mpi.MPIException;
-import org.apache.commons.cli.*;
 import edu.indiana.soic.spidal.configuration.ConfigurationMgr;
 import edu.indiana.soic.spidal.configuration.sections.DAVectorSpongeSection;
 import edu.indiana.soic.spidal.general.Box;
+import mpi.MPI;
+import mpi.MPIException;
+import org.apache.commons.cli.*;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -20,6 +19,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Date;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 public class Program
@@ -593,7 +593,7 @@ public class Program
 		Program.PointLabel = new int[DAVectorUtility.PointCount_Process];
 		Program.PointPosition = new double[DAVectorUtility.PointCount_Process][];
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -603,9 +603,7 @@ public class Program
                 }
 
             });// End loop initialing Point dependent quantities
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         Program.ClusterAssignments = new int[DAVectorUtility.PointCount_Global];
 

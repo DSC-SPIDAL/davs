@@ -1,12 +1,11 @@
 package edu.indiana.soic.spidal.davs;
 
 import com.google.common.io.Files;
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPI;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
 import edu.indiana.soic.spidal.general.IntArray;
 import edu.indiana.soic.spidal.mpi.MPIPacket;
+import mpi.MPI;
+import mpi.MPIException;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -15,6 +14,7 @@ import java.nio.file.OpenOption;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 // Calculate Vector Deterministic Annealing Algorithm
@@ -1081,7 +1081,7 @@ public class VectorAnnealIterate
         GlobalReductions.FindDoubleSum FindIgnoredCalcs = new GlobalReductions.FindDoubleSum(DAVectorUtility.ThreadCount);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 if (ParallelClustering.runningSolution.DistributedExecutionMode) {
@@ -1150,7 +1150,8 @@ public class VectorAnnealIterate
                             Term_NegativeExponential = SpongeTerm;
                             NumSponge = 1.0;
                         } else {
-                            Term_NegativeExponential = DAVectorParallelism.getSquaredScaledDistancePointActiveCluster(alpha,
+                            Term_NegativeExponential = DAVectorParallelism.getSquaredScaledDistancePointActiveCluster(
+                                    alpha,
                                     ActiveClusterIndex, ParallelClustering.runningSolution);
                         }
                         Term_NegativeExponential = Term_NegativeExponential / ParallelClustering.runningSolution.Temperature;
@@ -1244,7 +1245,8 @@ public class VectorAnnealIterate
                                 } else {
                                     Pvalue = DistributedClusteringSolution.StorageforTransportedClusters.TotalTransportedP_t[-ClusterIndex - 1];
                                 }
-                                message += CreatedIndex + " P " + String.format("%1$6.5f", Pvalue) + " C " + String.format(
+                                message += CreatedIndex + " P " + String.format("%1$6.5f",
+                                        Pvalue) + " C " + String.format(
                                         "%1$6.5f", Cvalue) + " Temp " + String.format("%1$5.4E",
                                         Save_CurrentP_k_TimesExponential[loop]) + " Term " + String.format("%1$7.6E",
                                         Save_Term_NegativeExponential[loop]) + " Old Malpha " + String.format("%1$6.5f",
@@ -1252,7 +1254,8 @@ public class VectorAnnealIterate
                             }
                             DAVectorUtility.printAndThrowRuntimeException(
                                     "Arithmetic Error Point " + (alpha + DAVectorUtility.PointStart_Process) + " Number of Clusters " + IndirectSize + " Indirect Index " + IndirectClusterIndex + " Created Index " + ParallelClustering.runningSolution.Map_alpha_PointertoCreatedIndex[alpha][IndirectClusterIndex] + " Selected Indirect Index " + MinimumTerm_IndirectClusterIndex + " ZeeX " + String.format(
-                                            "%1$5.4E", MalphaDenominator) + "\n" + message);
+                                            "%1$5.4E", MalphaDenominator) + "\n" + message
+                            );
 
                         }
 
@@ -1303,9 +1306,7 @@ public class VectorAnnealIterate
                 } // End loop over points
 
             }); // End parallel Thread loop
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
         DAVectorUtility.StopSubTimer(2);
 
         //  Parallel Accumulations. First those using all nodes
@@ -1518,7 +1519,7 @@ public class VectorAnnealIterate
         }
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 if (ParallelClustering.runningSolution.DistributedExecutionMode) {
@@ -1583,9 +1584,7 @@ public class VectorAnnealIterate
                 }
 
             }); // End Parallel Section calculating center positions
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         if (ParallelClustering.runningSolution.DistributedExecutionMode)
         {
@@ -2284,29 +2283,28 @@ public class VectorAnnealIterate
 
 		//  Parallel Section Splitting Malpha_k_ for non distributed mode
         // Note - parallel for
-        try {
-            forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->  //  End Parallel Section Splitting Cluster
-            {
-                int indexlen = DAVectorUtility.PointsperThread[threadIndex];
-                int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
-                for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
-                    int IndirectClusterIndex = ParallelClustering.runningSolution.MapClusterToIndirect(alpha,
-                            OldActiveClusterIndex);
-                    if (IndirectClusterIndex < 0) {
-                        continue;
-                    }
-                    double newvalueofM = ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][IndirectClusterIndex] * 0.5;
-                    ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][IndirectClusterIndex] = newvalueofM;
-                    int NewIndirectClusterIndex = ParallelClustering.runningSolution.NumClusters_alpha_[alpha];
-                    ParallelClustering.runningSolution.Map_alpha_PointertoCreatedIndex[alpha][NewIndirectClusterIndex] = CreatedIndex_child;
-                    ++ParallelClustering.runningSolution.NumClusters_alpha_[alpha];
-                    ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][NewIndirectClusterIndex] = newvalueofM;
-                }
+        launchHabaneroApp(() -> {
+            forallChunked(0, DAVectorUtility.ThreadCount - 1,
+                    (threadIndex) ->  //  End Parallel Section Splitting Cluster
+                    {
+                        int indexlen = DAVectorUtility.PointsperThread[threadIndex];
+                        int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
+                        for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
+                            int IndirectClusterIndex = ParallelClustering.runningSolution.MapClusterToIndirect(alpha,
+                                    OldActiveClusterIndex);
+                            if (IndirectClusterIndex < 0) {
+                                continue;
+                            }
+                            double newvalueofM = ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][IndirectClusterIndex] * 0.5;
+                            ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][IndirectClusterIndex] = newvalueofM;
+                            int NewIndirectClusterIndex = ParallelClustering.runningSolution.NumClusters_alpha_[alpha];
+                            ParallelClustering.runningSolution.Map_alpha_PointertoCreatedIndex[alpha][NewIndirectClusterIndex] = CreatedIndex_child;
+                            ++ParallelClustering.runningSolution.NumClusters_alpha_[alpha];
+                            ParallelClustering.runningSolution.M_alpha_kpointer_[alpha][NewIndirectClusterIndex] = newvalueofM;
+                        }
 
-            });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    });
+        });
 
     } // End dothesplit
 
@@ -2316,7 +2314,7 @@ public class VectorAnnealIterate
 
         //  Check Number of Clusters for each point. This could be stricter
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 double[] workingvector = new double[Program.ParameterVectorDimension];
@@ -2331,9 +2329,7 @@ public class VectorAnnealIterate
                 }
 
             }); //  End Section Setting Cluster numbers for points
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
         NumberChanged.sumoverthreadsandmpi();
 
         if (NumberChanged.TotalInt != 0)
@@ -2352,7 +2348,7 @@ public class VectorAnnealIterate
 	{
 		DAVectorUtility.SALSAPrint(0, "Complete Clean Up T " + ParallelClustering.runningSolution.Temperature);
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 double[] workingvector = new double[Program.ParameterVectorDimension];
@@ -2363,9 +2359,7 @@ public class VectorAnnealIterate
                 }
 
             }); //  End Section Setting Cluster numbers for points
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         VectorAnnealIterate.HammyNotSet = true;
 		ParallelClustering.runningSolution.DiffMalpha_k_Set = -1;
@@ -2407,7 +2401,7 @@ public class VectorAnnealIterate
 		}
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -2423,9 +2417,7 @@ public class VectorAnnealIterate
                 }
 
             }); // End Parallel Section calculating initial center positions
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         SystemCoG.sumoverthreadsandmpi();
 		for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
@@ -2440,7 +2432,7 @@ public class VectorAnnealIterate
 		GlobalReductions.FindDoubleMean InitialAverages = new GlobalReductions.FindDoubleMean(DAVectorUtility.ThreadCount);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -2448,13 +2440,12 @@ public class VectorAnnealIterate
                 for (int LocalPointIndex = beginpoint; LocalPointIndex < indexlen + beginpoint; LocalPointIndex++) {
                     InitialAverages.addapoint(threadIndex,
                             DAVectorParallelism.getSquaredScaledDistancePointActiveCluster(LocalPointIndex,
-                                    FirstRealCluster, StartSolution));
+                                    FirstRealCluster, StartSolution)
+                    );
                 }
 
             }); // End Parallel Section calculating average distance
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
         InitialAverages.sumoverthreadsandmpi();
 
 		//  Estimate of Initial Temperature is average scaled squared distance
@@ -2545,7 +2536,7 @@ public class VectorAnnealIterate
 
 		//  Set initial clusters for every point!
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -2576,9 +2567,7 @@ public class VectorAnnealIterate
                 }
 
             }); //  End Parallel Section
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         ParallelClustering.runningSolution.FindOccupationCounts();
 		double wgt = 1.0 / DAVectorUtility.PointCount_Global;
@@ -2983,7 +2972,7 @@ public class VectorAnnealIterate
 		//  Add Sponge to every point!
         // Note - parallel for
         final int SpongeCreatedIndexLoopVar = SpongeCreatedIndex;
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 double[] workingvector = new double[Program.ParameterVectorDimension];
@@ -2997,9 +2986,7 @@ public class VectorAnnealIterate
                 }
 
             }); //  End Parallel Section
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         //  Set up Sponge Cluster
 		ParallelClustering.runningSolution.Splittable_k_[CurrentMax] = 0;
@@ -3060,7 +3047,7 @@ public class VectorAnnealIterate
 
 		//  Parallel Section setting cluster labels
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -3094,9 +3081,7 @@ public class VectorAnnealIterate
                 }
 
             }); // End Parallel Section setting cluster label
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
 
         String directory = Paths.get(Program.config.ClusterFile).getParent().toString();
@@ -3113,7 +3098,7 @@ public class VectorAnnealIterate
 			}
 
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -3122,9 +3107,7 @@ public class VectorAnnealIterate
                             beginpoint + DAVectorUtility.PointStart_Process, indexlen + beginpoint - beginpoint);
 
                 }); // End Parallel Section setting cluster assignments in process 0
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             // Note - MPI Call Block (with MPI_Size = 1 this loop will not happen)
 			for (int MPISource = 1; MPISource < DAVectorUtility.MPI_Size; MPISource++)

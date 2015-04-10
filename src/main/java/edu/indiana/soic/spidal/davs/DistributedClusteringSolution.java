@@ -1,10 +1,10 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.api.SuspendableException;
+import edu.indiana.soic.spidal.general.Box;
 import mpi.MPI;
 import mpi.MPIException;
-import edu.indiana.soic.spidal.general.Box;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 
@@ -439,59 +439,60 @@ public class DistributedClusteringSolution
 		GlobalReductions.FindVectorDoubleSum FindDiagnosticSums_Points = new GlobalReductions.FindVectorDoubleSum(DAVectorUtility.ThreadCount, 8);
 
         // Note - parallel for
-        try {
-            forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End loop over Point dependent quantities
-            {
-                int[] ProposedClusters = new int[Program.maxNcentperPoint];
-                double[] ProposedDistances = new double[Program.maxNcentperPoint];
-                int indexlen = DAVectorUtility.PointsperThread[threadIndex];
-                int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
-                for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
-                    int NumberofClustersTobeUsed = 0;
-                    // double SmallDistce = -1.0;
-                    FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 0);
-                    // int AssignmentStatus = DATriangleInequality.SetAssociatedCenters(alpha, out NumberofClustersTobeUsed, ProposedClusters, out SmallDistce, ProposedDistances );
-                    Box<Integer> tempRef_NumberofClustersTobeUsed = new Box<>(NumberofClustersTobeUsed);
-                    int AssignmentStatus = DATriangleInequality.SetAssociatedCenters(alpha,
-                            tempRef_NumberofClustersTobeUsed, ProposedClusters);
-                    NumberofClustersTobeUsed = tempRef_NumberofClustersTobeUsed.content;
-                    FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 2 + AssignmentStatus);
-                    if (AssignmentStatus < 0) {
-                        DAVectorUtility.printAndThrowRuntimeException(
-                                "Error in Triangle Inequality at Point " + (alpha + DAVectorUtility.PointStart_Process) + " Old Number " + Solution.NumClusters_alpha_[alpha]);
+        launchHabaneroApp(() -> {
+            forallChunked(0, DAVectorUtility.ThreadCount - 1,
+                    (threadIndex) -> // End loop over Point dependent quantities
+                    {
+                        int[] ProposedClusters = new int[Program.maxNcentperPoint];
+                        double[] ProposedDistances = new double[Program.maxNcentperPoint];
+                        int indexlen = DAVectorUtility.PointsperThread[threadIndex];
+                        int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
+                        for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++) {
+                            int NumberofClustersTobeUsed = 0;
+                            // double SmallDistce = -1.0;
+                            FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 0);
+                            // int AssignmentStatus = DATriangleInequality.SetAssociatedCenters(alpha, out NumberofClustersTobeUsed, ProposedClusters, out SmallDistce, ProposedDistances );
+                            Box<Integer> tempRef_NumberofClustersTobeUsed = new Box<>(NumberofClustersTobeUsed);
+                            int AssignmentStatus = DATriangleInequality.SetAssociatedCenters(alpha,
+                                    tempRef_NumberofClustersTobeUsed, ProposedClusters);
+                            NumberofClustersTobeUsed = tempRef_NumberofClustersTobeUsed.content;
+                            FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 2 + AssignmentStatus);
+                            if (AssignmentStatus < 0) {
+                                DAVectorUtility.printAndThrowRuntimeException(
+                                        "Error in Triangle Inequality at Point " + (alpha + DAVectorUtility.PointStart_Process) + " Old Number " + Solution.NumClusters_alpha_[alpha]);
 
-                    }
-                    if (NumberofClustersTobeUsed <= 0) {
-                        DAVectorUtility.printAndThrowRuntimeException(
-                                "Error due to zero New Number of Clusters Point " + (alpha + DAVectorUtility.PointStart_Process) + " Old Number " + Solution.NumClusters_alpha_[alpha]);
+                            }
+                            if (NumberofClustersTobeUsed <= 0) {
+                                DAVectorUtility.printAndThrowRuntimeException(
+                                        "Error due to zero New Number of Clusters Point " + (alpha + DAVectorUtility.PointStart_Process) + " Old Number " + Solution.NumClusters_alpha_[alpha]);
 
-                    }
-                    //  Now make list for storing back
-                    double[] Mvalues = new double[NumberofClustersTobeUsed];
-                    double Msum = 0.0;
-                    for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
-                        Mvalues[IndirectClusterIndex] = 0.0;
-                        if (Solution.NumClusters_alpha_[alpha] == 0) {
-                            continue;
-                        }
-                        int ActiveClusterIndex = ProposedClusters[IndirectClusterIndex];
-                        int OldIndirectClusterIndex = Solution.MapClusterToIndirect(alpha, ActiveClusterIndex);
-                        if (OldIndirectClusterIndex < 0) {
-                            continue;
-                        }
-                        Mvalues[IndirectClusterIndex] = Solution.M_alpha_kpointer_[alpha][OldIndirectClusterIndex];
-                        Msum += Mvalues[IndirectClusterIndex];
-                    }
-                    if (Msum < 0.2) {
-                        for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
-                            Mvalues[IndirectClusterIndex] = 1.0 / (double) NumberofClustersTobeUsed;
-                        }
-                        Msum = 1.0;
-                        FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 6);
-                    }
+                            }
+                            //  Now make list for storing back
+                            double[] Mvalues = new double[NumberofClustersTobeUsed];
+                            double Msum = 0.0;
+                            for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
+                                Mvalues[IndirectClusterIndex] = 0.0;
+                                if (Solution.NumClusters_alpha_[alpha] == 0) {
+                                    continue;
+                                }
+                                int ActiveClusterIndex = ProposedClusters[IndirectClusterIndex];
+                                int OldIndirectClusterIndex = Solution.MapClusterToIndirect(alpha, ActiveClusterIndex);
+                                if (OldIndirectClusterIndex < 0) {
+                                    continue;
+                                }
+                                Mvalues[IndirectClusterIndex] = Solution.M_alpha_kpointer_[alpha][OldIndirectClusterIndex];
+                                Msum += Mvalues[IndirectClusterIndex];
+                            }
+                            if (Msum < 0.2) {
+                                for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
+                                    Mvalues[IndirectClusterIndex] = 1.0 / (double) NumberofClustersTobeUsed;
+                                }
+                                Msum = 1.0;
+                                FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 6);
+                            }
 
-                    //  Reset List
-                    int NumberChange = Solution.NumClusters_alpha_[alpha] - NumberofClustersTobeUsed;
+                            //  Reset List
+                            int NumberChange = Solution.NumClusters_alpha_[alpha] - NumberofClustersTobeUsed;
                     /*
                     if ( (Solution.Ncent_Global == 140) && (Solution.Temperature < 0.1) && (PrintOuts < 100) && ( NumberChange != 0) && (DAVectorUtility.MPI_Rank == 0) )
                     {
@@ -538,22 +539,20 @@ public class DistributedClusteringSolution
                         ++PrintOuts;
                     }
                     */
-                    FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumberChange, 7);
-                    Solution.NumClusters_alpha_[alpha] = NumberofClustersTobeUsed;
-                    for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
-                        Solution.M_alpha_kpointer_[alpha][IndirectClusterIndex] = Mvalues[IndirectClusterIndex] / Msum;
-                        Solution.Map_alpha_PointertoCreatedIndex[alpha][IndirectClusterIndex] = ClusteringSolution.MapActivetoCreatedIndex(
-                                ProposedClusters[IndirectClusterIndex], Solution);
-                    }
-                    for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
-                        ParallelClustering.runningSolution.LegalCluster(alpha, IndirectClusterIndex);
-                    }
-                }
+                            FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumberChange, 7);
+                            Solution.NumClusters_alpha_[alpha] = NumberofClustersTobeUsed;
+                            for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
+                                Solution.M_alpha_kpointer_[alpha][IndirectClusterIndex] = Mvalues[IndirectClusterIndex] / Msum;
+                                Solution.Map_alpha_PointertoCreatedIndex[alpha][IndirectClusterIndex] = ClusteringSolution.MapActivetoCreatedIndex(
+                                        ProposedClusters[IndirectClusterIndex], Solution);
+                            }
+                            for (int IndirectClusterIndex = 0; IndirectClusterIndex < NumberofClustersTobeUsed; IndirectClusterIndex++) {
+                                ParallelClustering.runningSolution.LegalCluster(alpha, IndirectClusterIndex);
+                            }
+                        }
 
-            });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    });
+        });
 
         Solution.DiffMalpha_k_Set = -1;
 
@@ -651,7 +650,7 @@ public class DistributedClusteringSolution
 		//  Initialize ClusteringSolution.UniversalMapping for this Node at this NEW Iteration number
 		//  This assumes that any child cluster is created fully but values of Malpha are not set any where
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1,
                     (threadIndex) -> // End Parallel Section over Total Number of Clusters
                     {
@@ -686,10 +685,9 @@ public class DistributedClusteringSolution
                             }
                         }
 
-                    }); // End Parallel Section over Total Number of Clusters
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    }
+            ); // End Parallel Section over Total Number of Clusters
+        });
 
         //  Loop over points in this node
 		//  Now find which clusters are actually used and remove clusters that have disappeared
@@ -697,7 +695,7 @@ public class DistributedClusteringSolution
 		//  Set up Accumulation arrays by setting any used to 0 (initialized to -1 above)
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 double[] Malpha_perpoint = new double[ClusteringSolution.NumberAvailableActiveClusters];
@@ -831,9 +829,7 @@ public class DistributedClusteringSolution
                 }
 
             }); // End loop Processing Point dependent quantities
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         //  Unset any split information and Set Accumulation Orders and start setting NodeAccMetaData
 		//  Done Sequentially in each node
@@ -913,7 +909,7 @@ public class DistributedClusteringSolution
 	public static void AssociateThreadtoNodeAccumulation()
 	{
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1,
                     (threadIndex) ->  //  End Parallel Section over NodeAccumulationIndex
                     {
@@ -975,10 +971,9 @@ public class DistributedClusteringSolution
                             }
                         }
 
-                    });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    }
+            );
+        });
     } // End AssociateThreadtoNodeAccumulation()
 
 	public static void SetupNewIteration() throws MPIException {

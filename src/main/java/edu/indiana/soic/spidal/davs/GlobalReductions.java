@@ -1,11 +1,11 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPI;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
 import edu.indiana.soic.spidal.mpi.MPIReducePlusIndex;
+import mpi.MPI;
+import mpi.MPIException;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 
@@ -679,7 +679,7 @@ public class GlobalReductions
 
 		public final void sumoverthreadsandmpi() throws MPIException {
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int beginindex = ParallelArrayRanges[threadIndex].getStartIndex();
@@ -692,9 +692,7 @@ public class GlobalReductions
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             if (DAVectorUtility.MPI_Size > 1)
 			{
@@ -765,7 +763,7 @@ public class GlobalReductions
 		public final void sumoverthreadsandmpi() throws MPIException {
 			DAVectorUtility.StartSubTimer(DAVectorUtility.ThreadTiming);
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                     int beginindex = ParallelArrayRanges[threadIndex].getStartIndex();
                     int indexlength = ParallelArrayRanges[threadIndex].getLength();
@@ -778,9 +776,7 @@ public class GlobalReductions
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             DAVectorUtility.StopSubTimer(DAVectorUtility.ThreadTiming);
 
@@ -874,7 +870,7 @@ public class GlobalReductions
 			}
 
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
                 {
                     int beginindex = ParallelArrayRanges[threadIndex].getStartIndex();
@@ -887,9 +883,7 @@ public class GlobalReductions
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             if (DAVectorUtility.MPI_Size > 1)
 			{

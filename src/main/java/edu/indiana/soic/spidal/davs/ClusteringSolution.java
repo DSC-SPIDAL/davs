@@ -1,12 +1,12 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPI;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
 import edu.indiana.soic.spidal.mpi.MPIPacket;
+import mpi.MPI;
+import mpi.MPIException;
 
-import static edu.rice.hj.Module1.*;
+import static edu.rice.hj.Module1.forallChunked;
+import static edu.rice.hj.Module1.launchHabaneroApp;
 
 public class ClusteringSolution {
     public boolean DistributedExecutionMode = false; // If True, run in distributed mode; if false only Global Clusters
@@ -186,7 +186,7 @@ public class ClusteringSolution {
 
         // Note - parallel for
         final int FirstRealClusterLoopVar = FirstRealCluster;
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) ->
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -200,9 +200,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         DAVectorUtility.SALSAPrint(0, "Large Arrays Created " + NumberofPointsinProcess);
 
@@ -333,7 +331,7 @@ public class ClusteringSolution {
         GlobalReductions.FindVectorDoubleSum FindAverageWidth = new GlobalReductions.FindVectorDoubleSum(DAVectorUtility.ThreadCount, Program.ParameterVectorDimension);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 if (this.DistributedExecutionMode) {
                     FindWidthsinDistributedMode.ThreadInitialize(threadIndex);
@@ -361,7 +359,8 @@ public class ClusteringSolution {
                         Box<Integer> tempRef_ActiveClusterIndex = new Box<>(
                                 ActiveClusterIndex);
                         Box<Integer> tempRef_RemoteIndex = new Box<>(RemoteIndex);
-                        VectorAnnealIterate.ClusterPointersforaPoint(alpha, IndirectClusterIndex, tempRef_RealClusterIndex,
+                        VectorAnnealIterate.ClusterPointersforaPoint(alpha, IndirectClusterIndex,
+                                tempRef_RealClusterIndex,
                                 tempRef_ActiveClusterIndex, tempRef_RemoteIndex);
                         RealClusterIndex = tempRef_RealClusterIndex.content;
                         ActiveClusterIndex = tempRef_ActiveClusterIndex.content;
@@ -401,9 +400,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         if (this.DistributedExecutionMode) {
             FindWidthsinDistributedMode.sumoverthreadsandmpi();
@@ -527,7 +524,7 @@ public class ClusteringSolution {
         }
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 if (this.DistributedExecutionMode) {
                     Find2Components.ThreadInitialize(threadIndex);
@@ -553,7 +550,8 @@ public class ClusteringSolution {
                         Box<Integer> tempRef_ActiveClusterIndex = new Box<>(
                                 ActiveClusterIndex);
                         Box<Integer> tempRef_RemoteIndex = new Box<>(RemoteIndex);
-                        VectorAnnealIterate.ClusterPointersforaPoint(alpha, IndirectClusterIndex, tempRef_RealClusterIndex,
+                        VectorAnnealIterate.ClusterPointersforaPoint(alpha, IndirectClusterIndex,
+                                tempRef_RealClusterIndex,
                                 tempRef_ActiveClusterIndex, tempRef_RemoteIndex);
                         RealClusterIndex = tempRef_RealClusterIndex.content;
                         ActiveClusterIndex = tempRef_ActiveClusterIndex.content;
@@ -587,9 +585,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         if (this.DistributedExecutionMode) {
             Find2Components.sumoverthreadsandmpi();
@@ -704,7 +700,7 @@ public class ClusteringSolution {
         }
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 //	0.5 as cluster halved
                 if (this.DistributedExecutionMode) {
@@ -751,7 +747,8 @@ public class ClusteringSolution {
                         Box<Integer> tempRef_ActiveClusterIndex = new Box<>(
                                 ActiveClusterIndex);
                         Box<Integer> tempRef_RemoteIndex = new Box<>(RemoteIndex);
-                        VectorAnnealIterate.ClusterPointersforaPoint(alpha, IndirectClusterIndex, tempRef_RealClusterIndex,
+                        VectorAnnealIterate.ClusterPointersforaPoint(alpha, IndirectClusterIndex,
+                                tempRef_RealClusterIndex,
                                 tempRef_ActiveClusterIndex, tempRef_RemoteIndex);
                         RealClusterIndex = tempRef_RealClusterIndex.content;
                         ActiveClusterIndex = tempRef_ActiveClusterIndex.content;
@@ -835,9 +832,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         if (this.DistributedExecutionMode) {
             Find2Components.sumoverthreadsandmpi();
@@ -911,7 +906,7 @@ public class ClusteringSolution {
 
         //  Parallel Section setting cluster occupation counts
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 if (this.DistributedExecutionMode) {
                     FindOccupationCounts.ThreadInitialize(threadIndex);
@@ -969,9 +964,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         double Result = 0.0;
         if (this.DistributedExecutionMode) {
@@ -1322,7 +1315,7 @@ public class ClusteringSolution {
         }
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                 int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
@@ -1336,9 +1329,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
     } // End CopySolution
 
     public final void CleanupClusters() { // Must follow by SetActiveClusters()
@@ -1466,7 +1457,7 @@ public class ClusteringSolution {
         final GlobalReductions.FindDoubleArraySum NewClusterNumberHistogram = new GlobalReductions.FindDoubleArraySum(DAVectorUtility.ThreadCount, this.Ncent_ThisNode + 1);
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                 //  If Program.UseTriangleInequality_DA > 0, zero cluster count will be fixed in DistributedClusteringSolution.ManageMajorSynchronization(true) called later
                 if (Program.RemovalDiagnosticPrint) {
@@ -1558,9 +1549,7 @@ public class ClusteringSolution {
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         if (Program.RemovalDiagnosticPrint) {
             OldClusterNumberHistogram.sumoverthreadsandmpi();

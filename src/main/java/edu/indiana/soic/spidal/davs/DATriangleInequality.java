@@ -1,12 +1,12 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
+import mpi.MPIException;
 
 import java.util.Arrays;
 import java.util.function.IntToDoubleFunction;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 
@@ -267,7 +267,7 @@ public class DATriangleInequality
         if (DATriangleInequality.UseParallelismoverCenters)
         { // Centers Parallel over Threads NOT nodes
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End Sum over Threads
                 {
                     int NumberCentersperThread = DATriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -279,9 +279,7 @@ public class DATriangleInequality
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
         }
         else
         { // Centers Sequential
@@ -304,7 +302,7 @@ public class DATriangleInequality
         DATriangleInequality.LB_Buffer2_alpha_ClusterPointer = new PointData[DAVectorUtility.PointCount_Process];
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End Loop over Threads for points
             {
                 int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -321,9 +319,7 @@ public class DATriangleInequality
                 }
 
             });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+        });
 
         DATriangleInequality.LB_Current_alpha_ClusterPointer = DATriangleInequality.LB_Buffer1_alpha_ClusterPointer;
         DATriangleInequality.LB_Last_alpha_ClusterPointer = null;
@@ -640,7 +636,7 @@ public class DATriangleInequality
 
         //  Point Dependent Lower Bounds
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1,
                     (threadIndex) -> // End Threads over Points -   End Loop over Points
                     {
@@ -655,10 +651,9 @@ public class DATriangleInequality
                                     DATriangleInequality.LB_Current_alpha_ClusterPointer[alpha], ClusterMapping);
                         }
 
-                    });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    }
+            );
+        });
 
     } // End DeleteCenter
 
@@ -787,7 +782,7 @@ public class DATriangleInequality
         if (DATriangleInequality.OldCenterOption >= 0)
         {
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
                     int indexlen = DAVectorUtility.PointsperThread[threadIndex];
                     int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
@@ -820,9 +815,7 @@ public class DATriangleInequality
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
         } // End skipping of Old centers
     } // End SplitCenter
 
@@ -830,7 +823,7 @@ public class DATriangleInequality
         if (DATriangleInequality.UseParallelismoverCenters)
         { // Centers Parallel over Threads NOT nodes
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End Sum over Threads
                 {
                     int NumberCentersperThread = DATriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -843,9 +836,7 @@ public class DATriangleInequality
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
         }
         else
         { // Centers Sequential
@@ -889,7 +880,7 @@ public class DATriangleInequality
             }
 
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End Sum over Threads
                 {
                     int NumberCentersperThread = DATriangleInequality.LocalParallel_CentersperThread[threadIndex];
@@ -910,9 +901,7 @@ public class DATriangleInequality
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
 
             for (int ThreadIndex = 0; ThreadIndex < DAVectorUtility.ThreadCount; ThreadIndex++)
             {
@@ -969,7 +958,7 @@ public class DATriangleInequality
 
             //  Parallel Center Processing
             // Note - parallel for
-            try {
+            launchHabaneroApp(() -> {
                 forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> // End Loop over Threads
                 {
                     int NumberCentersToProcess = DATriangleInequality.FullParallel_CentersperThread[threadIndex];
@@ -981,9 +970,7 @@ public class DATriangleInequality
                     }
 
                 });
-            } catch (SuspendableException e) {
-                DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-            }
+            });
         } // End Parallel Centers analysis of O(Number of Centers ^2) calculation
 
         else
@@ -1258,7 +1245,7 @@ public class DATriangleInequality
         //  When a new best center is found, it changes to loop over associated centers
         //  If best center loop exhausted it reverts to ploughing through center list
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1,
                     (threadIndex) -> // End Sum over Threads -  End loop over Points
                     {
@@ -1372,7 +1359,8 @@ public class DATriangleInequality
                                 LookedAt[ExaminedCenter] = true;
                             }
                             DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, BreakReason);
-                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumCentersToGo,
+                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
+                                    (double) NumCentersToGo,
                                     19);
                             Arrays.sort(smallers, 0, ActualNumber);
                             if (Num_LBValuesforPoint < ActualNumber) {
@@ -1387,7 +1375,8 @@ public class DATriangleInequality
                             if (Math.abs(BestScore - smallers[0].value) > 0.001 * BestScore) {
                                 DAVectorUtility.printAndThrowRuntimeException(
                                         "Incorrect Score " + String.format("%1$5.4f", BestScore) + " " + String.format(
-                                                "%1$5.4f", smallers[0].value));
+                                                "%1$5.4f", smallers[0].value)
+                                );
 
                             }
                             if (BestCenter < 0) {
@@ -1418,7 +1407,8 @@ public class DATriangleInequality
                             }
                             DATriangleInequality.NearestCentertoPoint_alpha[alpha] = BestCenter;
                             DATriangleInequality.Distance_NearestCentertoPoint_alpha[alpha] = BestScore;
-                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) ActualNumber, 4);
+                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) ActualNumber,
+                                    4);
                             DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, BestScore, 5);
                             DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
                                     DATriangleInequality.LB_Current_alpha_ClusterPointer[alpha].DistceLowerBound[ActualNumber - 1],
@@ -1427,10 +1417,9 @@ public class DATriangleInequality
                                     DATriangleInequality.MaxNcent_Global, 23);
                         }
 
-                    });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    }
+            );
+        });
 
     } // End InitialPointAnalysis()
 
@@ -1443,7 +1432,7 @@ public class DATriangleInequality
         //  When a new best center is found, it changes to loop over its associated centers
         //  If best center loop exhausted it reverts to ploughing through center list
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1,
                     (threadIndex) -> { // End loop over Threads -  End loop over Points
                         // Set up Look up arrays
@@ -1579,7 +1568,8 @@ public class DATriangleInequality
                                             if (LookedAt[ExaminedCenter]) {
                                                 continue;
                                             }
-                                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 16);
+                                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                    16);
                                         } else {
                                             Method = -1;
                                         }
@@ -1632,11 +1622,13 @@ public class DATriangleInequality
                                                     BestScore * BestScore + DATriangleInequality.ExponentialxTemperature)) {
                                                 --NumCentersToGo;
                                                 LookedAt[ExaminedCenter] = true;
-                                                DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
+                                                        1.0,
                                                         2);
                                                 continue;
                                             } else {
-                                                DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
+                                                        1.0,
                                                         13);
                                             }
                                         }
@@ -1647,10 +1639,12 @@ public class DATriangleInequality
                                                 BestScore * BestScore + DATriangleInequality.ExponentialxTemperature)) {
                                             --NumCentersToGo;
                                             LookedAt[ExaminedCenter] = true;
-                                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 3);
+                                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                    3);
                                             continue;
                                         } else {
-                                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 14);
+                                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0,
+                                                    14);
                                         }
                                     }
                                 }
@@ -1662,7 +1656,8 @@ public class DATriangleInequality
                                     PointCenterDistce = DATriangleInequality.SpongeFactor;
                                 } else {
                                     PointCenterDistce = DAVectorParallelism.getNOTSquaredScaledDistancebetweenVectors(
-                                            CenterY_k_i_Current[ExaminedCenter], DATriangleInequality.PointPosition[alpha],
+                                            CenterY_k_i_Current[ExaminedCenter],
+                                            DATriangleInequality.PointPosition[alpha],
                                             DATriangleInequality.CenterSigma_k_i_Current[ExaminedCenter]);
                                     DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 0);
                                     DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, 15);
@@ -1689,7 +1684,8 @@ public class DATriangleInequality
                                         DATriangleInequality.BackwardTest(threadIndex,
                                                 DATriangleInequality.CurrentInterCenter[ExaminedCenter],
                                                 tempRef_NumCentersToGo, LookedAt, PointCenterDistce + Math.sqrt(
-                                                BestScore * BestScore + DATriangleInequality.ExponentialxTemperature));
+                                                        BestScore * BestScore + DATriangleInequality.ExponentialxTemperature)
+                                        );
                                         NumCentersToGo = tempRef_NumCentersToGo.content;
                                     }
                                     continue;
@@ -1698,9 +1694,11 @@ public class DATriangleInequality
                                     Box<Integer> tempRef_NumCentersToGo2 = new Box<>(
                                             NumCentersToGo);
                                     DATriangleInequality.BackwardTest(threadIndex,
-                                            DATriangleInequality.CurrentInterCenter[BestCenter], tempRef_NumCentersToGo2,
+                                            DATriangleInequality.CurrentInterCenter[BestCenter],
+                                            tempRef_NumCentersToGo2,
                                             LookedAt, BestScore + Math.sqrt(
-                                            PointCenterDistce * PointCenterDistce + DATriangleInequality.ExponentialxTemperature));
+                                                    PointCenterDistce * PointCenterDistce + DATriangleInequality.ExponentialxTemperature)
+                                    );
                                     NumCentersToGo = tempRef_NumCentersToGo2.content;
                                 }
                                 BestScore = PointCenterDistce;
@@ -1720,7 +1718,8 @@ public class DATriangleInequality
                                 LookedAt[ExaminedCenter] = true;
                             }
                             DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, 1.0, BreakReason);
-                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex, (double) NumCentersToGo,
+                            DATriangleInequality.FindDiagnosticSums_Points.addapoint(threadIndex,
+                                    (double) NumCentersToGo,
                                     19);
                             for (int loopindex = 0; loopindex < DATriangleInequality.LB_Last_alpha_ClusterPointer[alpha].NumCenters; loopindex++) {
                                 int CenterIndex = DATriangleInequality.LB_Last_alpha_ClusterPointer[alpha].CenterIndices[loopindex];
@@ -1778,10 +1777,9 @@ public class DATriangleInequality
                                     DATriangleInequality.MaxNcent_Global, 23);
                         }
 
-                    });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    }
+            );
+        });
 
     } // End PointDependentAnalysis()
 

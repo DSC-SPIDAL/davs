@@ -1,10 +1,10 @@
 package edu.indiana.soic.spidal.davs;
 
-import edu.rice.hj.api.SuspendableException;
-import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
 import edu.indiana.soic.spidal.mpi.MPIPacket;
+import mpi.MPIException;
 
+import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
 // Control Kmeans
@@ -86,7 +86,7 @@ public class ControlKmeans
 	public static double[][] CaptureKmeans(int[] FullAssignment) throws MPIException { // Save Kmeans assignment and centers
 
         // Note - parallel for
-        try {
+        launchHabaneroApp(() -> {
             forallChunked(0, DAVectorUtility.ThreadCount - 1,
                     (threadIndex) -> // End Sum over Threads -  End loop over Points
                     {
@@ -96,10 +96,9 @@ public class ControlKmeans
                         System.arraycopy(KmeansTriangleInequality.NearestCentertoPoint, beginpoint, FullAssignment,
                                 beginpoint + DAVectorUtility.PointStart_Process, indexlen + beginpoint - beginpoint);
 
-                    });
-        } catch (SuspendableException e) {
-            DAVectorUtility.printAndThrowRuntimeException(e.getMessage());
-        }
+                    }
+            );
+        });
 
         if (DAVectorUtility.MPI_Size > 1)
 		{
