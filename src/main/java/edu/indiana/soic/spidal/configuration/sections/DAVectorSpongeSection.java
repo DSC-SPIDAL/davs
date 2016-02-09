@@ -12,131 +12,143 @@ public class DAVectorSpongeSection {
         try {
             p.load(new FileInputStream(configurationFilePath));
 
-            ClusterFile = p.getProperty("ClusterFile","cluster.txt");
-            DistanceMatrixFile = p.getProperty("DistanceMatrixFile", "distance.bin");
-            LabelFile = p.getProperty("LabelFile", "labels.txt");
-            ComparisonClusterFile = p.getProperty("ComparisonClusterFile", "ComparisonClusterFile.txt");
-            RestartClusterFile = p.getProperty("RestartClusterFile", "RestartClusterFile.txt");
-            TimingFile = p.getProperty("TimingFile", "timings.txt");
-            SummaryFile = p.getProperty("SummaryFile","summary.txt");
+            ClusterFile = getProperty(p,"ClusterFile","cluster.txt");
+            DistanceMatrixFile = getProperty(p,"DistanceMatrixFile", "distance.bin");
+            LabelFile = getProperty(p,"LabelFile", "labels.txt");
+            ComparisonClusterFile = getProperty(p,"ComparisonClusterFile", "ComparisonClusterFile.txt");
+            RestartClusterFile = getProperty(p,"RestartClusterFile", "RestartClusterFile.txt");
+            TimingFile = getProperty(p,"TimingFile", "timings.txt");
+            SummaryFile = getProperty(p,"SummaryFile","summary.txt");
 
 
-            UseSponge = Boolean.parseBoolean(p.getProperty("UseSponge", "false"));
-            SpongeFactor1 = Double.parseDouble(p.getProperty("SpongeFactor1", "3.0"));
-            SpongeFactor2 = Double.parseDouble(p.getProperty("SpongeFactor2", "3.0"));
-            SpongePOption = Integer.parseInt(p.getProperty("SpongePOption", "1"));
-            SpongePWeight = Double.parseDouble(p.getProperty("SpongePWeight", "0.1"));
-            CreateSpongeScaledSquaredWidth = Double.parseDouble(p.getProperty("CreateSpongeScaledSquaredWidth","-1.0" ));
-            ContinuousClustering = Boolean.parseBoolean(p.getProperty("ContinuousClustering","true"));
-            ParameterVectorDimension = Integer.parseInt(p.getProperty("ParameterVectorDimension","2"));
+            UseSponge = Boolean.parseBoolean(getProperty(p,"UseSponge", "false"));
+            SpongeFactor1 = Double.parseDouble(getProperty(p,"SpongeFactor1", "3.0"));
+            SpongeFactor2 = Double.parseDouble(getProperty(p,"SpongeFactor2", "3.0"));
+            SpongePOption = Integer.parseInt(getProperty(p,"SpongePOption", "1"));
+            SpongePWeight = Double.parseDouble(getProperty(p,"SpongePWeight", "0.1"));
+            CreateSpongeScaledSquaredWidth = Double.parseDouble(getProperty(p,"CreateSpongeScaledSquaredWidth","-1.0" ));
+            ContinuousClustering = Boolean.parseBoolean(getProperty(p,"ContinuousClustering","true"));
+            ParameterVectorDimension = Integer.parseInt(getProperty(p,"ParameterVectorDimension","2"));
 
-            SpongeTemperature1 = Double.parseDouble(p.getProperty("SpongeTemperature1","-1.0" ));
-            SpongeTemperature2 = Double.parseDouble(p.getProperty("SpongeTemperature2","-1.0" ));
-            RestartTemperature = Double.parseDouble(p.getProperty("RestartTemperature","-1.0" ));
+            SpongeTemperature1 = Double.parseDouble(getProperty(p,"SpongeTemperature1","-1.0" ));
+            SpongeTemperature2 = Double.parseDouble(getProperty(p,"SpongeTemperature2","-1.0" ));
+            RestartTemperature = Double.parseDouble(getProperty(p,"RestartTemperature","-1.0" ));
 
-            NumberDataPoints = Integer.parseInt(p.getProperty("NumberDataPoints","-1"));
-            SelectedInputLabel = Integer.parseInt(p.getProperty("SelectedInputLabel","6"));
-            InputFileType = Integer.parseInt(p.getProperty("InputFileType","0"));
-            Replicate = Integer.parseInt(p.getProperty("Replicate","1"));
+            NumberDataPoints = Integer.parseInt(getProperty(p,"NumberDataPoints","-1"));
+            SelectedInputLabel = Integer.parseInt(getProperty(p,"SelectedInputLabel","6"));
+            InputFileType = Integer.parseInt(getProperty(p,"InputFileType","0"));
+            Replicate = Integer.parseInt(getProperty(p,"Replicate","1"));
 
 
-            CompareSolution = Integer.parseInt(p.getProperty("CompareSolution","-1"));
-            ComparisonInputFileType = Integer.parseInt(p.getProperty("ComparisonInputFileType","0"));
-            ComparisonSelectedInputLabel = Integer.parseInt(p.getProperty("ComparisonSelectedInputLabel","2"));
-            RestartSelectedInputLabel = Integer.parseInt(p.getProperty("RestartSelectedInputLabel","-100000000"));
-            RestartInputFileType = Integer.parseInt(p.getProperty("RestartInputFileType","1"));
+            CompareSolution = Integer.parseInt(getProperty(p,"CompareSolution","-1"));
+            ComparisonInputFileType = Integer.parseInt(getProperty(p,"ComparisonInputFileType","0"));
+            ComparisonSelectedInputLabel = Integer.parseInt(getProperty(p,"ComparisonSelectedInputLabel","2"));
+            RestartSelectedInputLabel = Integer.parseInt(getProperty(p,"RestartSelectedInputLabel","-100000000"));
+            RestartInputFileType = Integer.parseInt(getProperty(p,"RestartInputFileType","1"));
 
-            SigmaMethod = Integer.parseInt(p.getProperty("SigmaMethod","0"));
+            SigmaMethod = Integer.parseInt(getProperty(p,"SigmaMethod","0"));
 
-            String SigmaVectorParametersIString = p.getProperty("SigmaVectorParameters_i", "0.000598,2.35");
+            String SigmaVectorParametersIString = getProperty(p,"SigmaVectorParameters_i", "0.000598,2.35");
             String [] splits = SigmaVectorParametersIString.split(",");
             SigmaVectorParameters_i = new double[splits.length];
             for (int i = 0; i < splits.length; ++i){
                 SigmaVectorParameters_i[i] = Double.parseDouble(splits[i]);
             }
 
-            FinalTargetTemperature = Double.parseDouble(p.getProperty("FinalTargetTemperature","3.0" ));
-            FinalTargetSigma0 = Double.parseDouble(p.getProperty("FinalTargetSigma0","0.0" ));
-            InitialSigma0 = Double.parseDouble(p.getProperty("InitialSigma0","0.0" ));
+            FinalTargetTemperature = Double.parseDouble(getProperty(p,"FinalTargetTemperature","3.0" ));
+            FinalTargetSigma0 = Double.parseDouble(getProperty(p,"FinalTargetSigma0","0.0" ));
+            InitialSigma0 = Double.parseDouble(getProperty(p,"InitialSigma0","0.0" ));
 
-            ClusterCountOutput = Integer.parseInt(p.getProperty("ClusterCountOutput", "0"));
-            NumberNearbyClusters = Integer.parseInt(p.getProperty("NumberNearbyClusters", "5"));
-            NearbySpongePointLimit = Double.parseDouble(p.getProperty("NearbySpongePointLimit", "-1.0"));
+            ClusterCountOutput = Integer.parseInt(getProperty(p,"ClusterCountOutput", "0"));
+            NumberNearbyClusters = Integer.parseInt(getProperty(p,"NumberNearbyClusters", "5"));
+            NearbySpongePointLimit = Double.parseDouble(getProperty(p,"NearbySpongePointLimit", "-1.0"));
 
-            ProcessingOption = Integer.parseInt(p.getProperty("ProcessingOption", "0"));
+            ProcessingOption = Integer.parseInt(getProperty(p,"ProcessingOption", "0"));
 
-            CacheLineSize = Integer.parseInt(p.getProperty("CacheLineSize", "0"));
-            ClusterPrintNumber = Integer.parseInt(p.getProperty("ClusterPrintNumber", "5"));
-            PrintInterval = Integer.parseInt(p.getProperty("PrintInterval", "3"));
-            RemovalDiagnosticPrint = Boolean.parseBoolean(p.getProperty("RemovalDiagnosticPrint", "false"));
+            CacheLineSize = Integer.parseInt(getProperty(p,"CacheLineSize", "0"));
+            ClusterPrintNumber = Integer.parseInt(getProperty(p,"ClusterPrintNumber", "5"));
+            PrintInterval = Integer.parseInt(getProperty(p,"PrintInterval", "3"));
+            RemovalDiagnosticPrint = Boolean.parseBoolean(getProperty(p,"RemovalDiagnosticPrint", "false"));
 
-            String magicTemperaturesString = p.getProperty("MagicTemperatures", "4.0,3.0,2.0,1.0,0.5");
+            String magicTemperaturesString = getProperty(p,"MagicTemperatures", "4.0,3.0,2.0,1.0,0.5");
             splits = magicTemperaturesString.split(",");
             MagicTemperatures = new double[splits.length];
             for (int i = 0; i < splits.length; ++i){
                 MagicTemperatures[i] = Double.parseDouble(splits[i]);
             }
 
-            MagicIndex = Integer.parseInt(p.getProperty("MagicIndex", "0"));
+            MagicIndex = Integer.parseInt(getProperty(p,"MagicIndex", "0"));
 
-            MaxNcentPerNode = Integer.parseInt(p.getProperty("MaxNcentPerNode", "0"));
-            MaxNcentTotal = Integer.parseInt(p.getProperty("MaxNcentTotal", "0"));
-            maxNcentCreated = Integer.parseInt(p.getProperty("maxNcentCreated", "0"));
-            TargetNcentPerPoint = Integer.parseInt(p.getProperty("TargetNcentPerPoint", "20"));
-            TargetMinimumNcentPerPoint = Integer.parseInt(p.getProperty("TargetMinimumNcentPerPoint", "1"));
-            MaxNcentPerPoint = Integer.parseInt(p.getProperty("MaxNcentPerPoint", "25"));
+            MaxNcentPerNode = Integer.parseInt(getProperty(p,"MaxNcentPerNode", "0"));
+            MaxNcentTotal = Integer.parseInt(getProperty(p,"MaxNcentTotal", "0"));
+            maxNcentCreated = Integer.parseInt(getProperty(p,"maxNcentCreated", "0"));
+            TargetNcentPerPoint = Integer.parseInt(getProperty(p,"TargetNcentPerPoint", "20"));
+            TargetMinimumNcentPerPoint = Integer.parseInt(getProperty(p,"TargetMinimumNcentPerPoint", "1"));
+            MaxNcentPerPoint = Integer.parseInt(getProperty(p,"MaxNcentPerPoint", "25"));
 
-            MaxIntegerComponents = Integer.parseInt(p.getProperty("MaxIntegerComponents", "2"));
-            MaxDoubleComponents = Integer.parseInt(p.getProperty("MaxDoubleComponents", "3"));
-            MaxMPITransportBuffer = Integer.parseInt(p.getProperty("MaxMPITransportBuffer", "500"));
-            MaxNumberAccumulationsPerNode = Integer.parseInt(p.getProperty("MaxNumberAccumulationsPerNode", "30000"));
-            MaxTransportedClusterStorage = Integer.parseInt(p.getProperty("MaxTransportedClusterStorage", "500"));
+            MaxIntegerComponents = Integer.parseInt(getProperty(p,"MaxIntegerComponents", "2"));
+            MaxDoubleComponents = Integer.parseInt(getProperty(p,"MaxDoubleComponents", "3"));
+            MaxMPITransportBuffer = Integer.parseInt(getProperty(p,"MaxMPITransportBuffer", "500"));
+            MaxNumberAccumulationsPerNode = Integer.parseInt(getProperty(p,"MaxNumberAccumulationsPerNode", "30000"));
+            MaxTransportedClusterStorage = Integer.parseInt(getProperty(p,"MaxTransportedClusterStorage", "500"));
 
-            ExpArgumentCut1 = Double.parseDouble(p.getProperty("ExpArgumentCut1", "20.0"));
-            ExpArgumentCut2 = Double.parseDouble(p.getProperty("ExpArgumentCut2", "40.0"));
-            ExpArgumentCut3 = Double.parseDouble(p.getProperty("ExpArgumentCut3", "50.0"));
-            Tminimum = Double.parseDouble(p.getProperty("Tminimum", "-1000.0"));
+            ExpArgumentCut1 = Double.parseDouble(getProperty(p,"ExpArgumentCut1", "20.0"));
+            ExpArgumentCut2 = Double.parseDouble(getProperty(p,"ExpArgumentCut2", "40.0"));
+            ExpArgumentCut3 = Double.parseDouble(getProperty(p,"ExpArgumentCut3", "50.0"));
+            Tminimum = Double.parseDouble(getProperty(p,"Tminimum", "-1000.0"));
 
-            InitialNcent = Integer.parseInt(p.getProperty("InitialNcent", "1"));
-            MinimumCountForClusterCk = Double.parseDouble(p.getProperty("MinimumCountForClusterCk", "1.0"));
-            MinimumCountForClusterCkWithSponge = Double.parseDouble(p.getProperty("MinimumCountForClusterCkWithSponge", "1.5"));
-            MinimuCountForClusterPoints = Integer.parseInt(p.getProperty("MinimuCountForClusterPoints", "2"));
-            CountForClusterCkToBeZero = Double.parseDouble(p.getProperty("CountForClusterCkToBeZero", "0.001"));
-            AddSpongeScaledWidthSquared = Double.parseDouble(p.getProperty("AddSpongeScaledWidthSquared", "-1.0"));
+            InitialNcent = Integer.parseInt(getProperty(p,"InitialNcent", "1"));
+            MinimumCountForClusterCk = Double.parseDouble(getProperty(p,"MinimumCountForClusterCk", "1.0"));
+            MinimumCountForClusterCkWithSponge = Double.parseDouble(getProperty(p,"MinimumCountForClusterCkWithSponge", "1.5"));
+            MinimuCountForClusterPoints = Integer.parseInt(getProperty(p,"MinimuCountForClusterPoints", "2"));
+            CountForClusterCkToBeZero = Double.parseDouble(getProperty(p,"CountForClusterCkToBeZero", "0.001"));
+            AddSpongeScaledWidthSquared = Double.parseDouble(getProperty(p,"AddSpongeScaledWidthSquared", "-1.0"));
 
-            InitialCoolingFactor = Double.parseDouble(p.getProperty("InitialCoolingFactor", "0.9875"));
-            InitialCoolingFactor1 = Double.parseDouble(p.getProperty("InitialCoolingFactor1", "0.9875"));
-            InitialCoolingFactor2 = Double.parseDouble(p.getProperty("InitialCoolingFactor2", "0.99375"));
-            FineCoolingFactor = Double.parseDouble(p.getProperty("FineCoolingFactor", "0.9975"));
-            FineCoolingFactor1 = Double.parseDouble(p.getProperty("FineCoolingFactor1", "0.9975"));
-            FineCoolingFactor2 = Double.parseDouble(p.getProperty("FineCoolingFactor2", "0.999375"));
-            CoolingTemperatureSwitch = Double.parseDouble(p.getProperty("CoolingTemperatureSwitch", "12.0"));
-            WaitIterations = Integer.parseInt(p.getProperty("WaitIterations", "10"));
-            WaitIterationsConverge = Integer.parseInt(p.getProperty("WaitIterationsConverge", "4"));
+            InitialCoolingFactor = Double.parseDouble(getProperty(p,"InitialCoolingFactor", "0.9875"));
+            InitialCoolingFactor1 = Double.parseDouble(getProperty(p,"InitialCoolingFactor1", "0.9875"));
+            InitialCoolingFactor2 = Double.parseDouble(getProperty(p,"InitialCoolingFactor2", "0.99375"));
+            FineCoolingFactor = Double.parseDouble(getProperty(p,"FineCoolingFactor", "0.9975"));
+            FineCoolingFactor1 = Double.parseDouble(getProperty(p,"FineCoolingFactor1", "0.9975"));
+            FineCoolingFactor2 = Double.parseDouble(getProperty(p,"FineCoolingFactor2", "0.999375"));
+            CoolingTemperatureSwitch = Double.parseDouble(getProperty(p,"CoolingTemperatureSwitch", "12.0"));
+            WaitIterations = Integer.parseInt(getProperty(p,"WaitIterations", "10"));
+            WaitIterationsConverge = Integer.parseInt(getProperty(p,"WaitIterationsConverge", "4"));
 
-            IterationAtEnd = Integer.parseInt(p.getProperty("IterationAtEnd", "2000"));
-            ConvergenceLoopLimit = Integer.parseInt(p.getProperty("ConvergenceLoopLimit", "20"));
+            IterationAtEnd = Integer.parseInt(getProperty(p,"IterationAtEnd", "2000"));
+            ConvergenceLoopLimit = Integer.parseInt(getProperty(p,"ConvergenceLoopLimit", "20"));
 
-            FreezingLimit = Double.parseDouble(p.getProperty("FreezingLimit", "0.002"));
-            MalphaMaxChange = Double.parseDouble(p.getProperty("MalphaMaxChange", "0.005"));
-            MalphaMaxChange1 = Double.parseDouble(p.getProperty("MalphaMaxChange1", "0.005"));
-            MaxNumberSplitClusters = Integer.parseInt(p.getProperty("MaxNumberSplitClusters", "3"));
-            ConvergeIntermediateClusters = Boolean.parseBoolean(p.getProperty("ConvergeIntermediateClusters", "false"));
-            TooSmallToSplit = Double.parseDouble(p.getProperty("TooSmallToSplit", "4.0"));
-            MinimumScaledWidthSquaredToSplit = Double.parseDouble(p.getProperty("MinimumScaledWidthSquaredToSplit", "1.5"));
-            ScaledSquaredDistanceAtClosenessTest = Double.parseDouble(p.getProperty("ScaledSquaredDistanceAtClosenessTest", "0.5"));
+            FreezingLimit = Double.parseDouble(getProperty(p,"FreezingLimit", "0.002"));
+            MalphaMaxChange = Double.parseDouble(getProperty(p,"MalphaMaxChange", "0.005"));
+            MalphaMaxChange1 = Double.parseDouble(getProperty(p,"MalphaMaxChange1", "0.005"));
+            MaxNumberSplitClusters = Integer.parseInt(getProperty(p,"MaxNumberSplitClusters", "3"));
+            ConvergeIntermediateClusters = Boolean.parseBoolean(getProperty(p,"ConvergeIntermediateClusters", "false"));
+            TooSmallToSplit = Double.parseDouble(getProperty(p,"TooSmallToSplit", "4.0"));
+            MinimumScaledWidthSquaredToSplit = Double.parseDouble(getProperty(p,"MinimumScaledWidthSquaredToSplit", "1.5"));
+            ScaledSquaredDistanceAtClosenessTest = Double.parseDouble(getProperty(p,"ScaledSquaredDistanceAtClosenessTest", "0.5"));
 
-            ClusterLimitForDistribution = Integer.parseInt(p.getProperty("ClusterLimitForDistribution", "-1"));
-            TemperatureLimitForDistribution = Double.parseDouble(p.getProperty("TemperatureLimitForDistribution", "-1.0"));
-            TemperatureForClosenessTest = Double.parseDouble(p.getProperty("TemperatureForClosenessTest", "4.0"));
+            ClusterLimitForDistribution = Integer.parseInt(getProperty(p,"ClusterLimitForDistribution", "-1"));
+            TemperatureLimitForDistribution = Double.parseDouble(getProperty(p,"TemperatureLimitForDistribution", "-1.0"));
+            TemperatureForClosenessTest = Double.parseDouble(getProperty(p,"TemperatureForClosenessTest", "4.0"));
 
-            DebugPrintOption = Integer.parseInt(p.getProperty("DebugPrintOption", "1"));
-            ConsoleDebugOutput = Boolean.parseBoolean(p.getProperty("ConsoleDebugOutput", "true"));
+            DebugPrintOption = Integer.parseInt(getProperty(p,"DebugPrintOption", "1"));
+            ConsoleDebugOutput = Boolean.parseBoolean(getProperty(p,"ConsoleDebugOutput", "true"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
 
+    }
+
+    private static String getProperty(Properties p, String name, String def) {
+        String val = System.getProperty(name);
+        if (val == null) {
+            if (def != null) {
+                val = p.getProperty(name, def);
+            } else {
+                val = p.getProperty(name);
+            }
+        }
+        return val;
     }
 
     public boolean UseSponge;
