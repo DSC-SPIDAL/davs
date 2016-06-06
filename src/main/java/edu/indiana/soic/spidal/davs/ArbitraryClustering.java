@@ -71,7 +71,7 @@ public class ArbitraryClustering
 				this.ClusterIDtoIndex[RawClusterIndex] = -1;
 				continue;
 			}
-			++this.MaxIndependentClusterIndex;
+		//	++this.MaxIndependentClusterIndex;
 		}
 
 		this.ClusterIndextoID = new int[this.MaxIndependentClusterIndex];
