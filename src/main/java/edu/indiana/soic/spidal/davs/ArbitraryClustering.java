@@ -403,7 +403,6 @@ public class ArbitraryClustering
 					System.out.println("RawtargetCluster" + RawtargetCluster);
 					System.out.println("UsedTargetClusters1 length" + UsedTargetClusters1.length);
 					System.out.println("ClusterIDtoIndex length" + this.ClusterIDtoIndex.length);
-
 					++UsedTargetClusters1[this.ClusterIDtoIndex[RawtargetCluster]];
 				}
 
