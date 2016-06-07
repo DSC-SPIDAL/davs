@@ -3245,6 +3245,8 @@ public class VectorAnnealIterate
                 java.nio.file.Files.newBufferedWriter(Paths.get(fname), Charset.defaultCharset(), mode), true)) {
 			System.out.println("MPI Process rank ----------------------- " + DAVectorUtility.MPI_Rank );
 			System.out.println("PointOriginalExprment ----------------------- " + Program.PointOriginalExprment.length);
+			System.out.println("data points ----------------------- " + dataPoints);
+			System.out.println("PointPositions points ----------------------- " + PointPositions.length);
 			for (int i = 0; i < dataPoints; i++) {
                 String line = String.valueOf(i + startposition);
 				line += " " + Program.PointOriginalExprment[i];
