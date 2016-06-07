@@ -3271,7 +3271,7 @@ public class VectorAnnealIterate
                 for (int i = 0; i < dataPoints; i++)
                 {
                     String line = String.valueOf(i + startposition);
-					line = " " + String.valueOf("");
+					line += " " + Program.PointOriginalExprment[i];
                     for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         tmp = PointPositions[i][VectorIndex];
