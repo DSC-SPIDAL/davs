@@ -3245,7 +3245,7 @@ public class VectorAnnealIterate
                 java.nio.file.Files.newBufferedWriter(Paths.get(fname), Charset.defaultCharset(), mode), true)) {
             for (int i = 0; i < dataPoints; i++) {
                 String line = String.valueOf(i + startposition);
-				line += " " + Program.PointOriginalExprment[i + startposition];
+				line += " " + Program.PointOriginalExprment[i];
                 for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                     line += " " + String.format("%1$7.6f", PointPositions[i][VectorIndex]);
                 }
