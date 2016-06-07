@@ -3159,6 +3159,7 @@ public class VectorAnnealIterate
 			int[] CenterLabel = new int[CenterLabelSize];
 			double[][] CenterPositions = new double[CenterLabelSize][];
 			String[] ExtraCenterlabels = new String[CenterLabelSize];
+			int[] CenterExperementNUmbers = new int[CenterLabelSize];
 
 			int decrement = 0;
 			for (int StrippedClusterIndex = 0; StrippedClusterIndex < CenterLabelSize; StrippedClusterIndex++)
@@ -3184,7 +3185,7 @@ public class VectorAnnealIterate
 			// In first column for centers, we output cluster number + Total Point Count
 			if (DoFileOutput)
 			{
-				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, CenterLabel, CenterPositions, new int[0], ExtraCenterlabels, CenterLabelSize, DAVectorUtility.PointCount_Global, true);
+				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, CenterLabel, CenterPositions, CenterExperementNUmbers, ExtraCenterlabels, CenterLabelSize, DAVectorUtility.PointCount_Global, true);
 			}
 
 		} // End Root Process that receives cluster assignments from afar
@@ -3294,7 +3295,7 @@ public class VectorAnnealIterate
                 for (int i = 0; i < dataPoints; i++)
                 {
                     String line = String.valueOf(i + startposition);
-					line += " " + Program.PointOriginalExprment[i];
+					line += " " + experimentNumbers[i];
                     for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         tmp = PointPositions[i][VectorIndex];
