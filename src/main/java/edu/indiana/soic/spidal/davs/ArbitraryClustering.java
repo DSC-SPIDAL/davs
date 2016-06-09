@@ -113,6 +113,7 @@ public class ArbitraryClustering
 			else
 			{
 				ListofCounts = this.ClusterGoldenCountsbyIndex;
+				if(ListofCounts.length == 0) continue;
 				CountLimit = 0;
 				HistogramType = "Select Golden Peaks";
 				Limits = new int[] {5, 15,40};

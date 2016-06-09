@@ -621,18 +621,36 @@ public class LCMSAnalyze
 			{
 				ClusterCountcut = 50;
 			}
+
 			Program.OurClusters.HistogramPeaks(ClusterCountcut);
-			Program.MedeaClusters.HistogramPeaks(ClusterCountcut);
-			Program.MclustClusters.HistogramPeaks(ClusterCountcut);
-			Program.GoldenPeaks.HistogramPeaks(ClusterCountcut);
+
+			if(Program.MedeaClusters.MaxIndependentClusterIndex > 0){
+				Program.MedeaClusters.HistogramPeaks(ClusterCountcut);
+			}
+
+			if(Program.MclustClusters.MaxIndependentClusterIndex > 0){
+				Program.MclustClusters.HistogramPeaks(ClusterCountcut);
+			}
+
+			if(Program.GoldenPeaks.MaxIndependentClusterIndex > 0){
+				Program.GoldenPeaks.HistogramPeaks(ClusterCountcut);
+			}
+
 			ClusterCountcut += 5;
 		}
 
 		//  Comparison of Basic Clusters
 		DAVectorUtility.SALSAPrint(0, "\n**************** Statistics of Clustering in each method and selection to Golden Clusters\nWith means versus occupation count and 1D/2D Point-Center Histograms");
 		Program.OurClusters.Statistics();
-		Program.MedeaClusters.Statistics();
-		Program.MclustClusters.Statistics();
+
+		if(Program.MedeaClusters.MaxIndependentClusterIndex > 0) {
+			Program.MedeaClusters.Statistics();
+		}
+
+		if(Program.MclustClusters.MaxIndependentClusterIndex > 0) {
+			Program.MclustClusters.Statistics();
+		}
+
 		if (Program.GoldenPeaks.MaxIndependentClusterIndex > 0)
 		{
 			Program.GoldenPeaks.Statistics();
@@ -648,10 +666,20 @@ public class LCMSAnalyze
 		}
 
 		DAVectorUtility.SALSAPrint(0, "\n Comparisons with DAVector Clusters");
-		Program.MedeaClusters.Difference(Program.OurClusters);
-		Program.MclustClusters.Difference(Program.OurClusters);
-		Program.OurClusters.Difference(Program.MedeaClusters);
-		Program.OurClusters.Difference(Program.MclustClusters);
+
+		if(Program.MedeaClusters.MaxIndependentClusterIndex > 0) {
+			Program.MedeaClusters.Difference(Program.OurClusters);
+		}
+		if(Program.MclustClusters.MaxIndependentClusterIndex > 0) {
+			Program.MclustClusters.Difference(Program.OurClusters);
+		}
+
+		if(Program.MedeaClusters.MaxIndependentClusterIndex > 0) {
+			Program.OurClusters.Difference(Program.MedeaClusters);
+		}
+		if(Program.MclustClusters.MaxIndependentClusterIndex > 0) {
+			Program.OurClusters.Difference(Program.MclustClusters);
+		}
 
 	}
 
