@@ -3095,7 +3095,7 @@ public class VectorAnnealIterate
 		{
 			if (DoFileOutput)
 			{
-				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, labels, Program.PointPosition, Program.PointOriginalExprment, Extralabels, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, false);
+				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, labels, Program.PointPosition, Program.PointOriginalExperimentNumber, Extralabels, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, false);
 			}
 
             // Note - parallel for
@@ -3208,7 +3208,7 @@ public class VectorAnnealIterate
 
 			for (int LocalPointIndex = 0; LocalPointIndex < DAVectorUtility.PointCount_Process; LocalPointIndex++)
 			{
-				tosendint.setMArrayIntAt(LocalPointIndex, Program.PointOriginalExprment[LocalPointIndex]);
+				tosendint.setMArrayIntAt(LocalPointIndex, Program.PointOriginalExperimentNumber[LocalPointIndex]);
 			}
 			DAVectorUtility.mpiOps.send(tosendint, 0, MPItag2);
 

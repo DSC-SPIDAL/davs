@@ -308,7 +308,7 @@ public class DAVectorReadData {
                             Program.PointPosition[ActualPointPosition][0] = Double.parseDouble(splits[1]);
                             Program.PointPosition[ActualPointPosition][1] = Double.parseDouble(splits[2]);
                             Program.PointOriginalIndex[ActualPointPosition] = Integer.parseInt(splits[0]);
-                            Program.PointOriginalExprment[ActualPointPosition] = Integer.parseInt(splits[ExpermentNumberPosition]);
+                            Program.PointOriginalExperimentNumber[ActualPointPosition] = Integer.parseInt(splits[ExpermentNumberPosition]);
                             if (Program.ParameterVectorDimension > 2) {
                                 for (int VectorIndex = 2; VectorIndex < Program.ParameterVectorDimension;
                                      VectorIndex++) {
