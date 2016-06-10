@@ -62,6 +62,7 @@ public class Program
 	public static int FirstClusterValue = 1; // Index for first cluster in Kmeans initialization
 	public static double[][]  PointPosition; // Position of Point x is PointPosition[x, i] where i runs over vector space directions 0 ... ParameterVectorDimension-1
 	public static int[] PointOriginalIndex; // Point Index on File
+	public static int[] PointOriginalExprment; // Point experiment Number
 	public static int[] PointLabel; // Label on File
 	public static int Replicate = 1; // Replicate points for scaling tests
 	public static double[][] FullPoint3DPosition; // 3D Position of Points -- all stored
@@ -590,6 +591,7 @@ public class Program
 
 		// Setup PointPosition and related arrays
 		Program.PointOriginalIndex = new int[DAVectorUtility.PointCount_Process]; // Point Index on File
+		Program.PointOriginalExprment = new int[DAVectorUtility.PointCount_Process]; // Point Index on File
 		Program.PointLabel = new int[DAVectorUtility.PointCount_Process];
 		Program.PointPosition = new double[DAVectorUtility.PointCount_Process][];
         // Note - parallel for

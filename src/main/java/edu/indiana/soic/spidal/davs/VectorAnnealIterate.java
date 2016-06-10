@@ -3090,11 +3090,12 @@ public class VectorAnnealIterate
 		String ClusternumberFileName = Paths.get(directory, file).toString();
 
 		int MPItag = 100;
+		int MPItag2 = 101;
 		if (DAVectorUtility.MPI_Rank == 0)
 		{
 			if (DoFileOutput)
 			{
-				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, labels, Program.PointPosition, Extralabels, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, false);
+				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, labels, Program.PointPosition, Program.PointOriginalExprment, Extralabels, DAVectorUtility.PointCount_Process, DAVectorUtility.PointStart_Process, false);
 			}
 
             // Note - parallel for
@@ -3122,11 +3123,20 @@ public class VectorAnnealIterate
 				}
 
 				double[][] AwayPointPositions = new double[AwayArraySize][];
+				int[] AwayOriginalExprment = new int[AwayArraySize];
 				for (int index = 0; index < AwayArraySize; index++)
 				{
 					AwayPointPositions[index] = new double[Program.ParameterVectorDimension];
 				}
 				MPIPacket fromsourcedouble;
+				MPIPacket fromsouceint;
+				fromsouceint = DAVectorUtility.mpiOps.receive(MPISource, MPItag2, MPIPacket.Type.Integer);
+
+				for (int LocalPointIndex = 0; LocalPointIndex < AwayArraySize; LocalPointIndex++)
+				{
+					AwayOriginalExprment[LocalPointIndex] = fromsouceint.getMArrayIntAt(LocalPointIndex);
+				}
+
 				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 				{
 					fromsourcedouble = DAVectorUtility.mpiOps.receive(MPISource, MPItag, MPIPacket.Type.Double);
@@ -3137,7 +3147,7 @@ public class VectorAnnealIterate
 				}
 				if (DoFileOutput)
 				{
-					VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, fromsource::getMArrayIntAt, AwayPointPositions, Extralabels, AwayArraySize, fromsource.getFirstPoint(), true);
+					VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, fromsource::getMArrayIntAt, AwayPointPositions,AwayOriginalExprment, Extralabels, AwayArraySize, fromsource.getFirstPoint(), true);
 				}
 			}
 
@@ -3149,6 +3159,7 @@ public class VectorAnnealIterate
 			int[] CenterLabel = new int[CenterLabelSize];
 			double[][] CenterPositions = new double[CenterLabelSize][];
 			String[] ExtraCenterlabels = new String[CenterLabelSize];
+			int[] CenterExperementNUmbers = new int[CenterLabelSize];
 
 			int decrement = 0;
 			for (int StrippedClusterIndex = 0; StrippedClusterIndex < CenterLabelSize; StrippedClusterIndex++)
@@ -3174,7 +3185,7 @@ public class VectorAnnealIterate
 			// In first column for centers, we output cluster number + Total Point Count
 			if (DoFileOutput)
 			{
-				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, CenterLabel, CenterPositions, ExtraCenterlabels, CenterLabelSize, DAVectorUtility.PointCount_Global, true);
+				VectorAnnealIterate.WriteClusterFile(ClusternumberFileName, CenterLabel, CenterPositions, CenterExperementNUmbers, ExtraCenterlabels, CenterLabelSize, DAVectorUtility.PointCount_Global, true);
 			}
 
 		} // End Root Process that receives cluster assignments from afar
@@ -3190,6 +3201,17 @@ public class VectorAnnealIterate
             // Note - MPI Call - Send - MPIPacket<Integer>
 			DAVectorUtility.mpiOps.send(tosend, 0, MPItag);
 			MPIPacket tosenddouble = MPIPacket.newDoublePacket(DAVectorUtility.PointCount_Process);
+			MPIPacket tosendint = MPIPacket.newIntegerPacket(DAVectorUtility.PointCount_Process);
+
+			tosendint.setFirstPoint(DAVectorUtility.PointStart_Process);
+			tosendint.setNumberOfPoints(DAVectorUtility.PointCount_Process);
+
+			for (int LocalPointIndex = 0; LocalPointIndex < DAVectorUtility.PointCount_Process; LocalPointIndex++)
+			{
+				tosendint.setMArrayIntAt(LocalPointIndex, Program.PointOriginalExprment[LocalPointIndex]);
+			}
+			DAVectorUtility.mpiOps.send(tosendint, 0, MPItag2);
+
 			for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
 			{
 				tosenddouble.setFirstPoint(DAVectorUtility.PointStart_Process);
@@ -3233,18 +3255,23 @@ public class VectorAnnealIterate
 		Write3DClusterFile(ClusternumberFileName, Program.ClusterAssignments, 0, false);
 	} // End Output3DClusterLabels()
 
-    public static void WriteClusterFile(String fname, int[] labels, double[][] PointPositions, String[] ExtraLabels, int dataPoints, int startposition, boolean append){
-        WriteClusterFile(fname, i -> labels[i], PointPositions, ExtraLabels, dataPoints, startposition, append);
+    public static void WriteClusterFile(String fname, int[] labels, double[][] PointPositions,int[] experimentNumbers, String[] ExtraLabels, int dataPoints, int startposition, boolean append){
+        WriteClusterFile(fname, i -> labels[i], PointPositions,experimentNumbers, ExtraLabels, dataPoints, startposition, append);
     }
-	public static void WriteClusterFile(String fname, IntArray labels, double[][] PointPositions, String[] ExtraLabels, int dataPoints, int startposition, boolean append)
+	public static void WriteClusterFile(String fname, IntArray labels, double[][] PointPositions,int[] experimentNumbers, String[] ExtraLabels, int dataPoints, int startposition, boolean append)
 	{
 
         OpenOption mode = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
 
         try (PrintWriter writer = new PrintWriter(
                 java.nio.file.Files.newBufferedWriter(Paths.get(fname), Charset.defaultCharset(), mode), true)) {
-            for (int i = 0; i < dataPoints; i++) {
+			System.out.println("experimentNumbers ----------------------- " + experimentNumbers.length);
+			System.out.println("data points ----------------------- " + dataPoints);
+			System.out.println("PointPositions points ----------------------- " + PointPositions.length);
+			System.out.println("PointOriginalIndex points ----------------------- " + Program.PointOriginalIndex.length);
+			for (int i = 0; i < dataPoints; i++) {
                 String line = String.valueOf(i + startposition);
+				line += " " + experimentNumbers[i];
                 for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                     line += " " + String.format("%1$7.6f", PointPositions[i][VectorIndex]);
                 }
@@ -3268,6 +3295,7 @@ public class VectorAnnealIterate
                 for (int i = 0; i < dataPoints; i++)
                 {
                     String line = String.valueOf(i + startposition);
+					line += " " + experimentNumbers[i];
                     for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         tmp = PointPositions[i][VectorIndex];
