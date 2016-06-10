@@ -3265,13 +3265,8 @@ public class VectorAnnealIterate
 
         try (PrintWriter writer = new PrintWriter(
                 java.nio.file.Files.newBufferedWriter(Paths.get(fname), Charset.defaultCharset(), mode), true)) {
-			System.out.println("experimentNumbers ----------------------- " + experimentNumbers.length);
-			System.out.println("data points ----------------------- " + dataPoints);
-			System.out.println("PointPositions points ----------------------- " + PointPositions.length);
-			System.out.println("PointOriginalIndex points ----------------------- " + Program.PointOriginalIndex.length);
 			for (int i = 0; i < dataPoints; i++) {
                 String line = String.valueOf(i + startposition);
-				line += " " + experimentNumbers[i];
                 for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++) {
                     line += " " + String.format("%1$7.6f", PointPositions[i][VectorIndex]);
                 }
