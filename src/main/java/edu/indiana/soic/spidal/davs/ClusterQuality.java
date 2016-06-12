@@ -447,6 +447,62 @@ public class ClusterQuality
         }
 	} // End OutputStatus()
 
+    public final void ExperimentAnalysis(){
+        int NumberofExperiments = 37;
+
+        if(NumberofExperiments <= 1) return;
+
+        int ExperimentPoints[]  = new int[NumberofExperiments];
+        double xshift[] = new double[NumberofExperiments];
+        double yshift[] = new double[NumberofExperiments];
+        double xwidth[] = new double[NumberofExperiments];
+        double ywidth[] = new double[NumberofExperiments];
+
+        int SpongeClusterNumber=ClusteringSolution.TotalClusterSummary.SpongeCluster;
+        DAVectorUtility.SALSAPrint(0, "Debug : DAVectorUtility.PointCount_Global :" + DAVectorUtility.PointCount_Global);
+        for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
+        {
+            int Clusterforpoint = Program.ClusterAssignments[GlobalPointIndex];
+            DAVectorUtility.SALSAPrint(0, "Debug : Program.ClusterAssignments :" + Program.ClusterAssignments.length);
+            DAVectorUtility.SALSAPrint(0, "Debug :  Program.PointOriginalExperimentNumber :" +  Program.PointOriginalExperimentNumber.length);
+            DAVectorUtility.SALSAPrint(0, "Debug :  GoldenExamination.PeakPosition :" +  GoldenExamination.PeakPosition.length);
+
+            if(Clusterforpoint < 0 ) continue;
+            if(Clusterforpoint == SpongeClusterNumber ) continue;
+
+            int expt =  Program.PointOriginalExperimentNumber[GlobalPointIndex] - 1;
+            if(expt < 0 ) DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be less than 0");
+            if(expt >= NumberofExperiments) DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be greater than " + NumberofExperiments);
+            ExperimentPoints[expt]++;
+
+            double xpoint = GoldenExamination.PeakPosition[GlobalPointIndex][0];
+            double ypoint = GoldenExamination.PeakPosition[GlobalPointIndex][1];
+            double xcenter = ClusteringSolution.TotalClusterSummary.CenterPosition[Clusterforpoint][0];
+            double ycenter = ClusteringSolution.TotalClusterSummary.CenterPosition[Clusterforpoint][1];
+            double Sigmax = Program.SigmaVectorParameters_i_[0] * xcenter;
+            double Sigmay = Program.SigmaVectorParameters_i_[1];
+            double tmp = (xpoint-xcenter)/Sigmax;
+            xshift[expt] += tmp;
+            xwidth[expt] += tmp*tmp;
+            tmp = (ypoint-ycenter)/Sigmay;
+            yshift[expt] += tmp;
+            ywidth[expt] += tmp*tmp;
+        }
+
+        // output  deviations by experiment number
+        for(int expt = 0; expt < NumberofExperiments; expt++) {
+            int numberofpointsinexpt = ExperimentPoints[expt];
+            if (numberofpointsinexpt == 0) continue;
+            double MZshift = xshift[expt] / numberofpointsinexpt;
+            double MZSD = Math.sqrt((xwidth[expt] / numberofpointsinexpt) - MZshift * MZshift);
+            double RTshift = yshift[expt] / numberofpointsinexpt;
+            double RTSD = Math.sqrt((ywidth[expt] / numberofpointsinexpt) - RTshift * RTshift);
+            DAVectorUtility.SALSAPrint(0,expt + " Number of Points" + numberofpointsinexpt);
+            DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + MZshift + " width " + MZSD);
+            DAVectorUtility.SALSAPrint(0," RT Normalized shift " + RTshift +  " width " + RTSD);
+        }
+
+    }
 	public static void CaculateTemperatureClusterCountPlot()
 	{
 		//  Output Global Counts versus Temperature

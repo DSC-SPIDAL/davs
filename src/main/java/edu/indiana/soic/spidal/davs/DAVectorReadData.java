@@ -52,7 +52,6 @@ public class DAVectorReadData {
                 GoldenExamination.GoldenLabel[count] = splits[GoldenLabelPosition];
                 GoldenExamination.PeakPosition[count][0] = Double.parseDouble(splits[1]);
                 GoldenExamination.PeakPosition[count][1] = Double.parseDouble(splits[2]);
-
                 parsedInt = Ints.tryParse(splits[MclustPosition]);
                 if (parsedInt == null) {
                     Double tryagain = Doubles.tryParse(splits[MclustPosition]);

@@ -514,6 +514,7 @@ public class LCMSAnalyze
 		Program.ClusterStatus.SetPointStatistics();
 		Program.ClusterStatus.SetNearbyClusters();
 		Program.ClusterStatus.OutputStatus();
+		Program.ClusterStatus.ExperimentAnalysis();
 
 		//  Set up Cluster Comparisons
 		//  Convert Sponge to singleton clusters
