@@ -453,6 +453,7 @@ public class ClusterQuality
         if(NumberofExperiments <= 1) return;
 
         int ExperimentPoints[]  = new int[NumberofExperiments];
+        int SpongeExptPoints[]  = new int[NumberofExperiments];
         double xshift[] = new double[NumberofExperiments];
         double yshift[] = new double[NumberofExperiments];
         double xwidth[] = new double[NumberofExperiments];
@@ -465,11 +466,17 @@ public class ClusterQuality
 
 
             if(Clusterforpoint < 0 ) continue;
-            if(Clusterforpoint == SpongeClusterNumber ) continue;
+            //if(Clusterforpoint == SpongeClusterNumber ) continue;
 
             int expt =  Program.ExperimentNumberAssigments[GlobalPointIndex] - 1;
             if(expt < 0 ) DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be less than 0");
             if(expt >= NumberofExperiments) DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be greater than " + NumberofExperiments);
+
+            if(Clusterforpoint == SpongeClusterNumber ) {
+                ++SpongeExptPoints[expt];
+                continue;
+            }
+
             ExperimentPoints[expt]++;
 
             double xpoint = GoldenExamination.PeakPosition[GlobalPointIndex][0];
@@ -494,9 +501,10 @@ public class ClusterQuality
             double MZSD = Math.sqrt((xwidth[expt] / numberofpointsinexpt) - MZshift * MZshift);
             double RTshift = yshift[expt] / numberofpointsinexpt;
             double RTSD = Math.sqrt((ywidth[expt] / numberofpointsinexpt) - RTshift * RTshift);
-            DAVectorUtility.SALSAPrint(0,expt + " Number of Points" + numberofpointsinexpt);
-            DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + MZshift + " width " + MZSD);
-            DAVectorUtility.SALSAPrint(0," RT Normalized shift " + RTshift +  " width " + RTSD);
+
+            DAVectorUtility.SALSAPrint(0,expt + " Number of Points " +  numberofpointsinexpt + " in Sponge " + SpongeExptPoints[expt]);
+            DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + String.format("%1$5.5E", MZshift) + " width " + String.format("%1$5.5E", MZSD));
+            DAVectorUtility.SALSAPrint(0," RT Normalized shift " + String.format("%1$5.5E", RTshift) +  " width " + String.format("%1$5.5E", RTSD));
         }
 
     }

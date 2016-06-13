@@ -3294,7 +3294,6 @@ public class VectorAnnealIterate
                 for (int i = 0; i < dataPoints; i++)
                 {
                     String line = String.valueOf(i + startposition);
-					line += " " + experimentNumbers[i];
                     for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
                     {
                         tmp = PointPositions[i][VectorIndex];
@@ -3310,6 +3309,7 @@ public class VectorAnnealIterate
                         line += " 0.0";
                     }
                     line += " " + labels.get(i);
+					line += " " + experimentNumbers[i];
                     writer.println(line);
                 }
                 writer.close();
