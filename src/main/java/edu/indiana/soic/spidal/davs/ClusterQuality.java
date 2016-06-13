@@ -464,31 +464,32 @@ public class ClusterQuality
 
         DAVectorUtility.SALSAPrint(0, "Debug : DAVectorUtility.PointCount_Global :" + DAVectorUtility.PointCount_Global);
         System.out.println("Debug : DAVectorUtility.PointCount_Global :" + DAVectorUtility.PointCount_Global);
+        System.out.println("Debug : Program.ClusterAssignments :" + Program.ClusterAssignments.length);
+        System.out.println("Debug :  Program.PointOriginalExperimentNumber :" +  Program.PointOriginalExperimentNumber.length);
+        System.out.println("Debug :  GoldenExamination.PeakPosition :" +  GoldenExamination.PeakPosition.length);
+        System.out.println("Debug :  GoldenExamination.PeakPosition :" +  Program.ExperimentNumberAssigments);
+        System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[0]);
+        System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[1]);
+        System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[2]);
+        System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[3]);
+        System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[4]);
+        System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[5]);
+        System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 1]);
+        System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 2]);
+        System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 3]);
+        System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 4]);
+        System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 5]);
+        System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 6]);
+        DAVectorUtility.SALSAPrint(0, "Debug : Program.ClusterAssignments :" + Program.ClusterAssignments.length);
+        DAVectorUtility.SALSAPrint(0, "Debug :  Program.PointOriginalExperimentNumber :" +  Program.PointOriginalExperimentNumber.length);
+        DAVectorUtility.SALSAPrint(0, "Debug :  GoldenExamination.PeakPosition :" +  GoldenExamination.PeakPosition.length);
+
+        System.out.println("===============================================================================");
+        System.out.println("===============================================================================");
         for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
         {
             int Clusterforpoint = Program.ClusterAssignments[GlobalPointIndex];
-            System.out.println("Debug : Program.ClusterAssignments :" + Program.ClusterAssignments.length);
-            System.out.println("Debug :  Program.PointOriginalExperimentNumber :" +  Program.PointOriginalExperimentNumber.length);
-            System.out.println("Debug :  GoldenExamination.PeakPosition :" +  GoldenExamination.PeakPosition.length);
-            System.out.println("Debug :  GoldenExamination.PeakPosition :" +  Program.ExperimentNumberAssigments);
-            System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[0]);
-            System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[1]);
-            System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[2]);
-            System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[3]);
-            System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[4]);
-            System.out.println("Debug :  First Set of experiments :" +  Program.ExperimentNumberAssigments[5]);
-            System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 1]);
-            System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 2]);
-            System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 3]);
-            System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 4]);
-            System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 5]);
-            System.out.println("Debug :  Last Set of experiments :" +  Program.ExperimentNumberAssigments[Program.ExperimentNumberAssigments.length - 6]);
-            DAVectorUtility.SALSAPrint(0, "Debug : Program.ClusterAssignments :" + Program.ClusterAssignments.length);
-            DAVectorUtility.SALSAPrint(0, "Debug :  Program.PointOriginalExperimentNumber :" +  Program.PointOriginalExperimentNumber.length);
-            DAVectorUtility.SALSAPrint(0, "Debug :  GoldenExamination.PeakPosition :" +  GoldenExamination.PeakPosition.length);
 
-            System.out.println("===============================================================================");
-            System.out.println("===============================================================================");
 
             if(Clusterforpoint < 0 ) continue;
             if(Clusterforpoint == SpongeClusterNumber ) continue;
