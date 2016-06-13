@@ -255,6 +255,7 @@ public class Program
 
 	public static int ClusterCountOutput = 0; // Control Label Output = -1 not at all, = 0 at end only, = 1 at each count
 	public static int[] ClusterAssignments; // This gives for all points their cluster assignments (set in OutputClusterLabels)
+	public static int[] ExperimentNumberAssigments; // This gives for all points their cluster assignments (set in OutputClusterLabels)
 	public static ClusterQuality ClusterStatus;
 	public static int ClusterNumberOutput = -1;
 	public static int NumberNearbyClusters = 5; // specify number of nearby clusters to output
@@ -608,6 +609,7 @@ public class Program
         });
 
         Program.ClusterAssignments = new int[DAVectorUtility.PointCount_Global];
+        Program.ExperimentNumberAssigments = new int[DAVectorUtility.PointCount_Global];
 
 		Program.ClusterLimitforDistribution = Math.max(Program.ClusterLimitforDistribution, 4 * DAVectorUtility.MPI_Size);
 
