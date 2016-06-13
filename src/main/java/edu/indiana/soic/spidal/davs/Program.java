@@ -1067,10 +1067,6 @@ public class Program
 		/* Compute the duration between the initial and the end time ignoring print out. */
 		DAVectorUtility.StopSubTimer(8);
 		DAVectorUtility.SALSAPrint(0, "\nTotal Time excluding I/O  " + DAVectorUtility.formatElapsedMillis(DAVectorUtility.mainDuration) + " " + String.format("%1$5.4E", DAVectorUtility.HPDuration * .001));
-		DAVectorUtility.SALSAPrint(0, " MaxIndependentClusterIndex  Values ::");
-		DAVectorUtility.SALSAPrint(0, "GoldenPeaks MaxIndependentClusterIndex  Value : " + GoldenPeaks.MaxIndependentClusterIndex);
-		DAVectorUtility.SALSAPrint(0, "MclustClusters MaxIndependentClusterIndex  Value : " + MclustClusters.MaxIndependentClusterIndex);
-		DAVectorUtility.SALSAPrint(0, "MedeaClusters MaxIndependentClusterIndex  Value : " + MedeaClusters.MaxIndependentClusterIndex);
 
 
         nextline = "Partial Times ";
