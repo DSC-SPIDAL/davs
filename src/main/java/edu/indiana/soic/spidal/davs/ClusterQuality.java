@@ -503,8 +503,8 @@ public class ClusterQuality
             double RTSD = Math.sqrt((ywidth[expt] / numberofpointsinexpt) - RTshift * RTshift);
 
             DAVectorUtility.SALSAPrint(0,expt + " Number of Points " +  numberofpointsinexpt + " in Sponge " + SpongeExptPoints[expt]);
-            DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + String.format("%1$5.5E", MZshift) + " width " + String.format("%1$5.5E", MZSD));
-            DAVectorUtility.SALSAPrint(0," RT Normalized shift " + String.format("%1$5.5E", RTshift) +  " width " + String.format("%1$5.5E", RTSD));
+            DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + String.format("%1$5.5f", MZshift) + " width " + String.format("%1$5.5f", MZSD));
+            DAVectorUtility.SALSAPrint(0," RT Normalized shift " + String.format("%1$5.5f", RTshift) +  " width " + String.format("%1$5.5f", RTSD));
         }
 
     }
