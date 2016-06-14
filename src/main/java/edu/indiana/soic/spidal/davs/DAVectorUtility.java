@@ -455,6 +455,22 @@ public class DAVectorUtility
         }
     } // End writeClusterResults
 
+	public static void writeExperimentalShifts(String file,int experimentID, double MZshift, double MZSD, double RTshift, double RTSD){
+		Path filePath = Paths.get(file);
+		OpenOption mode = Files.exists(filePath) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
 
+
+		try(PrintWriter writer = new PrintWriter(Files.newBufferedWriter(filePath,Charset.defaultCharset(),mode),true)) {
+
+			if(mode == StandardOpenOption.CREATE){
+				writer.println("Experiment\tMZshift\tMZSD\tRTshift\tRTSD");
+			}
+
+			writer.println(experimentID + "\t" + MZshift + "\t" + MZSD + "\t" + RTshift + "\t" + RTSD);
+			writer.close();
+		} catch (IOException e) {
+			System.err.format("Failed writing Experiment Shifts results due to I/O exception: %s%n", e);
+		}
+	}
 } // End DAVectorUtility
  // End Namespace SALSALibrary

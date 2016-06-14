@@ -505,6 +505,9 @@ public class ClusterQuality
             DAVectorUtility.SALSAPrint(0,expt + " Number of Points " +  numberofpointsinexpt + " in Sponge " + SpongeExptPoints[expt]);
             DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + String.format("%1$5.5f", MZshift) + " width " + String.format("%1$5.5f", MZSD));
             DAVectorUtility.SALSAPrint(0," RT Normalized shift " + String.format("%1$5.5f", RTshift) +  " width " + String.format("%1$5.5f", RTSD));
+
+            String file = Program.config.SummaryFile.replace("summary.txt","experimentalShifts.cvs");
+            DAVectorUtility.writeExperimentalShifts(file,expt + 1, MZshift,MZSD,RTshift,RTSD);
         }
 
     }
