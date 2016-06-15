@@ -467,6 +467,7 @@ public class DAVectorUtility
 			}
 
 			writer.println(experimentID + "\t" + MZshift + "\t" + MZSD + "\t" + RTshift + "\t" + RTSD);
+			writer.flush();
 			writer.close();
 		} catch (IOException e) {
 			System.err.format("Failed writing Experiment Shifts results due to I/O exception: %s%n", e);

@@ -494,6 +494,8 @@ public class ClusterQuality
         }
 
         // output  deviations by experiment number
+        String filePathName = Program.config.SummaryFile.replace("summary.txt","experimentalShifts.csv");
+
         for(int expt = 0; expt < NumberofExperiments; expt++) {
             int numberofpointsinexpt = ExperimentPoints[expt];
             if (numberofpointsinexpt == 0) continue;
@@ -506,8 +508,10 @@ public class ClusterQuality
             DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + String.format("%1$5.5f", MZshift) + " width " + String.format("%1$5.5f", MZSD));
             DAVectorUtility.SALSAPrint(0," RT Normalized shift " + String.format("%1$5.5f", RTshift) +  " width " + String.format("%1$5.5f", RTSD));
 
-            String file = Program.config.SummaryFile.replace("summary.txt","experimentalShifts.cvs");
-            DAVectorUtility.writeExperimentalShifts(file,expt + 1, MZshift,MZSD,RTshift,RTSD);
+
+            if(DAVectorUtility.MPI_Rank == 0) {
+                DAVectorUtility.writeExperimentalShifts(filePathName, expt + 1, MZshift, MZSD, RTshift, RTSD);
+            }
         }
 
     }
