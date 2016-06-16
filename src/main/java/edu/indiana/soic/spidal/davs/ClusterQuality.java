@@ -476,8 +476,14 @@ public class ClusterQuality
             //if(Clusterforpoint == SpongeClusterNumber ) continue;
 
             int expt =  Program.ExperimentNumberAssigments[GlobalPointIndex] - 1;
-            if(expt < 0 ) DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be less than 0");
-            if(expt >= NumberofExperiments) DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be greater than " + NumberofExperiments);
+            if(expt < 0 ) {
+                DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be less than 0");
+                return;
+            }
+            if(expt >= NumberofExperiments) {
+                DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be greater than " + NumberofExperiments);
+                return;
+            }
 
             if(Clusterforpoint == SpongeClusterNumber ) {
                 ++SpongeExptPoints[expt];
