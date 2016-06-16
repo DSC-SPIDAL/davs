@@ -132,6 +132,8 @@ public class DAVectorSpongeSection {
 
             DebugPrintOption = Integer.parseInt(getProperty(p,"DebugPrintOption", "1"));
             ConsoleDebugOutput = Boolean.parseBoolean(getProperty(p,"ConsoleDebugOutput", "true"));
+
+            LCMSmode = Integer.parseInt(getProperty(p,"LCMSmode","1"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -258,6 +260,8 @@ public class DAVectorSpongeSection {
     public String RestartClusterFile;
     public String TimingFile;
     public String SummaryFile;
+
+    public int LCMSmode;
 
     public boolean isUseSponge() {
         return UseSponge;

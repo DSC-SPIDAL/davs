@@ -1677,7 +1677,7 @@ public class Program
 			return;
 		}
 
-		int LCMSmode = 1;
+		int LCMSmode = config.LCMSmode;
 
 		//  Generic Set up
 		LCMSAnalyze.InitializeLCMS();

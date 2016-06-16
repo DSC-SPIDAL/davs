@@ -25,7 +25,7 @@ public class LCMSAnalyze
 		Program.CompareSolution = 1;
 		Program.ComparisonSelectedInputLabel = 2;
 		Program.ComparisonInputFileType = 0;
-		Program.ComparisonClusterFile = "c:\\remote\\input\\DarTBFULLSorted.txt";
+		//Program.ComparisonClusterFile = "c:\\remote\\input\\DarTBFULLSorted.txt";
 
 		Program.Refinement = false;
 		Program.UseSponge = true;
