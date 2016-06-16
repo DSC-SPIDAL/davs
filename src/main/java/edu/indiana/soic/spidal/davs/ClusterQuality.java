@@ -460,6 +460,13 @@ public class ClusterQuality
         double ywidth[] = new double[NumberofExperiments];
 
         int SpongeClusterNumber=ClusteringSolution.TotalClusterSummary.SpongeCluster;
+        double xpoint;
+        double ypoint;
+        double xcenter;
+        double ycenter;
+        double Sigmax = 0;
+        double Sigmay = 0;
+        double tmp;
         for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
         {
             int Clusterforpoint = Program.ClusterAssignments[GlobalPointIndex];
@@ -479,13 +486,13 @@ public class ClusterQuality
 
             ExperimentPoints[expt]++;
 
-            double xpoint = GoldenExamination.PeakPosition[GlobalPointIndex][0];
-            double ypoint = GoldenExamination.PeakPosition[GlobalPointIndex][1];
-            double xcenter = ClusteringSolution.TotalClusterSummary.CenterPosition[Clusterforpoint][0];
-            double ycenter = ClusteringSolution.TotalClusterSummary.CenterPosition[Clusterforpoint][1];
-            double Sigmax = Program.SigmaVectorParameters_i_[0] * xcenter;
-            double Sigmay = Program.SigmaVectorParameters_i_[1];
-            double tmp = (xpoint-xcenter)/Sigmax;
+            xpoint = GoldenExamination.PeakPosition[GlobalPointIndex][0];
+            ypoint = GoldenExamination.PeakPosition[GlobalPointIndex][1];
+            xcenter = ClusteringSolution.TotalClusterSummary.CenterPosition[Clusterforpoint][0];
+            ycenter = ClusteringSolution.TotalClusterSummary.CenterPosition[Clusterforpoint][1];
+            Sigmax = Program.SigmaVectorParameters_i_[0] * xcenter;
+            Sigmay = Program.SigmaVectorParameters_i_[1];
+            tmp = (xpoint-xcenter)/Sigmax;
             xshift[expt] += tmp;
             xwidth[expt] += tmp*tmp;
             tmp = (ypoint-ycenter)/Sigmay;
@@ -495,7 +502,8 @@ public class ClusterQuality
 
         // output  deviations by experiment number
         String filePathName = Program.config.SummaryFile.replace("summary.txt","experimentalShifts.csv");
-
+        DAVectorUtility.SALSAPrint(0,"Normalizing Sigma X " + Sigmax);
+        DAVectorUtility.SALSAPrint(0,"Normalizing Sigma Y " + Sigmay);
         for(int expt = 0; expt < NumberofExperiments; expt++) {
             int numberofpointsinexpt = ExperimentPoints[expt];
             if (numberofpointsinexpt == 0) continue;
@@ -503,6 +511,7 @@ public class ClusterQuality
             double MZSD = Math.sqrt((xwidth[expt] / numberofpointsinexpt) - MZshift * MZshift);
             double RTshift = yshift[expt] / numberofpointsinexpt;
             double RTSD = Math.sqrt((ywidth[expt] / numberofpointsinexpt) - RTshift * RTshift);
+
 
             DAVectorUtility.SALSAPrint(0,expt + " Number of Points " +  numberofpointsinexpt + " in Sponge " + SpongeExptPoints[expt]);
             DAVectorUtility.SALSAPrint(0," m/z Normalized shift " + String.format("%1$5.5f", MZshift) + " width " + String.format("%1$5.5f", MZSD));
