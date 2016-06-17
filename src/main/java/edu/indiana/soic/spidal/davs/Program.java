@@ -856,7 +856,7 @@ public class Program
 		DAVectorUtility.SALSAPrint(0, sigmamethodString);
 		if (Program.SigmaMethod == 3)
 		{
-			DAVectorUtility.SALSAPrint(0, "Initial Sigma[0] " + String.format("%1$5.4E", Program.InitialSigma0) + " Final Sigma[0] = " + String.format("%1$5.4E", Program.FinalTargetSigma0) + " /Center[0] at Temperature " + String.format("%1$5.4f", Program.FinalTargetTemperature));
+			DAVectorUtility.SALSAPrint(0, "Initial Sigma[0] " + String.format("%1$5.4E", Program.InitialSigma0) + " Final Sigma[0] = " + String.format("%1$5.4E", Program.FinalTargetSigma0) + " *Center[0] at Temperature " + String.format("%1$5.4f", Program.FinalTargetTemperature));
 		}
 
 		DAVectorUtility.SALSAPrint(0, "Initial Number of Centers: " + Program.InitialNcent);

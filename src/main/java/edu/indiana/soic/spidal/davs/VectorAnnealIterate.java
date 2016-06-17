@@ -3278,7 +3278,8 @@ public class VectorAnnealIterate
                     line += " 0.0";
                 }
                 line += " " + labels.get(i) + " " + ExtraLabels[i];
-                writer.println(line);
+				if(fname.contains("Final")) line += " " + experimentNumbers[i];
+				writer.println(line);
             }
             writer.close();
         } catch (IOException e) {
