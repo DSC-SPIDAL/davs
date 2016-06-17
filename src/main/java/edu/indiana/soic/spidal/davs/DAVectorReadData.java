@@ -19,6 +19,7 @@ public class DAVectorReadData {
         int GoldenIDPosition = 5;
         int MclustPosition = 6;
         int GoldenLabelPosition = 4;
+        int ExpermentNumberPosition = 8;
 
         boolean success = false;
         int count = 0;
@@ -63,7 +64,7 @@ public class DAVectorReadData {
                     }
                 }
                 Program.MclustClusters.PointstoClusterIDs[count] = parsedInt;
-
+                Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
                 parsedInt = Ints.tryParse(splits[MedeaPosition]);
                 if (parsedInt == null) {
                     Double tryagain = Doubles.tryParse(splits[MedeaPosition]);

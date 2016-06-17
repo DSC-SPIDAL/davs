@@ -561,6 +561,7 @@ public class Program
 			{
 				GoldenExamination.PeakPosition[GlobalPointIndex] = new double[Program.ParameterVectorDimension];
 			}
+			Program.ExperimentNumberAssigments = new int[DAVectorUtility.PointCount_Global];
 			DAVectorReadData.ReadLabelsFromFile(ComparisonClusterFile);
 			InputFileType = save1;
 			SelectedInputLabel = save2;
@@ -609,7 +610,6 @@ public class Program
         });
 
         Program.ClusterAssignments = new int[DAVectorUtility.PointCount_Global];
-        Program.ExperimentNumberAssigments = new int[DAVectorUtility.PointCount_Global];
 
 		Program.ClusterLimitforDistribution = Math.max(Program.ClusterLimitforDistribution, 4 * DAVectorUtility.MPI_Size);
 
