@@ -64,9 +64,7 @@ public class DAVectorReadData {
                     }
                 }
                 Program.MclustClusters.PointstoClusterIDs[count] = parsedInt;
-                if(Integer.valueOf(splits[GoldenLabelPosition]) != 100000000) {
-                    Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
-                }
+                Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
                 parsedInt = Ints.tryParse(splits[MedeaPosition]);
                 if (parsedInt == null) {
                     Double tryagain = Doubles.tryParse(splits[MedeaPosition]);
