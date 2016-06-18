@@ -474,7 +474,12 @@ public class ClusterQuality
 
             if(Clusterforpoint < 0 ) continue;
             //if(Clusterforpoint == SpongeClusterNumber ) continue;
-
+            System.out.println(Program.ExperimentNumberAssigments[0]);
+            System.out.println(Program.ExperimentNumberAssigments[1]);
+            System.out.println(Program.ExperimentNumberAssigments[2]);
+            System.out.println(Program.ExperimentNumberAssigments[3]);
+            System.out.println(Program.ExperimentNumberAssigments[4]);
+            System.out.println(Program.ExperimentNumberAssigments[5]);
             int expt =  Program.ExperimentNumberAssigments[GlobalPointIndex] - 1;
             if(expt < 0 ) {
                 DAVectorUtility.SALSAPrint(0, "Error: experiment number cannot be less than 0");
