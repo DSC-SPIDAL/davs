@@ -563,6 +563,12 @@ public class Program
 			}
 			Program.ExperimentNumberAssigments = new int[DAVectorUtility.PointCount_Global];
 			DAVectorReadData.ReadLabelsFromFile(ComparisonClusterFile);
+			System.out.println(Program.ExperimentNumberAssigments[0]);
+			System.out.println(Program.ExperimentNumberAssigments[1]);
+			System.out.println(Program.ExperimentNumberAssigments[2]);
+			System.out.println(Program.ExperimentNumberAssigments[3]);
+			System.out.println(Program.ExperimentNumberAssigments[4]);
+			System.out.println(Program.ExperimentNumberAssigments[5]);
 			InputFileType = save1;
 			SelectedInputLabel = save2;
 		}
