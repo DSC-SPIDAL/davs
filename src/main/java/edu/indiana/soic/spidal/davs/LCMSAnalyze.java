@@ -31,8 +31,8 @@ public class LCMSAnalyze
 		Program.UseSponge = true;
 
 		//  Set Final Sigma[0]
-//		Program.SigmaVectorParameters_i_[0] = 0.000217;
-		//Program.SigmaMethod = 2;
+		Program.SigmaVectorParameters_i_[0] = 0.00000598;
+		Program.SigmaMethod = 2;
 
 
 		//  Please set these
@@ -44,10 +44,10 @@ public class LCMSAnalyze
 		Program.RestartSelectedInputLabel = -100000000; // New Data Style
 
 		//  Set Sponge
-//		Program.SpongeFactor1 = 12.0;
-//		Program.SpongeFactor2 = 2.0;
-//		Program.SpongeFactor1 = 12.0;
-//		Program.SpongeFactor2 = 2.0;
+		Program.SpongeFactor1 = 2.0;
+		Program.SpongeFactor2 = 2.0;
+		Program.SpongeFactor1 = 1.0;
+		Program.SpongeFactor2 = 1.0;
 
 		//  No Sponge
 	   /*
