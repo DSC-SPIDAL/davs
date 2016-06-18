@@ -3106,8 +3106,9 @@ public class VectorAnnealIterate
                     int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
                     System.arraycopy(labels, beginpoint, Program.ClusterAssignments,
                             beginpoint + DAVectorUtility.PointStart_Process, indexlen + beginpoint - beginpoint);
-					System.arraycopy(Program.PointOriginalExperimentNumber, beginpoint, Program.ExperimentNumberAssigments,
-							beginpoint + DAVectorUtility.PointStart_Process, indexlen + beginpoint - beginpoint);
+					//TODO: check if its ok to comment out even for other LCMS modes
+//					System.arraycopy(Program.PointOriginalExperimentNumber, beginpoint, Program.ExperimentNumberAssigments,
+//							beginpoint + DAVectorUtility.PointStart_Process, indexlen + beginpoint - beginpoint);
 
                 }); // End Parallel Section setting cluster assignments in process 0
             });
@@ -3137,7 +3138,8 @@ public class VectorAnnealIterate
 				for (int LocalPointIndex = 0; LocalPointIndex < AwayArraySize; LocalPointIndex++)
 				{
 					AwayOriginalExprment[LocalPointIndex] = fromsouceint.getMArrayIntAt(LocalPointIndex);
-					Program.ExperimentNumberAssigments[LocalPointIndex + firstPoint] = AwayOriginalExprment[LocalPointIndex];
+					//TODO: check if its ok to comment out even for other LCMS modes
+					//Program.ExperimentNumberAssigments[LocalPointIndex + firstPoint] = AwayOriginalExprment[LocalPointIndex];
 				}
 
 				for (int VectorIndex = 0; VectorIndex < Program.ParameterVectorDimension; VectorIndex++)
