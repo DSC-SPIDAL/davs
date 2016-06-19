@@ -129,7 +129,14 @@ public class ClusteringSolution {
         int UniversalSize = (1 + MaximumCreatedClusters) * PACKINGMULTIPLIER;
         DAVectorUtility.SALSAPrint(0, "Create Universal Mapping " + UniversalSize);
         UniversalMapping = new ClusterIndirection[UniversalSize];
-        DAVectorUtility.SALSAPrint(0, "Set up Full Solution " + MaximumNumberClustersTotal);
+        DAVectorUtility.SALSAPrint(0, "Set up Full Solution with total maximum number of clusters " + MaximumNumberClustersTotal);
+        DAVectorUtility.SALSAPrint(0, "Maximum Number of Clusters Created in Index per node " + MaximumCreatedClusters);
+        DAVectorUtility.SALSAPrint(0, "Maximum Number of Clusters per node " + MaximumNumberClusterspernode);
+        DAVectorUtility.SALSAPrint(0, "Target Minimum Number of Clusters per Point " + TargetMinimumClustersperPoint);
+        DAVectorUtility.SALSAPrint(0, "Target Actual Number of Clusters per Point " + TargetClustersperPoint);
+        DAVectorUtility.SALSAPrint(0, "Maximum Number of Clusters per Point " + MaximumClustersperPoint);
+        DAVectorUtility.SALSAPrint(0, "Number of Points per node " + NumberofPointsinProcess);
+        DAVectorUtility.SALSAPrint(0, "Cache line size " + cachelinesize);
         TotalClusterSummary = new FullSolution(MaximumNumberClustersTotal);
         DAVectorUtility.SALSAPrint(0, "End ClusteringSolution");
     }

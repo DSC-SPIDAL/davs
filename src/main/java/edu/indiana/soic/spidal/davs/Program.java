@@ -861,7 +861,7 @@ public class Program
 
 		DAVectorUtility.SALSAPrint(0, "Initial Number of Centers: " + Program.InitialNcent);
 		DAVectorUtility.SALSAPrint(0, "Final Number of Centers: " + ParallelClustering.runningSolution.Ncent_Global);
-		DAVectorUtility.SALSAPrint(0, "Maximum Number of Centers: " + Program.maxNcentperNode);
+		DAVectorUtility.SALSAPrint(0, "Maximum Number of Centers per node: " + Program.maxNcentperNode);
 		DAVectorUtility.SALSAPrint(0, "Target Maximum number of cluster centers for each point (includes Sponge): " + Program.targetNcentperPoint);
 		DAVectorUtility.SALSAPrint(0, "Actual Maximum number of cluster centers for each point (includes Sponge): " + Program.maxNcentperPoint);
 
@@ -887,7 +887,7 @@ public class Program
 //                MaxCreatedIndex = DAVectorUtility.MPI_communicator.<Integer>Allreduce(MaxCreatedIndex, Operation<Integer>.Max);
                 MaxCreatedIndex = DAVectorUtility.mpiOps.allReduce(MaxCreatedIndex, MPI.MAX);
             }
-			DAVectorUtility.SALSAPrint(0, "Created Index Space " + MaxCreatedIndex + " times " + ClusteringSolution.PACKINGMULTIPLIER);
+			DAVectorUtility.SALSAPrint(0, "Maximum Created Index Space over all nodes " + MaxCreatedIndex + " times for each cluster " + ClusteringSolution.PACKINGMULTIPLIER);
 
 			DAVectorUtility.SALSAPrint(0, "Iterations at the End: " + Program.Iterationatend);
 			DAVectorUtility.SALSAPrint(0, "Limit on EM Convergence for each step: " + Program.ConvergenceLoopLimit);
