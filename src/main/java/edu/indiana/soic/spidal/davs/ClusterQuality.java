@@ -516,7 +516,9 @@ public class ClusterQuality
         DAVectorUtility.SALSAPrint(0,"Normalizing Sigma X " + Sigmax);
         DAVectorUtility.SALSAPrint(0,"Normalizing Sigma Y " + Sigmay);
         for(int expt = 0; expt < NumberofExperiments; expt++) {
+
             int numberofpointsinexpt = ExperimentPoints[expt];
+            DAVectorUtility.SALSAPrint(0,"number of points " + numberofpointsinexpt);
             if (numberofpointsinexpt == 0) continue;
             double MZshift = xshift[expt] / numberofpointsinexpt;
             double MZSD = Math.sqrt((xwidth[expt] / numberofpointsinexpt) - MZshift * MZshift);
