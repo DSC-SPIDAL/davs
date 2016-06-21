@@ -467,6 +467,7 @@ public class ClusterQuality
         double Sigmax = 0;
         double Sigmay = 0;
         double tmp;
+        DAVectorUtility.SALSAPrint(0, "Global Point Count " + DAVectorUtility.PointCount_Global);
         for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
         {
             int Clusterforpoint = Program.ClusterAssignments[GlobalPointIndex];
@@ -519,6 +520,7 @@ public class ClusterQuality
 
             int numberofpointsinexpt = ExperimentPoints[expt];
             DAVectorUtility.SALSAPrint(0,"number of points " + numberofpointsinexpt);
+            DAVectorUtility.SALSAPrint(0,"xshift and yshift raw " + xshift[expt] + "  " + yshift[expt]);
             if (numberofpointsinexpt == 0) continue;
             double MZshift = xshift[expt] / numberofpointsinexpt;
             double MZSD = Math.sqrt((xwidth[expt] / numberofpointsinexpt) - MZshift * MZshift);
