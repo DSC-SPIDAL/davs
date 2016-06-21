@@ -468,7 +468,7 @@ public class ClusterQuality
         double Sigmay = 0;
         double tmp;
         int counttemp = 0;
-        DAVectorUtility.SALSAPrint(0, "Global Point Count " + DAVectorUtility.PointCount_Global);
+        //DAVectorUtility.SALSAPrint(0, "Global Point Count " + DAVectorUtility.PointCount_Global);
         for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
         {
             int Clusterforpoint = Program.ClusterAssignments[GlobalPointIndex];
@@ -500,10 +500,10 @@ public class ClusterQuality
             Sigmax = Program.SigmaVectorParameters_i_[0] * xcenter;
             Sigmay = Program.SigmaVectorParameters_i_[1];
 
-            if(GlobalPointIndex % 199 == 0){
-                DAVectorUtility.SALSAPrint(0,"m/Z and RT values of " + GlobalPointIndex + "  : " + xpoint + "  " + ypoint + " " + expt);
-                DAVectorUtility.SALSAPrint(0,"m/Z and RT values of Centers " + GlobalPointIndex + "  : " + xcenter + "  " + ycenter);
-            }
+//            if(GlobalPointIndex % 199 == 0){
+//                DAVectorUtility.SALSAPrint(0,"m/Z and RT values of " + GlobalPointIndex + "  : " + xpoint + "  " + ypoint + " " + expt);
+//                DAVectorUtility.SALSAPrint(0,"m/Z and RT values of Centers " + GlobalPointIndex + "  : " + xcenter + "  " + ycenter);
+//            }
 
             tmp = (xpoint-xcenter)/Sigmax;
             xshift[expt] += tmp;
@@ -518,12 +518,12 @@ public class ClusterQuality
         String filePathName = Program.config.SummaryFile.replace("summary.txt","experimentalShifts.csv");
         DAVectorUtility.SALSAPrint(0,"Normalizing Sigma X " + Sigmax);
         DAVectorUtility.SALSAPrint(0,"Normalizing Sigma Y " + Sigmay);
-        DAVectorUtility.SALSAPrint(0,"Total Count for end of loop " + counttemp);
+        //DAVectorUtility.SALSAPrint(0,"Total Count for end of loop " + counttemp);
         for(int expt = 0; expt < NumberofExperiments; expt++) {
 
             int numberofpointsinexpt = ExperimentPoints[expt];
-            DAVectorUtility.SALSAPrint(0,"number of points " + numberofpointsinexpt);
-            DAVectorUtility.SALSAPrint(0,"xshift and yshift raw " + xshift[expt] + "  " + yshift[expt]);
+//            DAVectorUtility.SALSAPrint(0,"number of points " + numberofpointsinexpt);
+//            DAVectorUtility.SALSAPrint(0,"xshift and yshift raw " + xshift[expt] + "  " + yshift[expt]);
             if (numberofpointsinexpt == 0) continue;
             double MZshift = xshift[expt] / numberofpointsinexpt;
             double MZSD = Math.sqrt((xwidth[expt] / numberofpointsinexpt) - MZshift * MZshift);
