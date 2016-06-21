@@ -467,6 +467,7 @@ public class ClusterQuality
         double Sigmax = 0;
         double Sigmay = 0;
         double tmp;
+        int counttemp = 0;
         DAVectorUtility.SALSAPrint(0, "Global Point Count " + DAVectorUtility.PointCount_Global);
         for (int GlobalPointIndex = 0; GlobalPointIndex < DAVectorUtility.PointCount_Global; GlobalPointIndex++)
         {
@@ -510,12 +511,14 @@ public class ClusterQuality
             tmp = (ypoint-ycenter)/Sigmay;
             yshift[expt] += tmp;
             ywidth[expt] += tmp*tmp;
+            counttemp++;
         }
 
         // output  deviations by experiment number
         String filePathName = Program.config.SummaryFile.replace("summary.txt","experimentalShifts.csv");
         DAVectorUtility.SALSAPrint(0,"Normalizing Sigma X " + Sigmax);
         DAVectorUtility.SALSAPrint(0,"Normalizing Sigma Y " + Sigmay);
+        DAVectorUtility.SALSAPrint(0,"Total Count for end of loop " + counttemp);
         for(int expt = 0; expt < NumberofExperiments; expt++) {
 
             int numberofpointsinexpt = ExperimentPoints[expt];
