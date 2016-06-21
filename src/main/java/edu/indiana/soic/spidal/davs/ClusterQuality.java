@@ -498,8 +498,8 @@ public class ClusterQuality
             Sigmax = Program.SigmaVectorParameters_i_[0] * xcenter;
             Sigmay = Program.SigmaVectorParameters_i_[1];
 
-            if(GlobalPointIndex < 20){
-                DAVectorUtility.SALSAPrint(0,"m/Z and RT values of " + GlobalPointIndex + "  : " + xpoint + "  " + ypoint);
+            if(GlobalPointIndex < 50){
+                DAVectorUtility.SALSAPrint(0,"m/Z and RT values of " + GlobalPointIndex + "  : " + xpoint + "  " + ypoint + " " + expt);
                 DAVectorUtility.SALSAPrint(0,"m/Z and RT values of Centers " + GlobalPointIndex + "  : " + xcenter + "  " + ycenter);
             }
 
