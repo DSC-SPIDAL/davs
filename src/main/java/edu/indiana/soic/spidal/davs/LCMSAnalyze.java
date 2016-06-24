@@ -146,7 +146,7 @@ public class LCMSAnalyze
 
 		FreshFullAnalysis();
 		Program.Refinement = true;
-		Program.MaxNumberSplitClusters = 32;
+		//Program.MaxNumberSplitClusters = 32;
 
 		// Cooling
 		Program.InitialCoolingFactor1 = 0.9875;
