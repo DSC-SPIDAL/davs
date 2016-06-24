@@ -537,6 +537,8 @@ public class Program
 		{
 			Program.CompareSolution = -1;
 		}
+		// initialize Experiment Number Assignments
+		Program.ExperimentNumberAssigments = new int[DAVectorUtility.PointCount_Global];
 
 		//  Read data for LC-MS Clustering Comparisons
 		if (Program.CompareSolution > 0)
@@ -561,10 +563,12 @@ public class Program
 			{
 				GoldenExamination.PeakPosition[GlobalPointIndex] = new double[Program.ParameterVectorDimension];
 			}
-			Program.ExperimentNumberAssigments = new int[DAVectorUtility.PointCount_Global];
 			DAVectorReadData.ReadLabelsFromFile(ComparisonClusterFile);
 			InputFileType = save1;
 			SelectedInputLabel = save2;
+		}else{
+			//NOTE: This code is experiment dependent
+			DAVectorReadData.ReadExperimentNumbers(ComparisonClusterFile);
 		}
 
 		// Set up Decomposition of USED points

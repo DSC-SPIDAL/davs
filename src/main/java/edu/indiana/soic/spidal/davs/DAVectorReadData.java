@@ -12,6 +12,46 @@ import java.nio.file.Paths;
 import java.util.regex.Pattern;
 
 public class DAVectorReadData {
+
+    // Experiment Dependent code only applicable to Mani's 2016 dataset
+    public static void ReadExperimentNumbers(String comparisonClusterFile) {
+        int MinSplitSize = 8;
+        int ExpermentNumberPosition = 8;
+
+        boolean success = false;
+        int count = 0;
+        if (Strings.isNullOrEmpty(comparisonClusterFile)) {
+            DAVectorUtility.printAndThrowRuntimeException(new IllegalArgumentException(Constants.ERR_EMPTY_FILE_NAME));
+        }
+
+        try(BufferedReader br = Files.newBufferedReader(Paths.get(comparisonClusterFile),Charset.defaultCharset())){
+            String line;
+            Pattern pattern = Pattern.compile("[\t ]");
+            while ((line = br.readLine()) != null) {
+                if (Strings.isNullOrEmpty(line))
+                    continue; // continue on empty lines - "while" will break on null anyway;
+
+                String[] splits = pattern.split(line.trim());
+                if (splits.length < MinSplitSize) {
+                    DAVectorUtility.printAndThrowRuntimeException("Count " + count + "Illegal data length on Point " +
+                            "file " + splits.length + " " + MinSplitSize + " " + line);
+                }
+
+                Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
+
+                count++;
+            }
+
+            success = true;
+            br.close();
+        } catch (IOException e) {
+            System.err.format("Failed reading Points data due to I/O exception: %s%n", e);
+        }
+
+        if (!success) {
+            DAVectorUtility.printAndThrowRuntimeException("DA Vector File Analyze error " + comparisonClusterFile);
+        }
+    }
     public static void ReadLabelsFromFile(String fname) {
         int MinSplitSize = 8;
         int SplitPosition = 3;
@@ -515,5 +555,4 @@ public class DAVectorReadData {
             DAVectorUtility.printAndThrowRuntimeException("DA Vector File read error " + fname);
         }
     } // End Read3DDataFromFile
-
 } // End class DAVectorReadData
