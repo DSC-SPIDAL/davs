@@ -17,6 +17,7 @@ public class DAVectorReadData {
     public static void ReadExperimentNumbers(String comparisonClusterFile) {
         int MinSplitSize = 8;
         int ExpermentNumberPosition = 8;
+        int SplitPosition = 3;
 
         boolean success = false;
         int count = 0;
@@ -36,6 +37,9 @@ public class DAVectorReadData {
                     DAVectorUtility.printAndThrowRuntimeException("Count " + count + "Illegal data length on Point " +
                             "file " + splits.length + " " + MinSplitSize + " " + line);
                 }
+
+                Integer parsedInt = Ints.tryParse(splits[SplitPosition]);
+                if (parsedInt == null || parsedInt != Program.SelectedInputLabel) continue;
 
                 Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
 
