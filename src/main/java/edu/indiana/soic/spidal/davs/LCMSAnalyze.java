@@ -160,7 +160,7 @@ public class LCMSAnalyze
 		Program.CompareSolution = -1;
 
 		//  Analyze Sponge 1
-		Program.SpongeFactor2 = 1.0;
+		//Program.SpongeFactor2 = 1.0;
 
 	} // End SpongePointAnalysis()
 

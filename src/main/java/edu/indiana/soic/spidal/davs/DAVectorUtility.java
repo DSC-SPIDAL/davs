@@ -9,6 +9,7 @@ import edu.indiana.soic.spidal.mpi.MpiOps;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.LongBuffer;
 import java.nio.charset.Charset;
 import java.nio.file.*;
 import java.util.ArrayList;
@@ -68,6 +69,9 @@ public class DAVectorUtility
 	public static int MPIBROADCASTTiming = -1;
 	public static int MPISynchTiming = -1;
 	public static int ThreadTiming = -1; // viewed as MPI timing
+	// New Timming Parameters
+	public static LongBuffer threadsAndMPIBuffer;
+	public static LongBuffer mpiOnlyBuffer;
 
 	//  These are general parameters for C# codes
 	public static ArrayList<String> CosmicOutput = new ArrayList<>(1000); // Monitoring Output
