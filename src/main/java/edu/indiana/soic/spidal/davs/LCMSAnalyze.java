@@ -71,7 +71,7 @@ public class LCMSAnalyze
 		Program.InputFileType = 1;
 		Program.RestartSelectedInputLabel = -100000000;
 		Program.RestartInputFileType = 1;
-		Program.RestartClusterFile = Program.config.DistanceMatrixFile;
+		//Program.RestartClusterFile = Program.config.DistanceMatrixFile;
 
 		Program.Refinement = true;
 		Program.RestartTemperature = 0.025; // was 0.2
@@ -88,36 +88,37 @@ public class LCMSAnalyze
 		Program.InitialCoolingFactor2 = Math.sqrt(Program.InitialCoolingFactor2);
 
 		//  Set Final Sigma[0] for low temperature restart
-		Program.SigmaVectorParameters_i_[0] = 0.00000598;
+		//Program.SigmaVectorParameters_i_[0] = 0.00000598;
 		Program.SigmaMethod = 2;
 
 		Program.CompareSolution = 1;
 		Program.ComparisonSelectedInputLabel = 2;
 		Program.ComparisonInputFileType = 0;
-		Program.ComparisonClusterFile = "c:\\remote\\input\\DarTBFULLSorted.txt";
+		//Program.ComparisonClusterFile = "c:\\remote\\input\\DarTBFULLSorted.txt";
 
 		//  Please set these
 		Program.UseSponge = true;
 		Program.SpongeFactor1 = 2.0;
 		Program.SpongeFactor2 = 2.0;
+		Program.NearbySpongePointLimit = -1.0;
 
 		// Old Sponge 1
-		Program.SpongeFactor1 = 1.0;
-		Program.SpongeFactor2 = 1.0;
-		Program.RestartTemperature = 1.0; // was 0.025
-		Program.SelectedInputLabel = -1000000;
-		Program.RestartSelectedInputLabel = -1000000;
+		//Program.SpongeFactor1 = 1.0;
+		//Program.SpongeFactor2 = 1.0;
+//		Program.RestartTemperature = 1.0; // was 0.025
+//		Program.SelectedInputLabel = -1000000;
+//		Program.RestartSelectedInputLabel = -1000000;
 
 		// Redo DA2D
 
 		//  No Sponge
-		Program.SpongeTemperature1 = -1.0; // Minimum Temperature where Sponge Introduced
-		Program.SpongeTemperature2 = -1.0;
-		Program.NearbySpongePointLimit = 4.0;
-		Program.UseSponge = false;
-		Program.RestartTemperature = 0.4;
-		Program.SelectedInputLabel = -100000000;
-		Program.RestartSelectedInputLabel = -100000000;
+//		Program.SpongeTemperature1 = -1.0; // Minimum Temperature where Sponge Introduced
+//		Program.SpongeTemperature2 = -1.0;
+//		Program.NearbySpongePointLimit = 4.0;
+//		Program.UseSponge = false;
+//		//Program.RestartTemperature = 0.4;
+//		Program.SelectedInputLabel = -100000000;
+//		Program.RestartSelectedInputLabel = -100000000;
 
 	} // End JoinEquilibriate()
 
