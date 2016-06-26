@@ -242,7 +242,7 @@ public class DAVectorReadData {
             SplitPosition = 4;
             LabelPosition = 4;
         }
-
+        int statebeforerror = 0;
         boolean success = false;
         String line = " Unset";
         int CountLinesinFile = 0;
@@ -251,7 +251,6 @@ public class DAVectorReadData {
         if (Strings.isNullOrEmpty(fname)) {
             DAVectorUtility.printAndThrowRuntimeException(new IllegalArgumentException(Constants.ERR_EMPTY_FILE_NAME));
         }
-        DAVectorUtility.SALSAPrint(0,"Program.Replicate 111111" + Program.Replicate);
         try {
             BufferedReader br = Files.newBufferedReader(Paths.get(fname), Charset.defaultCharset());
             Pattern pattern = Pattern.compile("[\t ]");
@@ -259,6 +258,7 @@ public class DAVectorReadData {
                 if (Strings.isNullOrEmpty(line))
                     continue; // continue on empty lines - "while" will break on null anyway;
 
+                statebeforerror = 1;
                 String[] splits = pattern.split(line.trim());
                 if (splits.length < MinSplitSize) {
                     DAVectorUtility.printAndThrowRuntimeException("Count " + CountLinesinFile + "Illegal data length " +
@@ -270,8 +270,7 @@ public class DAVectorReadData {
                     continue;
                 }
 
-                DAVectorUtility.SALSAPrint(0,"Program.Replicate 2222222" + Program.Replicate);
-
+                statebeforerror = 2;
                 if (Program.SelectedInputLabel >= 0) {
                     if (parsedInt != Program.SelectedInputLabel) {
                         continue;
@@ -287,11 +286,14 @@ public class DAVectorReadData {
                         }
                     }
                 }
+
+                statebeforerror = 3;
+
                 if ((ReadVectorsOption <= 0) && (CountLinesinFile < FirstPointPosition)) {
                     CountLinesinFile += Program.Replicate;
                     continue;
                 }
-                DAVectorUtility.SALSAPrint(0,"Program.Replicate 333333" + Program.Replicate);
+                statebeforerror = 4;
 
                 int ActualPointPosition = 0;
                 if (ReadVectorsOption == 0) {
@@ -393,7 +395,7 @@ public class DAVectorReadData {
         } catch (Exception e) {
             DAVectorUtility.printAndThrowRuntimeException("Failed reading Points data " + DAVectorUtility.MPI_Rank +
                     " " + CountLinesinFile + " Start " + FirstPointPosition + " Number " + TotalNumberPointstoRead +
-                    " " + line + e.getMessage());
+                    " " + line + "State before Error :" + statebeforerror );
         }
         if (!success) {
             DAVectorUtility.printAndThrowRuntimeException("DA Vector File read error " + fname);
