@@ -2488,6 +2488,7 @@ public class VectorAnnealIterate
 			ParallelClustering.runningSolution.Ncent_Global = 1;
 		}
 		--ParallelClustering.runningSolution.Ncent_ThisNode;
+		DAVectorUtility.SALSAPrint(0,"Just before the error got here 111111");
 		DAVectorReadData.ReadDataFromFile(Program.RestartClusterFile, 2);
 		int InitialClusterCount = ParallelClustering.runningSolution.Ncent_Global;
 		int ExtraClusterCount = 0;
