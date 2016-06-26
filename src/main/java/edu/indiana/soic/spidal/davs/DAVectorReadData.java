@@ -399,9 +399,12 @@ public class DAVectorReadData {
 //            DAVectorUtility.printAndThrowRuntimeException("Failed reading Points data " + DAVectorUtility.MPI_Rank +
 //                    " " + CountLinesinFile + " Start " + FirstPointPosition + " Number " + TotalNumberPointstoRead +
 //                    " " + line + "State before Error :" + statebeforerror  + "\n" + e.);
-            DAVectorUtility.SALSAPrint(0,"22 File Name " + fname + "ReadVectorsOption " + ReadVectorsOption + " rank " + DAVectorUtility.MPI_Rank);
-            e.printStackTrace();
-        }
+                if(DAVectorUtility.MPI_Rank == 0){
+                    DAVectorUtility.SALSAPrint(0,"22 File Name " + fname + "ReadVectorsOption " + ReadVectorsOption + " rank " + DAVectorUtility.MPI_Rank);
+                    e.printStackTrace();
+
+                }
+            }
         if (!success) {
             DAVectorUtility.printAndThrowRuntimeException("DA Vector File read error " + fname + " rank " + DAVectorUtility.MPI_Rank);
         }
