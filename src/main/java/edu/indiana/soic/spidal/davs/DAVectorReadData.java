@@ -254,6 +254,8 @@ public class DAVectorReadData {
         try {
             BufferedReader br = Files.newBufferedReader(Paths.get(fname), Charset.defaultCharset());
             Pattern pattern = Pattern.compile("[\t ]");
+            statebeforerror = -1;
+
             while ((line = br.readLine()) != null) {
                 if (Strings.isNullOrEmpty(line))
                     continue; // continue on empty lines - "while" will break on null anyway;
