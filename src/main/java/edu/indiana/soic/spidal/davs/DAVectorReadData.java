@@ -251,7 +251,7 @@ public class DAVectorReadData {
         if (Strings.isNullOrEmpty(fname)) {
             DAVectorUtility.printAndThrowRuntimeException(new IllegalArgumentException(Constants.ERR_EMPTY_FILE_NAME));
         }
-
+        DAVectorUtility.SALSAPrint(0,"Program.Replicate 111111" + Program.Replicate);
         try {
             BufferedReader br = Files.newBufferedReader(Paths.get(fname), Charset.defaultCharset());
             Pattern pattern = Pattern.compile("[\t ]");
@@ -269,6 +269,9 @@ public class DAVectorReadData {
                 if (parsedInt == null) {
                     continue;
                 }
+
+                DAVectorUtility.SALSAPrint(0,"Program.Replicate 2222222" + Program.Replicate);
+
                 if (Program.SelectedInputLabel >= 0) {
                     if (parsedInt != Program.SelectedInputLabel) {
                         continue;
@@ -288,6 +291,7 @@ public class DAVectorReadData {
                     CountLinesinFile += Program.Replicate;
                     continue;
                 }
+                DAVectorUtility.SALSAPrint(0,"Program.Replicate 333333" + Program.Replicate);
 
                 int ActualPointPosition = 0;
                 if (ReadVectorsOption == 0) {
@@ -334,8 +338,6 @@ public class DAVectorReadData {
                     }
                 }
                 for (int CountReplicas = 0; CountReplicas < Program.Replicate; CountReplicas++) {
-                    DAVectorUtility.SALSAPrint(0,"Program.Replicate" + Program.Replicate);
-                    DAVectorUtility.SALSAPrint(0,"Current Line" + line);
                     if (ReadVectorsOption >= 2) {
                         ParallelClustering.runningSolution.Y_k_i_[ParallelClustering.runningSolution.Ncent_Global][0]
                                 = Double.parseDouble(splits[1]);
