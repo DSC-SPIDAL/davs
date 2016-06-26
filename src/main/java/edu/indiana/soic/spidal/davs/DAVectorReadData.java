@@ -403,7 +403,7 @@ public class DAVectorReadData {
             e.printStackTrace();
         }
         if (!success) {
-            DAVectorUtility.printAndThrowRuntimeException("DA Vector File read error " + fname);
+            DAVectorUtility.printAndThrowRuntimeException("DA Vector File read error " + fname + " rank " + DAVectorUtility.MPI_Rank);
         }
     } // End ReadDataFromFile
 
