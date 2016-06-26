@@ -251,7 +251,7 @@ public class DAVectorReadData {
         if (Strings.isNullOrEmpty(fname)) {
             DAVectorUtility.printAndThrowRuntimeException(new IllegalArgumentException(Constants.ERR_EMPTY_FILE_NAME));
         }
-        DAVectorUtility.SALSAPrint(0,"File Name " + fname + "ReadVectorsOption " + ReadVectorsOption);
+        DAVectorUtility.SALSAPrint(0,"File Name " + fname + "ReadVectorsOption " + ReadVectorsOption + " rank " + DAVectorUtility.MPI_Rank);
         try {
             BufferedReader br = Files.newBufferedReader(Paths.get(fname), Charset.defaultCharset());
             Pattern pattern = Pattern.compile("[\t ]");
@@ -399,6 +399,7 @@ public class DAVectorReadData {
 //            DAVectorUtility.printAndThrowRuntimeException("Failed reading Points data " + DAVectorUtility.MPI_Rank +
 //                    " " + CountLinesinFile + " Start " + FirstPointPosition + " Number " + TotalNumberPointstoRead +
 //                    " " + line + "State before Error :" + statebeforerror  + "\n" + e.);
+            DAVectorUtility.SALSAPrint(0,"22 File Name " + fname + "ReadVectorsOption " + ReadVectorsOption + " rank " + DAVectorUtility.MPI_Rank);
             e.printStackTrace();
         }
         if (!success) {
