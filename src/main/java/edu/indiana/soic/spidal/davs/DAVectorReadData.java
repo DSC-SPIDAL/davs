@@ -252,7 +252,7 @@ public class DAVectorReadData {
             DAVectorUtility.printAndThrowRuntimeException(new IllegalArgumentException(Constants.ERR_EMPTY_FILE_NAME));
         }
         try {
-            DAVectorUtility.SALSAPrint(0,"File Name" + fname);
+            DAVectorUtility.SALSAPrint(0,"File Name " + fname + "ReadVectorsOption " + ReadVectorsOption);
             BufferedReader br = Files.newBufferedReader(Paths.get(fname), Charset.defaultCharset());
             Pattern pattern = Pattern.compile("[\t ]");
             statebeforerror = -1;
