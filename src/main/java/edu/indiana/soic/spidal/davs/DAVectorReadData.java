@@ -334,6 +334,8 @@ public class DAVectorReadData {
                     }
                 }
                 for (int CountReplicas = 0; CountReplicas < Program.Replicate; CountReplicas++) {
+                    DAVectorUtility.SALSAPrint(0,"Program.Replicate" + Program.Replicate);
+                    DAVectorUtility.SALSAPrint(0,"Current Line" + line);
                     if (ReadVectorsOption >= 2) {
                         ParallelClustering.runningSolution.Y_k_i_[ParallelClustering.runningSolution.Ncent_Global][0]
                                 = Double.parseDouble(splits[1]);
