@@ -2493,6 +2493,7 @@ public class VectorAnnealIterate
 		int ExtraClusterCount = 0;
 		if (Program.config.LabelFile.length() > 0)
 		{
+			DAVectorUtility.SALSAPrint(0,"Just before the error got here");
 			DAVectorReadData.ReadDataFromFile(Program.config.LabelFile, 1);
 			DAVectorReadData.ReadDataFromFile(Program.config.LabelFile, 2);
 			ExtraClusterCount = ParallelClustering.runningSolution.Ncent_Global - InitialClusterCount;
