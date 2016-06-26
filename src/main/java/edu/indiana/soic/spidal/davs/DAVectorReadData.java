@@ -398,7 +398,7 @@ public class DAVectorReadData {
         } catch (Exception e) {
             DAVectorUtility.printAndThrowRuntimeException("Failed reading Points data " + DAVectorUtility.MPI_Rank +
                     " " + CountLinesinFile + " Start " + FirstPointPosition + " Number " + TotalNumberPointstoRead +
-                    " " + line + "State before Error :" + statebeforerror );
+                    " " + line + "State before Error :" + statebeforerror  + "\n" + e.getStackTrace());
         }
         if (!success) {
             DAVectorUtility.printAndThrowRuntimeException("DA Vector File read error " + fname);
