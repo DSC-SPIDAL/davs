@@ -18,15 +18,12 @@ public class DAVectorReadData {
         int MinSplitSize = 6;
         int ExpermentNumberPosition = 9;
         int SplitPosition = 4;
-        DAVectorUtility.SALSAPrint(0, "Reading Experiment Numbers");
 
         boolean success = false;
         int count = 0;
         if (Strings.isNullOrEmpty(comparisonClusterFile)) {
             DAVectorUtility.printAndThrowRuntimeException(new IllegalArgumentException(Constants.ERR_EMPTY_FILE_NAME));
         }
-        DAVectorUtility.SALSAPrint(0, "Charge Program.SelectedInputLabel " + Program.SelectedInputLabel);
-        DAVectorUtility.SALSAPrint(0, "Charge Program.RestartSelectedInputLabel " + Program.RestartSelectedInputLabel);
 
         try(BufferedReader br = Files.newBufferedReader(Paths.get(comparisonClusterFile),Charset.defaultCharset())){
             String line;
@@ -49,8 +46,6 @@ public class DAVectorReadData {
                 count++;
 
             }
-            DAVectorUtility.SALSAPrint(0, "Experiment Numbers Read " + count);
-
             success = true;
             br.close();
         } catch (IOException e) {
