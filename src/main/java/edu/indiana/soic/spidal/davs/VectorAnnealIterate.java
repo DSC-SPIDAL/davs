@@ -3269,6 +3269,10 @@ public class VectorAnnealIterate
 
         OpenOption mode = append ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
 
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers last " + Program.ExperimentNumberAssigments[3]);
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers last " + Program.ExperimentNumberAssigments[4]);
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers last " + Program.ExperimentNumberAssigments[5]);
+
         try (PrintWriter writer = new PrintWriter(
                 java.nio.file.Files.newBufferedWriter(Paths.get(fname), Charset.defaultCharset(), mode), true)) {
 			for (int i = 0; i < dataPoints; i++) {

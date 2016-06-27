@@ -571,6 +571,11 @@ public class Program
 			DAVectorReadData.ReadExperimentNumbers(ComparisonClusterFile);
 		}
 
+
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers " + Program.ExperimentNumberAssigments[0]);
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers " + Program.ExperimentNumberAssigments[1]);
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers " + Program.ExperimentNumberAssigments[2]);
+		DAVectorUtility.SALSAPrint(0, "Experiment Numbers " + Program.ExperimentNumberAssigments[3]);
 		// Set up Decomposition of USED points
 		DAVectorParallelism.SetParallelDecomposition();
 		if (Program.Replicate > 1)
