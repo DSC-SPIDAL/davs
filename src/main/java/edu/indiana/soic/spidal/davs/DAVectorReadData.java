@@ -42,7 +42,7 @@ public class DAVectorReadData {
                             "file " + splits.length + " " + MinSplitSize + " " + line);
                 }
                 Integer parsedInt = Ints.tryParse(splits[SplitPosition]);
-                if (parsedInt == null || parsedInt != Program.SelectedInputLabel) continue;
+                if (parsedInt == null) continue;
 
                 Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
 
