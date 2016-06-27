@@ -35,17 +35,14 @@ public class DAVectorReadData {
                 if (Strings.isNullOrEmpty(line))
                     continue; // continue on empty lines - "while" will break on null anyway;
 
-                DAVectorUtility.SALSAPrint(0, "111111");
 
                 String[] splits = pattern.split(line.trim());
                 if (splits.length < MinSplitSize) {
                     DAVectorUtility.printAndThrowRuntimeException("Count " + count + "Illegal data length on Point " +
                             "file " + splits.length + " " + MinSplitSize + " " + line);
                 }
-                DAVectorUtility.SALSAPrint(0, "222222");
                 Integer parsedInt = Ints.tryParse(splits[SplitPosition]);
                 if (parsedInt == null || parsedInt != Program.SelectedInputLabel) continue;
-                DAVectorUtility.SALSAPrint(0, "33333");
 
                 Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
 
