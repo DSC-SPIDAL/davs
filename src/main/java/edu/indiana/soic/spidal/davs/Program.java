@@ -52,7 +52,7 @@ public class Program
 
 	//  Set Dataset properties
 	public static int NumberDataPoints = -1; // if -1 then find number of points from input
-	public static int SelectedInputLabel = 2; // Charge to select; if negative veto this label
+	public static int SelectedInputLabel = 6; // Charge to select; if negative veto this label
 	public static int RestartSelectedInputLabel = 6; // Charge to select in Restart; if negative veto this label
 	public static int InputFileType = 0; // If 0 raw data; =1 Output file
 	public static int RestartInputFileType = 1; // If 0 raw data; =1 Output file for Restart
@@ -568,7 +568,7 @@ public class Program
 			SelectedInputLabel = save2;
 		}else{
 			//NOTE: This code is experiment dependent
-			DAVectorReadData.ReadExperimentNumbers(ComparisonClusterFile);
+			DAVectorReadData.ReadExperimentNumbers(DistanceMatrixFile);
 		}
 
 

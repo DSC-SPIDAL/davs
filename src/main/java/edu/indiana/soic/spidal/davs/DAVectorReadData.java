@@ -15,9 +15,9 @@ public class DAVectorReadData {
 
     // Experiment Dependent code only applicable to Mani's 2016 dataset
     public static void ReadExperimentNumbers(String comparisonClusterFile) {
-        int MinSplitSize = 8;
-        int ExpermentNumberPosition = 8;
-        int SplitPosition = 3;
+        int MinSplitSize = 6;
+        int ExpermentNumberPosition = 9;
+        int SplitPosition = 4;
         DAVectorUtility.SALSAPrint(0, "Reading Experiment Numbers");
 
         boolean success = false;
@@ -42,7 +42,7 @@ public class DAVectorReadData {
                             "file " + splits.length + " " + MinSplitSize + " " + line);
                 }
                 Integer parsedInt = Ints.tryParse(splits[SplitPosition]);
-                if (parsedInt == null) continue;
+                if (parsedInt == null || parsedInt != Program.SelectedInputLabel) continue;
 
                 Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
 
