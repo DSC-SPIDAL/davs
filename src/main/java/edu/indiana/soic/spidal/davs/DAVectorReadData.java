@@ -18,6 +18,7 @@ public class DAVectorReadData {
         int MinSplitSize = 8;
         int ExpermentNumberPosition = 8;
         int SplitPosition = 3;
+        DAVectorUtility.SALSAPrint(0, "Reading Experiment Numbers");
 
         boolean success = false;
         int count = 0;
@@ -44,7 +45,9 @@ public class DAVectorReadData {
                 Program.ExperimentNumberAssigments[count] = Integer.valueOf(splits[ExpermentNumberPosition]);
 
                 count++;
+
             }
+            DAVectorUtility.SALSAPrint(0, "Experiment Numbers Read " + count);
 
             success = true;
             br.close();
