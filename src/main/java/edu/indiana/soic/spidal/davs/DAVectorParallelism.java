@@ -32,6 +32,10 @@ public class DAVectorParallelism
 			DAVectorUtility.SALSAPrint(0, DAVectorUtility.ParallelPattern);
 		}
 
+		DAVectorUtility.mpiOnlyBuffer = MPI.newLongBuffer(DAVectorUtility.MPI_Size);
+		DAVectorUtility.threadsAndMPIBuffer = MPI.newLongBuffer(DAVectorUtility.MPI_Size * Program.config.getThreadCount());
+		DAVectorUtility.SALSAPrint(0, "Thread count " + Program.config.getThreadCount());
+		DAVectorUtility.SALSAPrint(0, "Processes count " + DAVectorUtility.MPI_Size);
 	} // End SetupParallelism
 
 	public static void TearDownParallelism() throws MPIException {

@@ -3,6 +3,7 @@ package edu.indiana.soic.spidal.davs;
 import com.google.common.base.Stopwatch;
 import com.google.common.base.Strings;
 import mpi.Intracomm;
+import mpi.MPI;
 import mpi.MPIException;
 import edu.indiana.soic.spidal.general.Box;
 import edu.indiana.soic.spidal.mpi.MpiOps;
@@ -476,6 +477,13 @@ public class DAVectorUtility
 		} catch (IOException e) {
 			System.err.format("Failed writing Experiment Shifts results due to I/O exception: %s%n", e);
 		}
+	}
+
+
+	//MPI function calls for timing calculations
+	public static void gather(LongBuffer buffer, int count, int root)
+			throws MPIException {
+		MPI_communicator.gather(buffer, count, MPI.LONG, root);
 	}
 } // End DAVectorUtility
  // End Namespace SALSALibrary

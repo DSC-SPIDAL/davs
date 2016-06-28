@@ -5,6 +5,10 @@ package edu.indiana.soic.spidal.davs;
 import com.google.common.base.Optional;
 import edu.indiana.soic.spidal.configuration.ConfigurationMgr;
 import edu.indiana.soic.spidal.configuration.sections.DAVectorSpongeSection;
+import edu.indiana.soic.spidal.davs.timing.GeneralTiming;
+import edu.indiana.soic.spidal.davs.timing.ReadDataTiming;
+import edu.indiana.soic.spidal.davs.timing.SectionTiming;
+import edu.indiana.soic.spidal.davs.timing.SetupTiming;
 import edu.indiana.soic.spidal.general.Box;
 import mpi.MPI;
 import mpi.MPIException;
@@ -402,6 +406,8 @@ public class Program
      *             --configFile, --threadCount, and --nodeCount respectively
      */
 	public static void main(String[] args) throws MPIException {
+
+		SetupTiming.startTiming(SetupTiming.TimingTask.SETUP);
         Optional<CommandLine> parserResult = parseCommandLineArguments(args, programOptions);
         if (!parserResult.isPresent()){
             System.out.println(Constants.ERR_PROGRAM_ARGUMENTS_PARSING_FAILED);
@@ -563,12 +569,16 @@ public class Program
 			{
 				GoldenExamination.PeakPosition[GlobalPointIndex] = new double[Program.ParameterVectorDimension];
 			}
+			ReadDataTiming.startTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 			DAVectorReadData.ReadLabelsFromFile(ComparisonClusterFile);
+			ReadDataTiming.endTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 			InputFileType = save1;
 			SelectedInputLabel = save2;
 		}else{
 			//NOTE: This code is experiment dependent
+			ReadDataTiming.startTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 			DAVectorReadData.ReadExperimentNumbers(DistanceMatrixFile);
+			ReadDataTiming.endTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 		}
 		
 		// Set up Decomposition of USED points
@@ -617,28 +627,40 @@ public class Program
 
 		Program.ClusterLimitforDistribution = Math.max(Program.ClusterLimitforDistribution, 4 * DAVectorUtility.MPI_Size);
 
+		SetupTiming.endTiming(SetupTiming.TimingTask.SETUP);
+
 		// Initial Processing Complete
         // Note - MPI Call - Barrier
         if (DAVectorUtility.MPI_Size > 1){
             DAVectorUtility.mpiOps.barrier(); // Make certain all processes have processed original data before writing updated
         }
 		//  read data into memory
+		// Timing Section 1
+		SectionTiming.startTiming(SectionTiming.TimingTask.SC1);
 		if (Program.DoKmeans)
 		{
+			GeneralTiming.startTiming(GeneralTiming.TimingTask.KMEANS);
 			KmeansTriangleInequality.SetTriangleInequalityParameters(Program.UseTriangleInequality_Kmeans, Program.MaxClusterLBsperPoint_Kmeans, Program.MaxCentersperCenter_Kmeans, Program.TriangleInequality_Delta1_old_Kmeans, Program.TriangleInequality_Delta1_current_Kmeans, Program.OldCenterOption_Kmeans, Program.DoBackwardFacingTests_Kmeans);
 			Kmeans.InitializeKmeans(Program.PointPosition, Program.config.DistanceMatrixFile,
 			    Program.ClusterIndexonInputLine, Program.FirstClusterValue, Program.StartPointPositiononInputLine, Program.InitialNcent, Program.maxNcentTOTAL, Program.maxNcentTOTALforParallelism_Kmeans,
 			    Program.ParameterVectorDimension, Program.KmeansCenterChangeStop, Program.KmeansIterationLimit);
+			GeneralTiming.endTiming(GeneralTiming.TimingTask.KMEANS);
 		}
 		else if (Program.DoLCMS)
 		{
+			ReadDataTiming.startTiming(ReadDataTiming.TimingTask.TOTAL_READ);
+			GeneralTiming.startTiming(GeneralTiming.TimingTask.LCMS);
 			DAVectorReadData.ReadDataFromFile(config.DistanceMatrixFile, 0);
+			ReadDataTiming.endTiming(ReadDataTiming.TimingTask.TOTAL_READ);
+			GeneralTiming.endTiming(GeneralTiming.TimingTask.LCMS);
 		}
 		else
 		{
+			ReadDataTiming.startTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 			DAVectorReadData.ReadDataFromFile(config.DistanceMatrixFile,
 			                                  Program.ClusterIndexonInputLine, null,
 			                                  Program.StartPointPositiononInputLine);
+			ReadDataTiming.endTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 		}
 		// Program.ClusterIndexonInputLine MUST be NULL
 
@@ -657,10 +679,12 @@ public class Program
 			}
 			if (DAVectorUtility.MPI_Rank == 0)
 			{
+				ReadDataTiming.startTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 				DAVectorReadData.Read3DDataFromFile(config.LabelFile, Program.RW3DData, 1);
+				ReadDataTiming.endTiming(ReadDataTiming.TimingTask.TOTAL_READ);
 			}
 		}
-
+		SectionTiming.endTiming(SectionTiming.TimingTask.SC1);
 		//  Set up Timing
 		int nonMPITimings = 14;
 		DAVectorUtility.InitializeTiming(13 + nonMPITimings);
@@ -719,6 +743,9 @@ public class Program
 			}
 		}
 
+
+		// Timing Section 2
+		SectionTiming.startTiming(SectionTiming.TimingTask.SC2);
 		//  Set up basic clusters
 		ClusteringSolution.SetParameters(DAVectorUtility.PointCount_Process, Program.maxNcentCreated, Program.maxNcentTOTAL, Program.maxNcentperNode, Program.cachelinesize, Program.targetNcentperPoint, Program.targetMinimumNcentperPoint, Program.maxNcentperPoint, Program.ExpArgumentCut2);
 
@@ -726,7 +753,9 @@ public class Program
 		DistributedClusteringSolution DistributedSetup;
 		if (Program.DoLCMS)
 		{
+			GeneralTiming.startTiming(GeneralTiming.TimingTask.LCMS);
 			DistributedSetup = new DistributedClusteringSolution(MaxMPITransportBuffer, MaxTransportedClusterStorage, MaxNumberAccumulationsperNode, MaxDoubleComponents, MaxIntegerComponents);
+			GeneralTiming.endTiming(GeneralTiming.TimingTask.LCMS);
 		}
 		DAVectorUtility.SALSAPrint(0, "Setup Finished");
 
@@ -735,12 +764,17 @@ public class Program
 		ControlKmeans RunKmeansClustering;
 		if (DoKmeans)
 		{
+			GeneralTiming.startTiming(GeneralTiming.TimingTask.KMEANS);
 			RunKmeansClustering = new ControlKmeans();
+			GeneralTiming.endTiming(GeneralTiming.TimingTask.KMEANS);
 		}
 		else
 		{
+			GeneralTiming.startTiming(GeneralTiming.TimingTask.DA);
 			RunVectorSpongeDA = new VectorAnnealIterate();
 			RunVectorSpongeDA.ControlVectorSpongeDA();
+			GeneralTiming.endTiming(GeneralTiming.TimingTask.DA);
+
 		}
 		Program.ActualEndTemperatureafterconverging = ParallelClustering.runningSolution.Temperature;
 
@@ -754,8 +788,10 @@ public class Program
 		//  This can alter "Sponge Confused Points"
 		if (!Program.DoKmeans)
 		{
-			ParallelClustering.runningSolution.FindOccupationCounts();
-		}
+            GeneralTiming.startTiming(GeneralTiming.TimingTask.LCMS);
+            ParallelClustering.runningSolution.FindOccupationCounts();
+            GeneralTiming.endTiming(GeneralTiming.TimingTask.LCMS);
+        }
 
 		if (Program.ClusterCountOutput >= 0 && (!Program.DoKmeans))
 		{
@@ -768,7 +804,8 @@ public class Program
 		}
 		if (Program.DoKmeans)
 		{
-			double[][] ClusterCenters = ControlKmeans.CaptureKmeans(Program.ClusterAssignments);
+            GeneralTiming.startTiming(GeneralTiming.TimingTask.KMEANS);
+            double[][] ClusterCenters = ControlKmeans.CaptureKmeans(Program.ClusterAssignments);
 			if (Program.ClusterCountOutput >= 0)
 			{
 				VectorAnnealIterate.SimpleOutputClusteringResults("Kmeans", ClusterCenters);
@@ -779,13 +816,20 @@ public class Program
 				VectorAnnealIterate.Output3DClusterLabels("Kmeans");
 				DAVectorUtility.SALSAPrint(0, "End Output of 3D Clusters");
 			}
-		}
+            GeneralTiming.endTiming(GeneralTiming.TimingTask.KMEANS);
+        }
 		if (Program.DoLCMS)
 		{
-			VectorAnnealIterate.CalculateClusterStatus();
-		}
+            GeneralTiming.startTiming(GeneralTiming.TimingTask.LCMS);
+            VectorAnnealIterate.CalculateClusterStatus();
+            GeneralTiming.endTiming(GeneralTiming.TimingTask.LCMS);
+        }
 
+
+		SectionTiming.endTiming(SectionTiming.TimingTask.SC2);
 		// Output Results
+		//Section Timing 3
+		SectionTiming.startTiming(SectionTiming.TimingTask.SC3);
 		String nextline = "\nNode 0 Center Averages (Counts) [Distce] ";
 		int Totnumber = ClusteringSolution.NumberLocalActiveClusters;
 		if (Totnumber > Program.MaxNumberClustersToPrint)
@@ -1137,6 +1181,8 @@ public class Program
 			}
 
 		}
+
+		SectionTiming.endTiming(SectionTiming.TimingTask.SC3);
 
 		if (DAVectorUtility.MPI_Rank == 0)
 		{
