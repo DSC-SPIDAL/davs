@@ -3284,7 +3284,13 @@ public class VectorAnnealIterate
                     line += " 0.0";
                 }
                 line += " " + labels.get(i) + " " + ExtraLabels[i];
-				if(fname.contains("Final")) line += " " + Program.ExperimentNumberAssigments[i + startposition];
+				if(fname.contains("Final")){
+					if(Program.ExperimentNumberAssigments.length > i + startposition){
+						line += " " + Program.ExperimentNumberAssigments[i + startposition];
+					}else{
+						line += " " + experimentNumbers[i];
+					}
+				}
 				writer.println(line);
             }
             writer.close();
@@ -3316,7 +3322,11 @@ public class VectorAnnealIterate
                         line += " 0.0";
                     }
                     line += " " + labels.get(i);
-					line += " " + Program.ExperimentNumberAssigments[i + startposition];
+					if(Program.ExperimentNumberAssigments.length > i + startposition){
+						line += " " + Program.ExperimentNumberAssigments[i + startposition];
+					}else{
+						line += " " + experimentNumbers[i];
+					}
                     writer.println(line);
                 }
                 writer.close();
