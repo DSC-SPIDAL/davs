@@ -37,12 +37,12 @@ public class ReadDataTiming {
         }
     }
 
-    public static double getTotalTime(TimingTask task){
+    public static long getTotalTime(TimingTask task){
         switch (task){
             case TOTAL_READ:
                 return tTotalRead;
         }
-        return  0.0;
+        return  0;
     }
 
     public static double getAverageTime(TimingTask task){

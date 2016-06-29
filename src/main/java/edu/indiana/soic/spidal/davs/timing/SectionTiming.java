@@ -61,7 +61,7 @@ public class SectionTiming {
         }
     }
 
-    public static double getTotalTime(TimingTask task){
+    public static long getTotalTime(TimingTask task){
         switch (task){
             case SC1:
                 return tSection1;
@@ -70,7 +70,7 @@ public class SectionTiming {
             case SC3:
                 return tSection3;
         }
-        return  0.0;
+        return  0;
     }
 
     public static double getAverageTime(TimingTask task){

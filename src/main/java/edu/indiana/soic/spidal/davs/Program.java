@@ -1407,21 +1407,21 @@ public class Program
         StandardOpenOption option = (Files.exists(file)) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
 
         try(PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(file,option))){
-            printWriter.println("General Timing K-Means " + GeneralTiming.getTotalTime(GeneralTiming.TimingTask.KMEANS));
-            printWriter.println("General Timing LCMS " + GeneralTiming.getTotalTime(GeneralTiming.TimingTask.LCMS));
-            printWriter.println("General Timing DA " + GeneralTiming.getTotalTime(GeneralTiming.TimingTask.DA));
+            printWriter.println("General Timing K-Means " + DAVectorUtility.formatElapsedMillis(GeneralTiming.getTotalTime(GeneralTiming.TimingTask.KMEANS)));
+            printWriter.println("General Timing LCMS " + DAVectorUtility.formatElapsedMillis(GeneralTiming.getTotalTime(GeneralTiming.TimingTask.LCMS)));
+            printWriter.println("General Timing DA " + DAVectorUtility.formatElapsedMillis(GeneralTiming.getTotalTime(GeneralTiming.TimingTask.DA)));
 
             printWriter.println();
 
-            printWriter.println("ReadData Timing " + ReadDataTiming.getTotalTime(ReadDataTiming.TimingTask.TOTAL_READ));
-            printWriter.println("Setup Timing " + SetupTiming.getTotalTime(SetupTiming.TimingTask.SETUP));
+            printWriter.println("ReadData Timing " + DAVectorUtility.formatElapsedMillis(ReadDataTiming.getTotalTime(ReadDataTiming.TimingTask.TOTAL_READ)));
+            printWriter.println("Setup Timing " + DAVectorUtility.formatElapsedMillis(SetupTiming.getTotalTime(SetupTiming.TimingTask.SETUP)));
 
             printWriter.println();
 
-            printWriter.println("Section Timing SC1 " + SectionTiming.getTotalTime(SectionTiming.TimingTask.SC1));
-            printWriter.println("Section Timing SC2 " + SectionTiming.getTotalTime(SectionTiming.TimingTask.SC2));
-            printWriter.println("Section Timing SC3 " + SectionTiming.getTotalTime(SectionTiming.TimingTask.SC3));
-            
+            printWriter.println("Section Timing SC1 " + DAVectorUtility.formatElapsedMillis(SectionTiming.getTotalTime(SectionTiming.TimingTask.SC1)));
+            printWriter.println("Section Timing SC2 " + DAVectorUtility.formatElapsedMillis(SectionTiming.getTotalTime(SectionTiming.TimingTask.SC2)));
+            printWriter.println("Section Timing SC3 " + DAVectorUtility.formatElapsedMillis(SectionTiming.getTotalTime(SectionTiming.TimingTask.SC3)));
+
             printWriter.flush();
             printWriter.close();
         } catch (IOException e) {

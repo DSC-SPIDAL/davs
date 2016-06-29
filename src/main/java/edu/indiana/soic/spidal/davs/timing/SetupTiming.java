@@ -37,12 +37,12 @@ public class SetupTiming {
         }
     }
 
-    public static double getTotalTime(TimingTask task){
+    public static long getTotalTime(TimingTask task){
         switch (task){
             case SETUP:
                 return tSetup;
         }
-        return  0.0;
+        return  0;
     }
 
     public static double getAverageTime(TimingTask task){

@@ -61,7 +61,7 @@ public class GeneralTiming {
         }
     }
 
-    public static double getTotalTime(TimingTask task){
+    public static long getTotalTime(TimingTask task){
         switch (task){
             case KMEANS:
                 return tKmeans;
@@ -70,7 +70,7 @@ public class GeneralTiming {
             case DA:
                 return tDA;
         }
-        return  0.0;
+        return  0;
     }
 
     public static double getAverageTime(TimingTask task){
