@@ -15,6 +15,7 @@ import mpi.MPIException;
 import org.apache.commons.cli.*;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.nio.file.Files;
@@ -1196,6 +1197,7 @@ public class Program
                     DAVectorUtility.SubDurations[3] * 0.001, DAVectorUtility.SubDurations[3] / DAVectorUtility.HPDuration,
                     DAVectorUtility.SubDurations[4] * 0.001, DAVectorUtility.SubDurations[4] / DAVectorUtility.HPDuration,
                     config.DistanceMatrixFile, new Date(), MPI.getProcessorName());
+            WriteTimingFileNew(config.TimingFile.replace("timing.txt","timingNew.txt"));
 		}
 
         try {
@@ -1398,6 +1400,34 @@ public class Program
         } catch (IOException e) {
             System.err.format("Failed writing timing file due to I/O exception: %s%n", e);
         }
+    }
+
+    public static void WriteTimingFileNew(String filename){
+        Path file = Paths.get(filename);
+        StandardOpenOption option = (Files.exists(file)) ? StandardOpenOption.APPEND : StandardOpenOption.CREATE;
+
+        try(PrintWriter printWriter = new PrintWriter(Files.newBufferedWriter(file,option))){
+            printWriter.println("General Timing K-Means " + GeneralTiming.getTotalTime(GeneralTiming.TimingTask.KMEANS));
+            printWriter.println("General Timing LCMS " + GeneralTiming.getTotalTime(GeneralTiming.TimingTask.LCMS));
+            printWriter.println("General Timing DA " + GeneralTiming.getTotalTime(GeneralTiming.TimingTask.DA));
+
+            printWriter.println();
+
+            printWriter.println("ReadData Timing " + ReadDataTiming.getTotalTime(ReadDataTiming.TimingTask.TOTAL_READ));
+            printWriter.println("Setup Timing " + SetupTiming.getTotalTime(SetupTiming.TimingTask.SETUP));
+
+            printWriter.println();
+
+            printWriter.println("Section Timing SC1 " + SectionTiming.getTotalTime(SectionTiming.TimingTask.SC1));
+            printWriter.println("Section Timing SC2 " + SectionTiming.getTotalTime(SectionTiming.TimingTask.SC2));
+            printWriter.println("Section Timing SC3 " + SectionTiming.getTotalTime(SectionTiming.TimingTask.SC3));
+            
+            printWriter.flush();
+            printWriter.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 	public static void SetupDA()
