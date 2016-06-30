@@ -1,6 +1,7 @@
 package edu.indiana.soic.spidal.davs;
 
 import com.google.common.io.Files;
+import edu.indiana.soic.spidal.davs.timing.GeneralMethodTiming;
 import edu.indiana.soic.spidal.general.Box;
 import mpi.MPIException;
 
@@ -85,6 +86,7 @@ public class ClusterQuality
 	} // End Initializer ClusterQuality(int InputNumberClusters, int InputSpongeOption, int InputNumberNearbyClusters, double InputNearbyCut)
 
     public final void SetClusterStatistics() throws MPIException {
+        GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_CLUSTER_STATISTICS);
         GlobalReductions.FindDoubleArraySum PointsperCluster =
                 new GlobalReductions.FindDoubleArraySum(DAVectorUtility.ThreadCount, HistogramOccupationMax);
         GlobalReductions.FindDoubleArraySum DistancesfromCluster =
@@ -162,10 +164,11 @@ public class ClusterQuality
         for (int histloop = 0; histloop < HistogramDistancesMax; histloop++) {
             HistogramDistancesValues[histloop] = (int) (DistancesfromCluster.TotalSum[histloop] + 0.001);
         }
-
+        GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_CLUSTER_STATISTICS);
     } // End SetClusterStatistics()
 
 	public final void SetPointStatistics() throws MPIException {
+        GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_POINT_STATISTICS);
 		TotalIllegalPoints = 0;
 
 		GlobalReductions.FindDoubleArraySum AccumulateSpongePoints = new GlobalReductions.FindDoubleArraySum(DAVectorUtility.ThreadCount, NumberClusters);
@@ -309,11 +312,12 @@ public class ClusterQuality
 		TotalConfusedClusterPoints = ConfusedClusterPoints.Total;
 		TotalConfusedSpongePoints1 = ConfusedSpongePoints1.Total;
 		TotalConfusedSpongePoints2 = ConfusedSpongePoints2.Total;
-
+        GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_POINT_STATISTICS);
 	} // End SetPointStatistics()
 
 	public final void SetNearbyClusters()
 	{
+        GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_NEARBY_CLUSTERS);
 		Range[] ParallelClusterRange = RangePartitioner.Partition(NumberClusters, DAVectorUtility.ThreadCount);
 
         // Note - parallel for
@@ -371,12 +375,13 @@ public class ClusterQuality
 
             });
         });
-
+        GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_NEARBY_CLUSTERS);
     } // End SetNearbyClusters()
 
 	public final void OutputStatus()
 	{
-		if (DAVectorUtility.MPI_Rank != 0)
+        GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.OUTPUT_STATUS);
+        if (DAVectorUtility.MPI_Rank != 0)
 		{
 			return;
 		}
@@ -445,9 +450,12 @@ public class ClusterQuality
 		} catch (IOException e) {
             System.err.format("Failed writing status due to I/O exception: %s%n", e);
         }
-	} // End OutputStatus()
+        GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.OUTPUT_STATUS);
+    } // End OutputStatus()
 
     public final void ExperimentAnalysis(){
+        GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.EXPERIMENT_ANALYSIS);
+
         int NumberofExperiments = 37;
 
         if(NumberofExperiments <= 1) return;
@@ -540,7 +548,7 @@ public class ClusterQuality
                 DAVectorUtility.writeExperimentalShifts(filePathName, expt + 1, MZshift, MZSD, RTshift, RTSD);
             }
         }
-
+        GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.EXPERIMENT_ANALYSIS);
     }
 	public static void CaculateTemperatureClusterCountPlot()
 	{

@@ -1,5 +1,6 @@
 package edu.indiana.soic.spidal.davs;
 
+import edu.indiana.soic.spidal.davs.timing.GeneralMethodTiming;
 import mpi.MPIException;
 
 public class LCMSAnalyze
@@ -545,6 +546,7 @@ public class LCMSAnalyze
 
 	public static void ClusterComparison()
 	{
+		GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.CLUSTER_COMPARISON);
 		if (Program.CompareSolution <= 0)
 		{
 			return;
@@ -684,7 +686,7 @@ public class LCMSAnalyze
 		if(Program.MclustClusters.MaxIndependentClusterIndex > 0) {
 			Program.OurClusters.Difference(Program.MclustClusters);
 		}
-
+		GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.CLUSTER_COMPARISON);
 	}
 
 } // End LCMSAnalyze

@@ -1,5 +1,6 @@
 package edu.indiana.soic.spidal.davs;
 
+import edu.indiana.soic.spidal.davs.timing.GeneralMethodTiming;
 import edu.indiana.soic.spidal.general.Box;
 
 public class ArbitraryClustering
@@ -36,6 +37,7 @@ public class ArbitraryClustering
 	//
 	public final void setup()
 	{
+		GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SETUP);
 		this.MaxClusterID = 0;
 		for (int GlobalPointIndex = 0; GlobalPointIndex < this.NumberofPoints; GlobalPointIndex++)
 		{
@@ -92,6 +94,7 @@ public class ArbitraryClustering
 			this.ClusterIDtoIndex[RawClusterIndex] = index;
 			++index;
 		}
+		GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SETUP);
 	} // End setup
 
 	public final void Statistics()

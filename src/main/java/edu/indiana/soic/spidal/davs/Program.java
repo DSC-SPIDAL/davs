@@ -5,10 +5,7 @@ package edu.indiana.soic.spidal.davs;
 import com.google.common.base.Optional;
 import edu.indiana.soic.spidal.configuration.ConfigurationMgr;
 import edu.indiana.soic.spidal.configuration.sections.DAVectorSpongeSection;
-import edu.indiana.soic.spidal.davs.timing.GeneralTiming;
-import edu.indiana.soic.spidal.davs.timing.ReadDataTiming;
-import edu.indiana.soic.spidal.davs.timing.SectionTiming;
-import edu.indiana.soic.spidal.davs.timing.SetupTiming;
+import edu.indiana.soic.spidal.davs.timing.*;
 import edu.indiana.soic.spidal.general.Box;
 import mpi.MPI;
 import mpi.MPIException;
@@ -1422,7 +1419,17 @@ public class Program
             printWriter.println("Section Timing SC2 " + DAVectorUtility.formatElapsedMillis(SectionTiming.getTotalTime(SectionTiming.TimingTask.SC2)));
             printWriter.println("Section Timing SC3 " + DAVectorUtility.formatElapsedMillis(SectionTiming.getTotalTime(SectionTiming.TimingTask.SC3)));
 
-            printWriter.flush();
+			printWriter.println();
+			printWriter.println("General Method Timing ClusterStatus.SetClusterStatistics " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SET_CLUSTER_STATISTICS)));
+			printWriter.println("General Method Timing ClusterStatus.SetPointStatistics " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SET_POINT_STATISTICS)));
+			printWriter.println("General Method Timing ClusterStatus.SetNearbyClusters " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SET_NEARBY_CLUSTERS)));
+			printWriter.println("General Method Timing ClusterStatus.OutputStatus " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.OUTPUT_STATUS)));
+			printWriter.println("General Method Timing ClusterStatus.ExperimentAnalysis " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.EXPERIMENT_ANALYSIS)));
+			printWriter.println("General Method Timing OurClusters.setup " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SETUP)));
+			printWriter.println("General Method Timing LCMSAnalyze.ClusterComparison " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.CLUSTER_COMPARISON)));
+
+
+			printWriter.flush();
             printWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
