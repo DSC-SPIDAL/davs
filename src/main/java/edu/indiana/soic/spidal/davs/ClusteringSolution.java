@@ -152,6 +152,7 @@ public class ClusteringSolution {
 
         }
         int CreatedIndex = host + 1 + (CenterMaxforCreatedIndex << ClusteringSolution.PACKINGSHIFT);
+        if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: SetCreatedIndex: ClusteringSolution.UniversalMapping initialized " + CurrentIteration + "," + RealLocalClusterIndex + 1 );
         UniversalMapping[CreatedIndex] = new ClusterIndirection(CurrentIteration, RealLocalClusterIndex + 1);
         ParallelClustering.runningSolution.LocalCreatedIndex[RealLocalClusterIndex] = CreatedIndex;
         return CreatedIndex;
@@ -1073,7 +1074,9 @@ public class ClusteringSolution {
             int numberOfPoints = FromAfarInt.getNumberOfPoints();
             for (int FromAfarIndex = 0; FromAfarIndex < numberOfPoints; FromAfarIndex++) {
                 int CreatedIndex = FromAfarInt.getMArrayIntAt(FromAfarIndex);
+                if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: SetGlobalClusterNumbers : ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + 0 );
                 if (ClusteringSolution.UniversalMapping[CreatedIndex] == null) {
+                    if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: SetGlobalClusterNumbers is null: ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + 0 );
                     ClusteringSolution.UniversalMapping[CreatedIndex] = new ClusterIndirection(ClusteringSolution.CurrentIteration, 0);
                 }
 

@@ -2954,6 +2954,7 @@ public class VectorAnnealIterate
 			DAVectorUtility.StopSubTimer(DAVectorUtility.MPIBROADCASTTiming);
 			if (DAVectorUtility.MPI_Rank != 0)
 			{
+				if(SpongeCreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: AddSpongeCluster : ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + (1 + CurrentMax) );
 				ClusteringSolution.UniversalMapping[SpongeCreatedIndex] = new ClusterIndirection(ClusteringSolution.CurrentIteration, 1 + CurrentMax);
 				ParallelClustering.runningSolution.LocalCreatedIndex[CurrentMax] = SpongeCreatedIndex;
 			}

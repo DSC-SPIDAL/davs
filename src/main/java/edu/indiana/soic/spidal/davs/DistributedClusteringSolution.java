@@ -416,8 +416,10 @@ public class DistributedClusteringSolution
 		for (int Clustersfromafar = 0; Clustersfromafar < StorageforTransportedClusters.SizeOfTransportedArray; Clustersfromafar++)
 		{
 			int CreatedIndex = StorageforTransportedClusters.TotalTransportedCreatedIndex[Clustersfromafar];
+			if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: MajorSynchronizationTransportDistributedClusterCenters : ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + 0 );
 			if (ClusteringSolution.UniversalMapping[CreatedIndex] == null)
 			{
+				if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: MajorSynchronizationTransportDistributedClusterCenters is null: ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + (-1 - Clustersfromafar) );
 				ClusteringSolution.UniversalMapping[CreatedIndex] = new ClusterIndirection(ClusteringSolution.CurrentIteration, -1 - Clustersfromafar);
 			}
 			ClusteringSolution.UniversalMapping[CreatedIndex].PackedHost = StorageforTransportedClusters.TotalTransportedOriginalHost[Clustersfromafar];
