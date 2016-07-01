@@ -579,10 +579,13 @@ public class DistributedClusteringSolution
 		if (ongoing && (!ParallelClustering.runningSolution.DistributedExecutionMode))
 		{
 			++ClusteringSolution.CurrentIteration; // Increment Iteration Number
+			DAVectorUtility.SALSAPrint(0, "Debug:ClusteringSolution.NumberLocalActiveClusters  " + ClusteringSolution.NumberLocalActiveClusters);
+			DAVectorUtility.SALSAPrint(0, "Debug:ClusteringSolution.UniversalMapping Length " + ClusteringSolution.UniversalMapping.length);
 			for (int LocalActiveClusterIndex = 0; LocalActiveClusterIndex < ClusteringSolution.NumberLocalActiveClusters; LocalActiveClusterIndex++)
 			{
 				int RealClusterIndex = ClusteringSolution.RealClusterIndices[LocalActiveClusterIndex];
 				int CreatedIndex = ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex];
+				DAVectorUtility.SALSAPrint(0, "Debug:CreatedIndex " + CreatedIndex);
 				ClusteringSolution.UniversalMapping[CreatedIndex].Availability = 1 + RealClusterIndex;
 				ClusteringSolution.UniversalMapping[CreatedIndex].IterationSet = ClusteringSolution.CurrentIteration;
 				ClusteringSolution.LocalHost[LocalActiveClusterIndex] = 0;
