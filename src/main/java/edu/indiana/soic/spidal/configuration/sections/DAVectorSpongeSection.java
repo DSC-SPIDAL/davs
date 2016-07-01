@@ -134,6 +134,12 @@ public class DAVectorSpongeSection {
             ConsoleDebugOutput = Boolean.parseBoolean(getProperty(p,"ConsoleDebugOutput", "true"));
 
             LCMSmode = Integer.parseInt(getProperty(p,"LCMSmode","1"));
+
+            //Cluster Quality Parameters
+
+            HistogramOccupationMax = Integer.parseInt(getProperty(p,"HistogramOccupationMax","202"));
+            HistogramDistancesMax = Integer.parseInt(getProperty(p,"HistogramDistancesMax","200"));
+
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -262,6 +268,10 @@ public class DAVectorSpongeSection {
     public String SummaryFile;
 
     public int LCMSmode;
+
+    //Cluster Quality Parameters
+    public int HistogramOccupationMax;
+    public int HistogramDistancesMax;
 
     public boolean isUseSponge() {
         return UseSponge;

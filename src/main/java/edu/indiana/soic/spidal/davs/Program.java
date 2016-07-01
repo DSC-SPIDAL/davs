@@ -263,6 +263,10 @@ public class Program
 	public static int NumberNearbyClusters = 5; // specify number of nearby clusters to output
 	public static double NearbySpongePointLimit = -1.0; // Multiplier for sigma used in counting sponge points near a cluster; if negative use spongefactor
 
+	//Cluster Quality Parameters
+	public static int HistogramOccupationMax;
+	public static int HistogramDistancesMax;
+
 	// Config Settings
 	public static DAVectorSpongeSection config;
     public static String ClusterFile;
@@ -818,7 +822,11 @@ public class Program
         }
 		if (Program.DoLCMS)
 		{
-            GeneralTiming.startTiming(GeneralTiming.TimingTask.LCMS);
+			// Set Cluster Quality Parameters
+
+			Program.HistogramDistancesMax = config.HistogramDistancesMax;
+			Program.HistogramOccupationMax = config.HistogramOccupationMax	;
+			GeneralTiming.startTiming(GeneralTiming.TimingTask.LCMS);
             VectorAnnealIterate.CalculateClusterStatus();
             GeneralTiming.endTiming(GeneralTiming.TimingTask.LCMS);
         }

@@ -50,6 +50,8 @@ public class ClusterQuality
 	//  InputNearbyCut -- Count Sponge Points and Clusters within this cut times sigma
 	public ClusterQuality(int InputNumberClusters, int InputSpongeOption, int InputNumberNearbyClusters, double InputNearbyCut)
 	{
+        HistogramOccupationMax = Program.HistogramOccupationMax;
+        HistogramDistancesMax = Program.HistogramDistancesMax;
 		NumberClusters = InputNumberClusters;
 		SpongeOption = InputSpongeOption;
 		NumberNearbyClusters = Math.min(InputNumberNearbyClusters, NumberClusters - 1);
