@@ -1,8 +1,11 @@
 package edu.indiana.soic.spidal.davs;
 
 import edu.indiana.soic.spidal.mpi.MpiOps;
+import edu.indiana.soic.spidal.mpi.ParallelOps;
 import mpi.MPI;
 import mpi.MPIException;
+
+import java.io.IOException;
 
 
 public class DAVectorParallelism
@@ -36,6 +39,8 @@ public class DAVectorParallelism
 		DAVectorUtility.threadsAndMPIBuffer = MPI.newLongBuffer(DAVectorUtility.MPI_Size * Program.config.getThreadCount());
 		DAVectorUtility.SALSAPrint(0, "Thread count " + Program.config.getThreadCount());
 		DAVectorUtility.SALSAPrint(0, "Processes count " + DAVectorUtility.MPI_Size);
+
+		ParallelOps.setupParallelism(args);
 	} // End SetupParallelism
 
 	public static void TearDownParallelism() throws MPIException {
@@ -43,8 +48,7 @@ public class DAVectorParallelism
         MPI.Finalize();
 	} // End TearDownParallelism
 
-	public static void SetParallelDecomposition()
-	{
+	public static void SetParallelDecomposition() throws IOException, MPIException {
 		//	First divide points among processes
 		Range[] processRanges = RangePartitioner.Partition(DAVectorUtility.PointCount_Global, DAVectorUtility.MPI_Size);
 		Range processRange = processRanges[DAVectorUtility.MPI_Rank]; // The answer for this process
@@ -83,6 +87,8 @@ public class DAVectorParallelism
 			DAVectorUtility.PointsperThread[j] = threadRanges[j].getLength();
 			DAVectorUtility.StartPointperThread[j] = threadRanges[j].getStartIndex();
 		}
+
+        ParallelOps.setParallelDecomposition();
 	} // End SetParallelDecomposition()
 
 	public static double getDistancefromPoint(int LocalToProcessIndex, double[] ClusterPosition)

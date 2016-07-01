@@ -7,6 +7,7 @@ import edu.indiana.soic.spidal.configuration.ConfigurationMgr;
 import edu.indiana.soic.spidal.configuration.sections.DAVectorSpongeSection;
 import edu.indiana.soic.spidal.davs.timing.*;
 import edu.indiana.soic.spidal.general.Box;
+import edu.indiana.soic.spidal.mpi.ParallelOps;
 import mpi.MPI;
 import mpi.MPIException;
 import org.apache.commons.cli.*;
@@ -34,6 +35,10 @@ public class Program
                 Constants.CMD_OPTION_DESCRIPTION_N);
         programOptions.addOption(String.valueOf(Constants.CMD_OPTION_SHORT_T),Constants.CMD_OPTION_LONG_T,true,
                 Constants.CMD_OPTION_DESCRIPTION_T);
+		programOptions.addOption(Constants.CMD_OPTION_SHORT_MMAPS, true, Constants.CMD_OPTION_DESCRIPTION_MMAPS);
+		programOptions.addOption(
+				Constants.CMD_OPTION_SHORT_MMAP_SCRATCH_DIR, true,
+				Constants.CMD_OPTION_DESCRIPTION_MMAP_SCRATCH_DIR);
     }
 
 	//  Specify Clustering Algorithm
@@ -403,7 +408,7 @@ public class Program
      *             The options may also be given as longer names
      *             --configFile, --threadCount, and --nodeCount respectively
      */
-	public static void main(String[] args) throws MPIException {
+	public static void main(String[] args) throws MPIException, IOException {
 
 		SetupTiming.startTiming(SetupTiming.TimingTask.SETUP);
         Optional<CommandLine> parserResult = parseCommandLineArguments(args, programOptions);
@@ -1325,6 +1330,11 @@ public class Program
 
         DAVectorUtility.DebugPrintOption = config.DebugPrintOption;
         DAVectorUtility.ConsoleDebugOutput = config.ConsoleDebugOutput;
+
+        ParallelOps.mmapsPerNode = cmd.hasOption(Constants.CMD_OPTION_SHORT_MMAPS) ? Integer.parseInt(cmd.getOptionValue(Constants.CMD_OPTION_SHORT_MMAPS)) : 1;
+        ParallelOps.mmapScratchDir = cmd.hasOption(Constants.CMD_OPTION_SHORT_MMAP_SCRATCH_DIR) ? cmd.getOptionValue(Constants.CMD_OPTION_SHORT_MMAP_SCRATCH_DIR) : ".";
+        ParallelOps.nodeCount = DAVectorUtility.NodeCount;
+        ParallelOps.threadCount = DAVectorUtility.ThreadCount;
 	}
 
 	public static void WriteControlFile()
