@@ -416,10 +416,8 @@ public class DistributedClusteringSolution
 		for (int Clustersfromafar = 0; Clustersfromafar < StorageforTransportedClusters.SizeOfTransportedArray; Clustersfromafar++)
 		{
 			int CreatedIndex = StorageforTransportedClusters.TotalTransportedCreatedIndex[Clustersfromafar];
-			if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: MajorSynchronizationTransportDistributedClusterCenters : ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + 0 );
 			if (ClusteringSolution.UniversalMapping[CreatedIndex] == null)
 			{
-				if(CreatedIndex == 0) DAVectorUtility.SALSAPrint(0, "Debug: MajorSynchronizationTransportDistributedClusterCenters is null: ClusteringSolution.UniversalMapping initialized " + ClusteringSolution.CurrentIteration + "," + (-1 - Clustersfromafar) );
 				ClusteringSolution.UniversalMapping[CreatedIndex] = new ClusterIndirection(ClusteringSolution.CurrentIteration, -1 - Clustersfromafar);
 			}
 			ClusteringSolution.UniversalMapping[CreatedIndex].PackedHost = StorageforTransportedClusters.TotalTransportedOriginalHost[Clustersfromafar];
@@ -581,14 +579,10 @@ public class DistributedClusteringSolution
 		if (ongoing && (!ParallelClustering.runningSolution.DistributedExecutionMode))
 		{
 			++ClusteringSolution.CurrentIteration; // Increment Iteration Number
-			DAVectorUtility.SALSAPrint(0, "Debug:ClusteringSolution.NumberLocalActiveClusters  " + ClusteringSolution.NumberLocalActiveClusters);
-			DAVectorUtility.SALSAPrint(0, "Debug:ClusteringSolution.UniversalMapping Length " + ClusteringSolution.UniversalMapping.length);
 			for (int LocalActiveClusterIndex = 0; LocalActiveClusterIndex < ClusteringSolution.NumberLocalActiveClusters; LocalActiveClusterIndex++)
 			{
 				int RealClusterIndex = ClusteringSolution.RealClusterIndices[LocalActiveClusterIndex];
 				int CreatedIndex = ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex];
-				DAVectorUtility.SALSAPrint(0, "Debug:CreatedIndex " + CreatedIndex);
-				DAVectorUtility.SALSAPrint(0, "Debug:ClusteringSolution.UniversalMapping " + ClusteringSolution.UniversalMapping[CreatedIndex]);
 				ClusteringSolution.UniversalMapping[CreatedIndex].Availability = 1 + RealClusterIndex;
 				ClusteringSolution.UniversalMapping[CreatedIndex].IterationSet = ClusteringSolution.CurrentIteration;
 				ClusteringSolution.LocalHost[LocalActiveClusterIndex] = 0;
