@@ -586,6 +586,7 @@ public class DistributedClusteringSolution
 				int RealClusterIndex = ClusteringSolution.RealClusterIndices[LocalActiveClusterIndex];
 				int CreatedIndex = ParallelClustering.runningSolution.LocalCreatedIndex[RealClusterIndex];
 				DAVectorUtility.SALSAPrint(0, "Debug:CreatedIndex " + CreatedIndex);
+				DAVectorUtility.SALSAPrint(0, "Debug:ClusteringSolution.UniversalMapping " + ClusteringSolution.UniversalMapping[CreatedIndex]);
 				ClusteringSolution.UniversalMapping[CreatedIndex].Availability = 1 + RealClusterIndex;
 				ClusteringSolution.UniversalMapping[CreatedIndex].IterationSet = ClusteringSolution.CurrentIteration;
 				ClusteringSolution.LocalHost[LocalActiveClusterIndex] = 0;
