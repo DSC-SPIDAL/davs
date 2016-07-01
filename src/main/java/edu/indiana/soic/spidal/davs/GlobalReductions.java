@@ -2,6 +2,7 @@ package edu.indiana.soic.spidal.davs;
 
 import edu.indiana.soic.spidal.general.Box;
 import edu.indiana.soic.spidal.mpi.MPIReducePlusIndex;
+import edu.indiana.soic.spidal.mpi.ParallelOps;
 import mpi.MPI;
 import mpi.MPIException;
 
@@ -174,7 +175,9 @@ public class GlobalReductions
 				TotalNumberofPoints = DAVectorUtility.mpiOps.allReduce(TotalNumberofPoints, MPI.SUM);
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalSum, Operation<Double>.Add);
-				DAVectorUtility.mpiOps.allReduce(TotalSum, MPI.SUM);
+                // Note - changing to mmap call
+//				DAVectorUtility.mpiOps.allReduce(TotalSum, MPI.SUM);
+                ParallelOps.allReduceSum(TotalSum);
 
 				DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
@@ -622,7 +625,9 @@ public class GlobalReductions
 				TotalNumberofPoints = DAVectorUtility.mpiOps.allReduce(TotalNumberofPoints, MPI.SUM);
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
-				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                // Note - changing to mmap call
+//				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                ParallelOps.allReduceSum(TotalVectorSum);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 
@@ -702,7 +707,9 @@ public class GlobalReductions
 				TotalNumberofPoints = DAVectorUtility.mpiOps.allReduce(TotalNumberofPoints, MPI.SUM);
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
-				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                // Note - changing to mmap call
+//				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                ParallelOps.allReduceSum(TotalVectorSum);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 
@@ -791,7 +798,9 @@ public class GlobalReductions
 				{
                     // Note - MPI Call - Allreduce - double[] - sum
 //					TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
-					DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                    // Note - changing to mmap call
+//					DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                    ParallelOps.allReduceSum(TotalVectorSum);
                 }
 				else
 				{
@@ -804,7 +813,9 @@ public class GlobalReductions
                         System.arraycopy(TotalVectorSum, start, buffer, 0, whatsleft);
                         // Note - MPI Call - Allreduce - double[] - sum
 //						buffer = DAVectorUtility.MPI_communicator.<Double>Allreduce(buffer, Operation<Double>.Add);
-						DAVectorUtility.mpiOps.allReduce(buffer, MPI.SUM);
+                        // Note - changing to mmap call
+//						DAVectorUtility.mpiOps.allReduce(buffer, MPI.SUM);
+                        ParallelOps.allReduceSum(buffer);
                         System.arraycopy(buffer, 0, TotalVectorSum, start, whatsleft);
 						start += whatsleft;
 					}
@@ -893,7 +904,9 @@ public class GlobalReductions
 				TotalNumberofPoints = DAVectorUtility.mpiOps.allReduce(TotalNumberofPoints, MPI.SUM);
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
-				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                // Note - changing to mmap call
+//				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                ParallelOps.allReduceSum(TotalVectorSum);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 
@@ -960,7 +973,9 @@ public class GlobalReductions
                 DAVectorUtility.mpiOps.allReduce(TotalNumberofPoints,MPI.SUM);
                 // Note - MPI Call - Allreduce - double[] - sum
 //				Totalmean = DAVectorUtility.MPI_communicator.<Double>Allreduce(Totalmean, Operation<Double>.Add);
-                DAVectorUtility.mpiOps.allReduce(Totalmean,MPI.SUM);
+				// Note - changing to mmap call
+//				DAVectorUtility.mpiOps.allReduce(Totalmean,MPI.SUM);
+                ParallelOps.allReduceSum(Totalmean);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 

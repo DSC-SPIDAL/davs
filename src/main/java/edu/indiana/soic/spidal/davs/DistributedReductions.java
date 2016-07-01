@@ -1,6 +1,7 @@
 package edu.indiana.soic.spidal.davs;
 
 import edu.indiana.soic.spidal.general.Box;
+import edu.indiana.soic.spidal.mpi.ParallelOps;
 import mpi.MPI;
 import mpi.MPIException;
 
@@ -164,7 +165,9 @@ public class DistributedReductions
 					DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming6);
                     // Note - MPI Call - Allreduce - double [] - sum
 //					GlobalClusterComponent = DAVectorUtility.MPI_communicator.<Double>Allreduce(GlobalClusterComponent, Operation<Double>.Add);
-					DAVectorUtility.mpiOps.allReduce(GlobalClusterComponent, MPI.SUM);
+					// Note - changing to mmap call
+//					DAVectorUtility.mpiOps.allReduce(GlobalClusterComponent, MPI.SUM);
+					ParallelOps.allReduceSum(GlobalClusterComponent);
 
                     DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming6);
 					NumberGlobal2 = 0;
