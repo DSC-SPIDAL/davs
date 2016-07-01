@@ -6,6 +6,8 @@ import edu.indiana.soic.spidal.mpi.ParallelOps;
 import mpi.MPI;
 import mpi.MPIException;
 
+import java.util.Arrays;
+
 import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
 
@@ -176,8 +178,8 @@ public class GlobalReductions
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalSum, Operation<Double>.Add);
                 // Note - changing to mmap call
-//				DAVectorUtility.mpiOps.allReduce(TotalSum, MPI.SUM);
-                ParallelOps.allReduceSum(TotalSum);
+				DAVectorUtility.mpiOps.allReduce(TotalSum, MPI.SUM);
+//                ParallelOps.allReduceSum(TotalSum);
 
 				DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
@@ -626,8 +628,8 @@ public class GlobalReductions
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
                 // Note - changing to mmap call
-//				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
-                ParallelOps.allReduceSum(TotalVectorSum);
+				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+                //ParallelOps.allReduceSum(TotalVectorSum);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 
@@ -708,8 +710,8 @@ public class GlobalReductions
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
                 // Note - changing to mmap call
-//				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
-                ParallelOps.allReduceSum(TotalVectorSum);
+				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+//                ParallelOps.allReduceSum(TotalVectorSum);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 
@@ -799,8 +801,8 @@ public class GlobalReductions
                     // Note - MPI Call - Allreduce - double[] - sum
 //					TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
                     // Note - changing to mmap call
-//					DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
-                    ParallelOps.allReduceSum(TotalVectorSum);
+					DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+//                    ParallelOps.allReduceSum(TotalVectorSum);
                 }
 				else
 				{
@@ -814,8 +816,8 @@ public class GlobalReductions
                         // Note - MPI Call - Allreduce - double[] - sum
 //						buffer = DAVectorUtility.MPI_communicator.<Double>Allreduce(buffer, Operation<Double>.Add);
                         // Note - changing to mmap call
-//						DAVectorUtility.mpiOps.allReduce(buffer, MPI.SUM);
-                        ParallelOps.allReduceSum(buffer);
+						DAVectorUtility.mpiOps.allReduce(buffer, MPI.SUM);
+//                        ParallelOps.allReduceSum(buffer);
                         System.arraycopy(buffer, 0, TotalVectorSum, start, whatsleft);
 						start += whatsleft;
 					}
@@ -905,8 +907,8 @@ public class GlobalReductions
                 // Note - MPI Call - Allreduce - double[] - sum
 //				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
                 // Note - changing to mmap call
-//				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
-                ParallelOps.allReduceSum(TotalVectorSum);
+				DAVectorUtility.mpiOps.allReduce(TotalVectorSum, MPI.SUM);
+//                ParallelOps.allReduceSum(TotalVectorSum);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 
@@ -974,9 +976,13 @@ public class GlobalReductions
                 // Note - MPI Call - Allreduce - double[] - sum
 //				Totalmean = DAVectorUtility.MPI_communicator.<Double>Allreduce(Totalmean, Operation<Double>.Add);
 				// Note - changing to mmap call
-//				DAVectorUtility.mpiOps.allReduce(Totalmean,MPI.SUM);
+				DAVectorUtility.mpiOps.allReduce(Totalmean,MPI.SUM);
+				double[] tempTotalMean = new double[Totalmean.length];
+				System.arraycopy(Totalmean, 0, tempTotalMean, 0, Totalmean.length);
                 ParallelOps.allReduceSum(Totalmean);
                 DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
+				DAVectorUtility.SALSAPrint(0,"The two arrays are equal " + Arrays.equals(tempTotalMean,Totalmean));
+
 			}
 
 			if (TotalNumberofPoints < 0.5)

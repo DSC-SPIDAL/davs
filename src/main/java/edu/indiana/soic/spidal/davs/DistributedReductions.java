@@ -166,8 +166,8 @@ public class DistributedReductions
                     // Note - MPI Call - Allreduce - double [] - sum
 //					GlobalClusterComponent = DAVectorUtility.MPI_communicator.<Double>Allreduce(GlobalClusterComponent, Operation<Double>.Add);
 					// Note - changing to mmap call
-//					DAVectorUtility.mpiOps.allReduce(GlobalClusterComponent, MPI.SUM);
-					ParallelOps.allReduceSum(GlobalClusterComponent);
+					DAVectorUtility.mpiOps.allReduce(GlobalClusterComponent, MPI.SUM);
+//					ParallelOps.allReduceSum(GlobalClusterComponent);
 
                     DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming6);
 					NumberGlobal2 = 0;
