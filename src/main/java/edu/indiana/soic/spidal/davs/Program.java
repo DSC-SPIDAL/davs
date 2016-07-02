@@ -408,7 +408,7 @@ public class Program
      *             --configFile, --threadCount, and --nodeCount respectively
      */
 	public static void main(String[] args) throws MPIException {
-
+		GeneralTiming.startTiming(GeneralTiming.TimingTask.TOTAL);
 		SetupTiming.startTiming(SetupTiming.TimingTask.SETUP);
         Optional<CommandLine> parserResult = parseCommandLineArguments(args, programOptions);
         if (!parserResult.isPresent()){
@@ -1189,6 +1189,7 @@ public class Program
 		}
 
 		SectionTiming.endTiming(SectionTiming.TimingTask.SC3);
+		GeneralTiming.endTiming(GeneralTiming.TimingTask.TOTAL);
 
 		if (DAVectorUtility.MPI_Rank == 0)
 		{
@@ -1435,6 +1436,9 @@ public class Program
 			printWriter.println("General Method Timing ClusterStatus.ExperimentAnalysis " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.EXPERIMENT_ANALYSIS)));
 			printWriter.println("General Method Timing OurClusters.setup " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SETUP)));
 			printWriter.println("General Method Timing LCMSAnalyze.ClusterComparison " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.CLUSTER_COMPARISON)));
+
+			printWriter.println();
+			printWriter.println("Total Run time " + DAVectorUtility.formatElapsedMillis(GeneralTiming.getTotalTime(GeneralTiming.TimingTask.TOTAL)));
 
 
 			printWriter.flush();

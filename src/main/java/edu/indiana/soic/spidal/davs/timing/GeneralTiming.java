@@ -9,20 +9,23 @@ import java.util.concurrent.TimeUnit;
 
 public class GeneralTiming {
     public static enum TimingTask{
-        KMEANS,LCMS,DA
+        KMEANS,LCMS,DA,TOTAL
     }
 
     private static Stopwatch timerKmeans = Stopwatch.createUnstarted();
     private static Stopwatch timerLCMS = Stopwatch.createUnstarted();
     private static Stopwatch timerDA = Stopwatch.createUnstarted();
+    private static Stopwatch timerTotal = Stopwatch.createUnstarted();
 
     private static long tKmeans;
     private static long tLCMS;
     private static long tDA;
+    private static long tTotal;
 
     private static long countLCMS;
     private static long countKmeans;
     private static long countDA;
+    private static long countTotal;
 
     public static void startTiming(TimingTask task){
         switch (task){
@@ -37,6 +40,10 @@ public class GeneralTiming {
             case DA:
                 timerDA.start();
                 ++countDA;
+                break;
+            case TOTAL:
+                timerTotal.start();
+                ++countTotal;
                 break;
         }
     }
@@ -58,6 +65,11 @@ public class GeneralTiming {
                 tDA += timerDA.elapsed(TimeUnit.MILLISECONDS);
                 timerDA.reset();
                 break;
+            case TOTAL:
+                timerTotal.stop();
+                tTotal += timerTotal.elapsed(TimeUnit.MILLISECONDS);
+                timerTotal.reset();
+                break;
         }
     }
 
@@ -69,6 +81,8 @@ public class GeneralTiming {
                 return tLCMS;
             case DA:
                 return tDA;
+            case TOTAL:
+                return tTotal;
         }
         return  0;
     }
@@ -81,6 +95,8 @@ public class GeneralTiming {
                 return tLCMS *1.0/ countLCMS;
             case DA:
                 return tDA *1.0/ countDA;
+            case TOTAL:
+                return tTotal *1.0/ countTotal;
         }
         return  0.0;
     }
@@ -97,6 +113,9 @@ public class GeneralTiming {
                 break;
             case DA:
                 mpiOnlyTimingBuffer.put(countDA);
+                break;
+            case TOTAL:
+                mpiOnlyTimingBuffer.put(countTotal);
                 break;
         }
         long [] mpiOnlyTimingArray = new long[DAVectorUtility.MPI_Size];
