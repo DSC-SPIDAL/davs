@@ -9,7 +9,8 @@ import java.util.concurrent.TimeUnit;
 
 public class GeneralMethodTiming {
     public static enum TimingTask{
-        SET_CLUSTER_STATISTICS, SET_POINT_STATISTICS, SET_NEARBY_CLUSTERS, OUTPUT_STATUS,SETUP, CLUSTER_COMPARISON, EXPERIMENT_ANALYSIS
+        SET_CLUSTER_STATISTICS, SET_POINT_STATISTICS, SET_NEARBY_CLUSTERS, OUTPUT_STATUS,SETUP, CLUSTER_COMPARISON, EXPERIMENT_ANALYSIS,
+        SET_WIDTH
     }
 
     private static Stopwatch timerSetClusterStatistics = Stopwatch.createUnstarted();
@@ -19,6 +20,7 @@ public class GeneralMethodTiming {
     private static Stopwatch timerExperimentAnalysis = Stopwatch.createUnstarted();
     private static Stopwatch timerSetPointStatistics = Stopwatch.createUnstarted();
     private static Stopwatch timerSetNearbyClusters = Stopwatch.createUnstarted();
+    private static Stopwatch timerSetWidth = Stopwatch.createUnstarted();
 
     private static long tSetClusterStatistics;
     private static long tOutputStatus;
@@ -27,6 +29,7 @@ public class GeneralMethodTiming {
     private static long tExperimentAnalysis;
     private static long tSetPointStatistics;
     private static long tSetNearbyClusters;
+    private static long tSetWidth;
 
     private static long countSetPointStatistics;
     private static long countSetClusterStatistics;
@@ -35,6 +38,7 @@ public class GeneralMethodTiming {
     private static long countSetup;
     private static long countClusterComparison;
     private static long countExperimentAnalysis;
+    private static long countSetWidth;
 
     public static void startTiming(TimingTask task){
         switch (task){
@@ -66,6 +70,11 @@ public class GeneralMethodTiming {
                 timerExperimentAnalysis.start();
                 ++countExperimentAnalysis;
                 break;
+            case SET_WIDTH:
+                timerSetWidth.start();
+                ++countSetWidth;
+                break;
+
         }
     }
 
@@ -106,6 +115,11 @@ public class GeneralMethodTiming {
                 tExperimentAnalysis += timerExperimentAnalysis.elapsed(TimeUnit.MILLISECONDS);
                 timerExperimentAnalysis.reset();
                 break;
+            case SET_WIDTH:
+                timerSetWidth.stop();
+                tSetWidth += timerSetWidth.elapsed(TimeUnit.MILLISECONDS);
+                timerSetWidth.reset();
+                break;
         }
     }
 
@@ -125,6 +139,8 @@ public class GeneralMethodTiming {
                 return tClusterComparison;
             case EXPERIMENT_ANALYSIS:
                 return tExperimentAnalysis;
+            case SET_WIDTH:
+                return tSetWidth;
         }
         return  0;
     }
@@ -145,6 +161,8 @@ public class GeneralMethodTiming {
                 return tClusterComparison *1.0/ countClusterComparison;
             case EXPERIMENT_ANALYSIS:
                 return tExperimentAnalysis *1.0/ countExperimentAnalysis;
+            case SET_WIDTH:
+                return tSetWidth *1.0/ countSetWidth;
         }
         return  0.0;
     }
@@ -173,6 +191,9 @@ public class GeneralMethodTiming {
                 break;
             case EXPERIMENT_ANALYSIS:
                 mpiOnlyTimingBuffer.put(countExperimentAnalysis);
+                break;
+            case SET_WIDTH:
+                mpiOnlyTimingBuffer.put(countSetWidth);
                 break;
         }
         long [] mpiOnlyTimingArray = new long[DAVectorUtility.MPI_Size];
