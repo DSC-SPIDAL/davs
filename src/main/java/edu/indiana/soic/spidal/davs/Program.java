@@ -1436,6 +1436,7 @@ public class Program
 			printWriter.println("General Method Timing ClusterStatus.ExperimentAnalysis " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.EXPERIMENT_ANALYSIS)));
 			printWriter.println("General Method Timing OurClusters.setup " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SETUP)));
 			printWriter.println("General Method Timing LCMSAnalyze.ClusterComparison " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.CLUSTER_COMPARISON)));
+			printWriter.println("General Method Timing ArbitraryClustering.SetWidth " + DAVectorUtility.formatElapsedMillis(GeneralMethodTiming.getTotalTime(GeneralMethodTiming.TimingTask.SET_WIDTH)));
 
 			printWriter.println();
 			printWriter.println("Total Run time " + DAVectorUtility.formatElapsedMillis(GeneralTiming.getTotalTime(GeneralTiming.TimingTask.TOTAL)));

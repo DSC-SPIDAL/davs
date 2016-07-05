@@ -1,6 +1,7 @@
 package edu.indiana.soic.spidal.davs;
 
 import edu.indiana.soic.spidal.davs.timing.GeneralMethodTiming;
+import edu.indiana.soic.spidal.davs.timing.GeneralTiming;
 import edu.indiana.soic.spidal.general.Box;
 
 public class ArbitraryClustering
@@ -297,7 +298,7 @@ public class ArbitraryClustering
 
 	public final void SetWidths(int ClusterNumber, Box<Double> Width_x, Box<Double> Width_y)
 	{ // Calculate Contribution to the x and y widths of this cluster. This is NOT divided by Occupation Count
-
+		GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
 		Width_x.content = 0.0;
 		Width_y.content = 0.0;
 		double[] Center = new double[2];
@@ -339,7 +340,7 @@ public class ArbitraryClustering
 			tmp = (GoldenExamination.PeakPosition[GlobalPointIndex][1] - Center[1]) / Sigma[1];
 			Width_y.content += tmp * tmp;
 		}
-
+		GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
 	} // End SetWidths
 
 	public final void Difference(ArbitraryClustering BaseClusters)
