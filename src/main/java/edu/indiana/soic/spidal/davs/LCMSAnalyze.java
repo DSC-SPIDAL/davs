@@ -75,7 +75,7 @@ public class LCMSAnalyze
 		//Program.RestartClusterFile = Program.config.DistanceMatrixFile;
 
 		Program.Refinement = true;
-		Program.RestartTemperature = 0.5; // was 0.2
+		Program.RestartTemperature = 0.025; // was 0.2
 		Program.Tminimum = 0.005;
 
 
