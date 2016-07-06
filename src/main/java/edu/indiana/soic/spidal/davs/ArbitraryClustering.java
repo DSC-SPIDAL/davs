@@ -348,10 +348,8 @@ public class ArbitraryClustering
 			if (DAVectorUtility.MPI_Size > 1) {
 				DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming1);
 				// Note - MPI Call - Allreduce - double - sum
-//				TotalNumberofPoints = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalNumberofPoints, Operation<Double>.Add);
 				PointsinCluster = DAVectorUtility.mpiOps.allReduce(PointsinCluster, MPI.SUM);
 				// Note - MPI Call - Allreduce - double[] - sum
-//				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
 				DAVectorUtility.mpiOps.allReduce(Center, MPI.SUM);
 				DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
