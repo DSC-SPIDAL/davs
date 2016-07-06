@@ -3,6 +3,11 @@ package edu.indiana.soic.spidal.davs;
 import edu.indiana.soic.spidal.davs.timing.GeneralMethodTiming;
 import edu.indiana.soic.spidal.davs.timing.GeneralTiming;
 import edu.indiana.soic.spidal.general.Box;
+import mpi.MPI;
+import mpi.MPIException;
+
+import static edu.rice.hj.Module0.launchHabaneroApp;
+import static edu.rice.hj.Module1.forallChunked;
 
 public class ArbitraryClustering
 {
@@ -296,8 +301,34 @@ public class ArbitraryClustering
 
 	} // End TrimHistograms(int[] CountList, ref int NumCounts, int start, int interval)
 
-	public final void SetWidths(int ClusterNumber, Box<Double> Width_x, Box<Double> Width_y)
-	{ // Calculate Contribution to the x and y widths of this cluster. This is NOT divided by Occupation Count
+	public final void SetWidths(int ClusterNumber, Box<Double> Width_x, Box<Double> Width_y){ // Calculate Contribution to the x and y widths of this cluster. This is NOT divided by Occupation Count
+
+		// Note - parallel for
+		double[][] threadCenter = new double[DAVectorUtility.ThreadCount][2];
+		double[] threadPointsinCluster = new double[DAVectorUtility.ThreadCount];
+		launchHabaneroApp(() -> {
+			forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
+				int indexlen = DAVectorUtility.PointsperThread[threadIndex];
+				int beginpoint = DAVectorUtility.StartPointperThread[threadIndex] - DAVectorUtility.PointStart_Process;
+
+				for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++)
+				{
+					int ClusterforPoint = this.PointstoClusterIDs[alpha];
+					if (ClusterforPoint != ClusterNumber)
+					{
+						continue;
+					}
+					for (int VectorIndex = 0; VectorIndex < 2; VectorIndex++)
+					{
+						threadCenter[threadIndex][VectorIndex] += GoldenExamination.PeakPosition[alpha][VectorIndex];
+					}
+					threadPointsinCluster[threadIndex]++;
+				}
+
+			});
+		});
+
+
 		GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
 		Width_x.content = 0.0;
 		Width_y.content = 0.0;
@@ -305,22 +336,27 @@ public class ArbitraryClustering
 		double[] Sigma = new double[2];
 		int PointsinCluster = 0;
 
-		for (int GlobalPointIndex = 0; GlobalPointIndex < this.NumberofPoints; GlobalPointIndex++)
+		for (int ThreadNo = 0; ThreadNo < DAVectorUtility.ThreadCount; ThreadNo++)
 		{
-			int ClusterforPoint = this.PointstoClusterIDs[GlobalPointIndex];
-			if (ClusterforPoint != ClusterNumber)
-			{
-				continue;
-			}
+			PointsinCluster += threadPointsinCluster[ThreadNo];
 			for (int VectorIndex = 0; VectorIndex < 2; VectorIndex++)
 			{
-				Center[VectorIndex] += GoldenExamination.PeakPosition[GlobalPointIndex][VectorIndex];
+				Center[VectorIndex] += threadCenter[ThreadNo][VectorIndex];
 			}
-			++PointsinCluster;
 		}
-		if (PointsinCluster == 0)
-		{
-			return;
+		try {
+			if (DAVectorUtility.MPI_Size > 1) {
+				DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming1);
+				// Note - MPI Call - Allreduce - double - sum
+//				TotalNumberofPoints = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalNumberofPoints, Operation<Double>.Add);
+				PointsinCluster = DAVectorUtility.mpiOps.allReduce(PointsinCluster, MPI.SUM);
+				// Note - MPI Call - Allreduce - double[] - sum
+//				TotalVectorSum = DAVectorUtility.MPI_communicator.<Double>Allreduce(TotalVectorSum, Operation<Double>.Add);
+				DAVectorUtility.mpiOps.allReduce(Center, MPI.SUM);
+				DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
+			}
+		}catch (MPIException e){
+			DAVectorUtility.printAndThrowRuntimeException("MPI error while calculating widths " + e);
 		}
 
 		Center[0] = Center[0] / PointsinCluster;
@@ -342,6 +378,53 @@ public class ArbitraryClustering
 		}
 		GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
 	} // End SetWidths
+
+//	public final void SetWidths(int ClusterNumber, Box<Double> Width_x, Box<Double> Width_y)
+//	{ // Calculate Contribution to the x and y widths of this cluster. This is NOT divided by Occupation Count
+//		GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
+//		Width_x.content = 0.0;
+//		Width_y.content = 0.0;
+//		double[] Center = new double[2];
+//		double[] Sigma = new double[2];
+//		int PointsinCluster = 0;
+//
+//		for (int GlobalPointIndex = 0; GlobalPointIndex < this.NumberofPoints; GlobalPointIndex++)
+//		{
+//			int ClusterforPoint = this.PointstoClusterIDs[GlobalPointIndex];
+//			if (ClusterforPoint != ClusterNumber)
+//			{
+//				continue;
+//			}
+//			for (int VectorIndex = 0; VectorIndex < 2; VectorIndex++)
+//			{
+//				Center[VectorIndex] += GoldenExamination.PeakPosition[GlobalPointIndex][VectorIndex];
+//			}
+//			++PointsinCluster;
+//		}
+//		if (PointsinCluster == 0)
+//		{
+//			return;
+//		}
+//
+//		Center[0] = Center[0] / PointsinCluster;
+//		Center[1] = Center[1] / PointsinCluster;
+//		Sigma[0] = Program.SigmaVectorParameters_i_[0] * Center[0];
+//		Sigma[1] = Program.SigmaVectorParameters_i_[1];
+//
+//		for (int GlobalPointIndex = 0; GlobalPointIndex < this.NumberofPoints; GlobalPointIndex++)
+//		{
+//			int ClusterforPoint = this.PointstoClusterIDs[GlobalPointIndex];
+//			if (ClusterforPoint != ClusterNumber)
+//			{
+//				continue;
+//			}
+//			double tmp = (GoldenExamination.PeakPosition[GlobalPointIndex][0] - Center[0]) / Sigma[0];
+//			Width_x.content += tmp * tmp;
+//			tmp = (GoldenExamination.PeakPosition[GlobalPointIndex][1] - Center[1]) / Sigma[1];
+//			Width_y.content += tmp * tmp;
+//		}
+//		GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
+//	} // End SetWidths
 
 	public final void Difference(ArbitraryClustering BaseClusters)
 	{
