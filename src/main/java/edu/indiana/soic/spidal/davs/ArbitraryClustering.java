@@ -3,8 +3,11 @@ package edu.indiana.soic.spidal.davs;
 import edu.indiana.soic.spidal.davs.timing.GeneralMethodTiming;
 import edu.indiana.soic.spidal.davs.timing.GeneralTiming;
 import edu.indiana.soic.spidal.general.Box;
+import edu.rice.hj.runtime.region.Point;
 import mpi.MPI;
 import mpi.MPIException;
+
+import java.util.Arrays;
 
 import static edu.rice.hj.Module0.launchHabaneroApp;
 import static edu.rice.hj.Module1.forallChunked;
@@ -303,10 +306,14 @@ public class ArbitraryClustering
 
 	public final void SetWidths(int ClusterNumber, Box<Double> Width_x, Box<Double> Width_y){ // Calculate Contribution to the x and y widths of this cluster. This is NOT divided by Occupation Count
 		GeneralMethodTiming.startTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
+		DAVectorUtility.SALSAPrint(0," Points assigned to  " + DAVectorUtility.MPI_Rank + " is " + DAVectorUtility.PointsperProcess[DAVectorUtility.MPI_Rank]);
+		DAVectorUtility.SALSAPrint(0," Number of Threads in Process  " + DAVectorUtility.ThreadCount);
+		DAVectorUtility.SALSAPrint(0," Points per Thread  " + Arrays.toString(DAVectorUtility.PointsperThread));
 
 		// Note - parallel for
 		double[][] threadCenter = new double[DAVectorUtility.ThreadCount][2];
 		double[] threadPointsinCluster = new double[DAVectorUtility.ThreadCount];
+		double[] threadPointsCount= new double[DAVectorUtility.ThreadCount];
 		launchHabaneroApp(() -> {
 			forallChunked(0, DAVectorUtility.ThreadCount - 1, (threadIndex) -> {
 				int indexlen = DAVectorUtility.PointsperThread[threadIndex];
@@ -314,6 +321,7 @@ public class ArbitraryClustering
 
 				for (int alpha = beginpoint; alpha < indexlen + beginpoint; alpha++)
 				{
+					threadPointsCount[threadIndex]++;
 					int ClusterforPoint = this.PointstoClusterIDs[alpha];
 					if (ClusterforPoint != ClusterNumber)
 					{
@@ -335,10 +343,12 @@ public class ArbitraryClustering
 		double[] Center = new double[2];
 		double[] Sigma = new double[2];
 		int PointsinCluster = 0;
+		int PointsCount = 0;
 
 		for (int ThreadNo = 0; ThreadNo < DAVectorUtility.ThreadCount; ThreadNo++)
 		{
 			PointsinCluster += threadPointsinCluster[ThreadNo];
+			PointsCount += threadPointsCount[ThreadNo];
 			for (int VectorIndex = 0; VectorIndex < 2; VectorIndex++)
 			{
 				Center[VectorIndex] += threadCenter[ThreadNo][VectorIndex];
@@ -349,12 +359,20 @@ public class ArbitraryClustering
 				DAVectorUtility.StartSubTimer(DAVectorUtility.MPIREDUCETiming1);
 				// Note - MPI Call - Allreduce - double - sum
 				PointsinCluster = DAVectorUtility.mpiOps.allReduce(PointsinCluster, MPI.SUM);
+				PointsCount = DAVectorUtility.mpiOps.allReduce(PointsCount, MPI.SUM);
 				// Note - MPI Call - Allreduce - double[] - sum
 				DAVectorUtility.mpiOps.allReduce(Center, MPI.SUM);
 				DAVectorUtility.StopSubTimer(DAVectorUtility.MPIREDUCETiming1);
 			}
 		}catch (MPIException e){
 			DAVectorUtility.printAndThrowRuntimeException("MPI error while calculating widths " + e);
+		}
+		DAVectorUtility.SALSAPrint(0," Total Number of Points in Cluster " + ClusterNumber + " is " + PointsinCluster);
+		DAVectorUtility.SALSAPrint(0," Total Number of Points is " + PointsCount);
+
+		if (PointsinCluster == 0)
+		{
+			return;
 		}
 
 		Center[0] = Center[0] / PointsinCluster;
