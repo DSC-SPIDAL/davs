@@ -372,6 +372,7 @@ public class ArbitraryClustering
 
 		if (PointsinCluster == 0)
 		{
+			GeneralMethodTiming.endTiming(GeneralMethodTiming.TimingTask.SET_WIDTH);
 			return;
 		}
 
