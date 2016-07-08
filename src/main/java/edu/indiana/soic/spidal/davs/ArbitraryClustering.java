@@ -309,6 +309,7 @@ public class ArbitraryClustering
 		DAVectorUtility.SALSAPrint(0," Points assigned to  " + DAVectorUtility.MPI_Rank + " is " + DAVectorUtility.PointsperProcess[DAVectorUtility.MPI_Rank]);
 		DAVectorUtility.SALSAPrint(0," Number of Threads in Process  " + DAVectorUtility.ThreadCount);
 		DAVectorUtility.SALSAPrint(0," Points per Thread  " + Arrays.toString(DAVectorUtility.PointsperThread));
+		DAVectorUtility.SALSAPrint(0," Thread Start positions  " + Arrays.toString(DAVectorUtility.StartPointperThread));
 
 		// Note - parallel for
 		double[][] threadCenter = new double[DAVectorUtility.ThreadCount][2];
